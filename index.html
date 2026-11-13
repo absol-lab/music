@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="1.2">
+<meta name="app-version" content="1.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -65,8 +65,14 @@ textarea{ min-height:56px; resize:vertical; }
 /* graph */
 .gwrap{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:6px; overflow:hidden; }
 svg text{ fill:var(--tx); font-size:10.5px; }
+.covbig{ width:256px; height:256px; max-width:88%; border-radius:14px; object-fit:cover; border:1px solid var(--line); background:var(--panel2); }
+.gstage{ position:relative; }
+.gnode{ position:absolute; transform:translate(-50%,-50%); border-radius:50%; overflow:hidden; border:2px solid var(--acc); background:#2b241b; cursor:pointer; }
+.gnode img{ width:100%; height:100%; object-fit:cover; display:block; }
+.gnode.sel{ border-color:#ece5d8; border-width:3px; }
+.gname{ position:absolute; transform:translateX(-50%); text-align:center; font-size:10.5px; line-height:1.3; color:var(--ink); width:100px; pointer-events:none; }
 .cov{ width:64px; height:64px; border-radius:10px; object-fit:cover; flex:none; border:1px solid var(--line); background:var(--panel2); }
-.covs{ width:44px; height:44px; border-radius:8px; object-fit:cover; flex:none; border:1px solid var(--line); background:var(--panel2); }
+.covs{ width:88px; height:88px; border-radius:8px; object-fit:cover; flex:none; border:1px solid var(--line); background:var(--panel2); }
 .publine{ color:#b7ab93; font-size:.74em; margin-top:5px; }
 .publine b{ color:var(--acc2); font-weight:700; }
 .reltag{ display:inline-block; font-size:.66em; border-radius:6px; padding:2px 7px; margin-right:6px; vertical-align:1px; }
@@ -113,7 +119,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='1.2';
+const APP_VERSION='1.3';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -167,7 +173,7 @@ const CATALOG=[
 ["pastel-blues","Pastel Blues","Nina Simone",1965,"ジャズ/ソウル",[3,2,5,4,5,1],"Be My Husband の呪文のような反復。声の存在そのものが楽器。","https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/99/98/27/99982707-07ed-cf56-7bc7-bc18f7443574/13UAAIM08287.rgb.jpg/600x600bb.jpg","https://music.apple.com/us/album/pastel-blues/1445668394?uo=4"],
 ["spiegel-part","Alina","Arvo Pärt",1999,"現代音楽",[1,2,5,5,1,4],"Für Alina と Spiegel im Spiegel。音を減らすことで哀愁と静けさの極へ行く盤。","https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/93/0d/68/930d6811-2544-1429-2be2-957ba3f5a1e7/00028944995824.rgb.jpg/600x600bb.jpg","https://music.apple.com/us/album/p%C3%A4rt-alina-spiegel-im-spiegel/1440748495?uo=4"]
 ];
-const PORTRAITS={"armstrong": "https://commons.wikimedia.org/wiki/Special:FilePath/Louis_Armstrong_in_Color_%28restored%29.jpg?width=400", "ellington": "https://commons.wikimedia.org/wiki/Special:FilePath/Duke_Ellington_-_publicity.JPG?width=400", "hawkins": "https://commons.wikimedia.org/wiki/Special:FilePath/Coleman_Hawkins.jpg?width=400", "parker": "https://commons.wikimedia.org/wiki/Special:FilePath/Portrait_of_Charlie_Parker_in_1947.jpg?width=400", "monk": "https://commons.wikimedia.org/wiki/Special:FilePath/Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg?width=400", "miles": "https://commons.wikimedia.org/wiki/Special:FilePath/Miles_Davis_by_Palumbo_cropped.jpg?width=400", "mingus": "https://commons.wikimedia.org/wiki/Special:FilePath/Charles_Mingus_1976_cropped.jpg?width=400", "evans": "https://commons.wikimedia.org/wiki/Special:FilePath/Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg?width=400", "coltrane": "https://commons.wikimedia.org/wiki/Special:FilePath/John_Coltrane_1963_cropped_ver2.jpg?width=400", "ornette": "https://commons.wikimedia.org/wiki/Special:FilePath/Ornette-Coleman-2008-Heidelberg-schindelbeck.jpg?width=400", "hancock": "https://commons.wikimedia.org/wiki/Special:FilePath/Herbie_Hancock_2023.jpg?width=400", "jarrett": "https://commons.wikimedia.org/wiki/Special:FilePath/Keith_Jarrett.jpg?width=400", "gleason": "https://commons.wikimedia.org/wiki/Special:FilePath/Publicity_photo_young_Jackie_Gleason.jpg?width=400", "sinatra": "https://commons.wikimedia.org/wiki/Special:FilePath/Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg?width=400", "lynch": "https://commons.wikimedia.org/wiki/Special:FilePath/David_Lynch_%281990%29.jpg?width=400", "badalamenti": "https://commons.wikimedia.org/wiki/Special:FilePath/Angelo_Badalamenti_%28yearbook%29.jpg?width=400", "cruise": "https://commons.wikimedia.org/wiki/Special:FilePath/Julee_Cruise_%28retouch%29_%28cropped%29.jpg?width=400", "walker": "https://commons.wikimedia.org/wiki/Special:FilePath/Fenklup1968ScottWalker_%28cropped%29.jpg?width=400", "portishead": "https://commons.wikimedia.org/wiki/Special:FilePath/Portishead13b.jpg?width=400", "fiona": "https://commons.wikimedia.org/wiki/Special:FilePath/Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg?width=400", "johnston": "https://commons.wikimedia.org/wiki/Special:FilePath/Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg?width=400", "buckley": "https://upload.wikimedia.org/wikipedia/en/1/13/Jeff_Buckley_by_Gahr.jpg"};
+const PORTRAITS={"armstrong": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Louis_Armstrong_in_Color_%28restored%29.jpg/500px-Louis_Armstrong_in_Color_%28restored%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ellington": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Duke_Ellington_-_publicity.JPG/500px-Duke_Ellington_-_publicity.JPG?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "hawkins": "https://upload.wikimedia.org/wikipedia/commons/3/33/Coleman_Hawkins.jpg", "parker": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Portrait_of_Charlie_Parker_in_1947.jpg/500px-Portrait_of_Charlie_Parker_in_1947.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "monk": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg/500px-Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "miles": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Miles_Davis_by_Palumbo_cropped.jpg/500px-Miles_Davis_by_Palumbo_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "mingus": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Charles_Mingus_1976_cropped.jpg/500px-Charles_Mingus_1976_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "evans": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg/500px-Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "coltrane": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/John_Coltrane_1963_cropped_ver2.jpg/500px-John_Coltrane_1963_cropped_ver2.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ornette": "https://upload.wikimedia.org/wikipedia/commons/0/03/Ornette-Coleman-2008-Heidelberg-schindelbeck.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "hancock": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Herbie_Hancock_2023.jpg/500px-Herbie_Hancock_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "jarrett": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Keith_Jarrett.jpg/500px-Keith_Jarrett.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "gleason": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Publicity_photo_young_Jackie_Gleason.jpg/500px-Publicity_photo_young_Jackie_Gleason.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "sinatra": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg/500px-Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "lynch": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/David_Lynch_%281990%29.jpg/500px-David_Lynch_%281990%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "badalamenti": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Angelo_Badalamenti_%28yearbook%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "cruise": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Julee_Cruise_%28retouch%29_%28cropped%29.jpg/500px-Julee_Cruise_%28retouch%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "walker": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Fenklup1968ScottWalker_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "portishead": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Portishead13b.jpg/500px-Portishead13b.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "fiona": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg/500px-Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "johnston": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg/500px-Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "buckley": "https://upload.wikimedia.org/wikipedia/en/1/13/Jeff_Buckley_by_Gahr.jpg"};
 /* ================= DATA: timeline (public history) ================= */
 const ERAS=[[1900,1945,"黎明とスウィング","ジャズが生まれ、ダンスホールを支配するまで"],[1945,1959,"革新の15年","ビバップ、クール、ハードバップ——即興が芸術になる"],[1959,1970,"拡張と解放","モード、フリー、スピリチュアル、そして電気へ"],[1970,1990,"電気と多様化","フュージョン、ロックの成熟、ポップの実験"],[1990,2010,"深化と引用","トリップホップ、オルタナティブ、ローファイ"],[2010,2030,"現在へ","ジャンルが溶け、個人の世界観が軸になる時代"]];
 const TIMELINE=[
@@ -380,7 +386,7 @@ function renderRec(){
   h+=criteriaHtml();
   items.forEach((x,i)=>{
     const c=x.c, r=ratingOf(c[0]);
-    h+='<div class="card"><div class="recrow"><div class="scorebox"><div class="num">'+x.s+'</div><div class="lbl">MATCH</div></div>'+coverHtml(c,'cov')+'<div style="flex:1;min-width:0">'
+    h+='<div class="card"><div style="text-align:center;margin-bottom:10px">'+coverHtml(c,'covbig')+'</div><div class="recrow"><div class="scorebox"><div class="num">'+x.s+'</div><div class="lbl">MATCH</div></div><div style="flex:1;min-width:0">'
       +'<div class="atitle">'+(i+1)+'. '+esc(c[1])+'</div><div class="aartist">'+esc(c[2])+'</div>'
       +'<div class="ameta">'+c[3]+' ・ '+esc(c[4])+'</div>'+scoresHtml(c)+axesChips(c)
       +'<div class="areason">'+esc(c[6])+'</div>'
@@ -427,26 +433,23 @@ function renderGraph(){
     +'<button class="tagchip'+(curGraph==='world'?' on':'')+'" onclick="curGraph=\'world\';selNode=null;renderGraph()">世界観系譜図</button></div>';
   h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作など、記録で確認できる関係）。破線＝<b>系譜・評価</b>（影響の証言や批評に基づく接続で、編者の読みを含むものはその旨を明示）。人物をタップすると、各関係の根拠が出ます。写真は Wikipedia／Wikimedia Commons の肖像。</div>';
   const pos={}; g.nodes.forEach(n=>pos[n[0]]={x:n[2],y:n[3]});
-  let svg='<svg viewBox="0 0 360 584" style="width:100%;height:auto;display:block"><defs>';
-  g.nodes.forEach(n=>{
-    if(PORTRAITS[n[0]]){ const r=(n[5]==='hub'?23:18); svg+='<clipPath id="cp-'+curGraph+'-'+n[0]+'"><circle cx="'+n[2]+'" cy="'+n[3]+'" r="'+r+'"/></clipPath>'; }
-  });
-  svg+='</defs>';
+  let svg='<svg viewBox="0 0 360 584" style="width:100%;height:auto;display:block">';
   g.edges.forEach(e=>{
     const a=pos[e[0]], b=pos[e[1]]; if(!a||!b) return;
     svg+='<line class="edge'+(e[3]==='lineage'?' lin':'')+'" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'"/>';
     svg+='<text class="elbl" x="'+((a.x+b.x)/2)+'" y="'+((a.y+b.y)/2-3)+'" text-anchor="middle">'+esc(e[2])+'</text>';
   });
-  g.nodes.forEach(n=>{
-    const r=(n[5]==='hub'?23:18), has=!!PORTRAITS[n[0]];
-    const lines=splitLabel(n[1]);
-    svg+='<g class="node'+(n[5]==='hub'?' hub':'')+(selNode===n[0]?' sel':'')+'" onclick="selNode=\''+n[0]+'\';renderGraph()" style="cursor:pointer">'
-      +'<circle cx="'+n[2]+'" cy="'+n[3]+'" r="'+r+'"/>'
-      +(has? '<image href="'+PORTRAITS[n[0]]+'" x="'+(n[2]-r)+'" y="'+(n[3]-r)+'" width="'+(2*r)+'" height="'+(2*r)+'" preserveAspectRatio="xMidYMid slice" clip-path="url(#cp-'+curGraph+'-'+n[0]+')"/><circle cx="'+n[2]+'" cy="'+n[3]+'" r="'+r+'" fill="none" stroke="'+(selNode===n[0]?'#ece5d8':'#d8a24a')+'" stroke-width="'+(selNode===n[0]?2.6:1.4)+'"/>' : '')
-      + lines.map((ln,i)=>'<text x="'+n[2]+'" y="'+(n[3]+r+11+(i*10))+'" text-anchor="middle">'+esc(ln)+'</text>').join('') + '</g>';
-  });
   svg+='</svg>';
-  h+='<div class="gwrap">'+svg+'</div>';
+  let nodes='';
+  g.nodes.forEach(n=>{
+    const r=(n[5]==='hub'?23:18);
+    const lx=(n[2]/360*100).toFixed(2), ly=(n[3]/584*100).toFixed(2), w=(2*r/360*100).toFixed(2);
+    nodes+='<div class="gnode'+(selNode===n[0]?' sel':'')+'" style="left:'+lx+'%;top:'+ly+'%;width:'+w+'%;aspect-ratio:1/1" onclick="selNode=\''+n[0]+'\';renderGraph()">'
+      +(PORTRAITS[n[0]]? '<img src="'+PORTRAITS[n[0]]+'" alt="" loading="lazy">' : '')
+      +'</div>';
+    nodes+='<div class="gname" style="left:'+lx+'%;top:'+(((n[3]+r+5)/584)*100).toFixed(2)+'%">'+splitLabel(n[1]).map(esc).join('<br>')+'</div>';
+  });
+  h+='<div class="gwrap"><div class="gstage">'+svg+nodes+'</div></div>';
   if(selNode){
     const n=g.nodes.find(x=>x[0]===selNode);
     if(n){
