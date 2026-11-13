@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="1.5">
+<meta name="app-version" content="1.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -125,7 +125,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='1.5';
+const APP_VERSION='1.6';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -181,30 +181,49 @@ const CATALOG=[
 ];
 const PORTRAITS={"armstrong": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Louis_Armstrong_in_Color_%28restored%29.jpg/500px-Louis_Armstrong_in_Color_%28restored%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ellington": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Duke_Ellington_-_publicity.JPG/500px-Duke_Ellington_-_publicity.JPG?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "hawkins": "https://upload.wikimedia.org/wikipedia/commons/3/33/Coleman_Hawkins.jpg", "parker": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Portrait_of_Charlie_Parker_in_1947.jpg/500px-Portrait_of_Charlie_Parker_in_1947.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "monk": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg/500px-Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "miles": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Miles_Davis_by_Palumbo_cropped.jpg/500px-Miles_Davis_by_Palumbo_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "mingus": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Charles_Mingus_1976_cropped.jpg/500px-Charles_Mingus_1976_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "evans": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg/500px-Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "coltrane": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/John_Coltrane_1963_cropped_ver2.jpg/500px-John_Coltrane_1963_cropped_ver2.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ornette": "https://upload.wikimedia.org/wikipedia/commons/0/03/Ornette-Coleman-2008-Heidelberg-schindelbeck.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "hancock": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Herbie_Hancock_2023.jpg/500px-Herbie_Hancock_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "jarrett": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Keith_Jarrett.jpg/500px-Keith_Jarrett.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "gleason": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Publicity_photo_young_Jackie_Gleason.jpg/500px-Publicity_photo_young_Jackie_Gleason.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "sinatra": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg/500px-Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "lynch": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/David_Lynch_%281990%29.jpg/500px-David_Lynch_%281990%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "badalamenti": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Angelo_Badalamenti_%28yearbook%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "cruise": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Julee_Cruise_%28retouch%29_%28cropped%29.jpg/500px-Julee_Cruise_%28retouch%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "walker": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Fenklup1968ScottWalker_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "portishead": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Portishead13b.jpg/500px-Portishead13b.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "fiona": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg/500px-Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "johnston": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg/500px-Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "buckley": "https://upload.wikimedia.org/wikipedia/en/1/13/Jeff_Buckley_by_Gahr.jpg"};
 /* ================= DATA: timeline (public history) ================= */
-const ERAS=[[1900,1945,"黎明とスウィング","ジャズが生まれ、ダンスホールを支配するまで"],[1945,1959,"革新の15年","ビバップ、クール、ハードバップ——即興が芸術になる"],[1959,1970,"拡張と解放","モード、フリー、スピリチュアル、そして電気へ"],[1970,1990,"電気と多様化","フュージョン、ロックの成熟、ポップの実験"],[1990,2010,"深化と引用","トリップホップ、オルタナティブ、ローファイ"],[2010,2030,"現在へ","ジャンルが溶け、個人の世界観が軸になる時代"]];
+const ERAS=[[0,1900,"古典の蓄積","平均律から第九まで——西洋音楽の文法が固まる時代"],[1900,1945,"録音の世紀のはじまり","レコードが音楽を大衆のものにし、ジャズが生まれる"],[1945,1966,"ジャズの成熟とロックの誕生","ビバップからモード・ジャズへ。同時に新しい若者の音楽が爆発する"],[1966,1976,"ロック／ポップの黄金期","LP が芸術形式になり、音楽が文化の中心に来る"],[1976,2000,"分岐と電子化","パンク、ヒップホップ、電子音楽——ジャンルが枝分かれし続ける"],[2000,2030,"配信の時代","ネットが流通を変え、聴くという行為そのものが変わる"]];
 const TIMELINE=[
-[1917,"初のジャズレコード","ジャズ","Original Dixieland Jass Band が録音。ジャズが商品として世界へ出る。"],
-[1925,"Louis Armstrong — Hot Five 録音","ジャズ","集団即興から「ソロイストの芸術」へ。ジャズの文法がここで決まる。"],
-[1935,"スウィング時代の幕開け","ジャズ","Benny Goodman の大成功。ビッグバンドとダンスの時代。"],
-[1939,"Coleman Hawkins — Body and Soul","ジャズ","テナーの独奏が「物語を語る」ことを証明した3分間。"],
-[1945,"ビバップ誕生","ジャズ","Charlie Parker と Dizzy Gillespie。聴くための速く複雑なジャズへ。"],
-[1949,"Birth of the Cool","ジャズ","Miles Davis。抑制と編曲の美学——クール・ジャズの起点。"],
-[1954,"ハードバップ","ジャズ","Art Blakey らがゴスペルとブルースの熱を取り戻す。"],
-[1956,"Mingus — Pithecanthropus Erectus","ジャズ","作曲家としての Mingus。オーケストラ的野心の芽。"],
-[1959,"奇跡の年","ジャズ","Kind of Blue、Time Out、Giant Steps、The Shape of Jazz to Come が同年に出る。"],
-[1960,"フリージャズ","ジャズ","Ornette Coleman のダブル・カルテット。和声の外へ。"],
-[1963,"Mingus — The Black Saint and the Lady Sinner","ジャズ","バレエ音楽としてのジャズ。官能と狂気の大編成。"],
-[1965,"A Love Supreme","ジャズ","Coltrane の祈り。スピリチュアル・ジャズの頂点。"],
-[1967,"The Velvet Underground & Nico","ロック","美術と音楽の接続。暗く美しいロックの系譜の起点。"],
-[1969,"In a Silent Way / Bitches Brew 録音","ジャズ","Miles が電気へ。ジャズとロックと闇が溶ける。"],
-[1971,"What's Going On / Journey in Satchidananda","ソウル/ジャズ","祈りのソウルと、浮遊するスピリチュアル・ジャズが同じ年に。"],
-[1989,"Julee Cruise — Floating into the Night","ポップ","Lynch×Badalamenti。ドラマ『Twin Peaks』への助走。"],
-[1991,"Nevermind","ロック","オルタナティブが世界の中心に躍り出る。"],
-[1994,"Dummy / Grace","ポップ","トリップホップと Buckley の哀愁。同年に静かな革新が並ぶ。"],
-[1996,"Tidal","ポップ","Fiona Apple、17歳。彼の世界の主が現れる。"],
-[1998,"Mezzanine / In the Aeroplane Over the Sea","ポップ","闇の密度と、剥き出しの祈り。対極の2枚が同じ年に。"],
-[2006,"Scott Walker — The Drift","実験","歌ものの果て。存在の不穏が主役になる。"],
-[2020,"Fetch the Bolt Cutters","ポップ","家と身体を打楽器にする Fiona の到達点。"]
+[1722,"バッハ『平均律クラヴィーア曲集』第1巻","クラシック","全ての調を巡る鍵盤曲集。以後の西洋音楽の調性システムの土台になる。"],
+[1824,"ベートーヴェン 交響曲第9番 初演","クラシック","合唱入りの交響曲。「歓喜の歌」を擁し、古典派の到達点にしてロマン派の出発点。"],
+[1899,"ジョプリン「Maple Leaf Rag」出版","源流","ラグタイムの楽譜が大ヒット。ジャズへつながるアメリカ大衆音楽の源流の一つ。"],
+[1913,"ストラヴィンスキー『春の祭典』初演","クラシック","パリ初演は騒動に。不協和音と変拍子が近代音楽の幕開けを象徴した。"],
+[1917,"初のジャズ・レコード","ジャズ","Original Dixieland Jass Band の録音。ジャズがレコードで世界へ広まり始める。"],
+[1925,"ルイ・アームストロング Hot Five 録音開始","ジャズ","集団即興から個人のソロへ。ジャズの表現の中心が移る録音群。"],
+[1935,"スウィング時代の幕開け","ジャズ","ベニー・グッドマンの大成功で、ビッグバンド・ジャズが大衆文化の中心に。"],
+[1939,"コールマン・ホーキンス「Body and Soul」","ジャズ","テナーサックス独奏の完成度で知られる録音。バラード演奏の基準になった。"],
+[1945,"ビバップの誕生","ジャズ","チャーリー・パーカーとディジー・ガレスピー。速く複雑な「聴くジャズ」へ。"],
+[1949,"マイルス・デイヴィス『Birth of the Cool』録音","ジャズ","抑制された音色と編曲を重視するクール・ジャズの起点。"],
+[1951,"「Rocket 88」","ロック","ロックンロールの最初期の録音として、しばしば名前が挙がる R&B。"],
+[1954,"エルヴィス・プレスリー、サン・スタジオで録音","ロック","「That's All Right」。ロックンロールが大衆化していく起点の一つ。"],
+[1955,"チャック・ベリー「Maybellene」","ロック","ギターと若者の日常を歌う言葉で、ロックの基本形式を決定づけた。"],
+[1959,"マイルス・デイヴィス『Kind of Blue』","ジャズ","モード・ジャズの代表作。ジャズ史上最も売れたアルバムの一つ。"],
+[1959,"モータウン設立","ソウル／R&B","ベリー・ゴーディがデトロイトに設立。60年代ソウル・ポップの制作体制が生まれる。"],
+[1959,"オーネット・コールマン『The Shape of Jazz to Come』","ジャズ","和声の枠組みから離れるフリー・ジャズの宣言となった一枚。"],
+[1961,"ロバート・ジョンスン再発盤","ブルース","『King of the Delta Blues Singers』。ロック世代がブルースを再発見する契機に。"],
+[1963,"ビートルズ デビュー・アルバム","ロック","『Please Please Me』。イギリス発のバンドが世界のポップの中心に躍り出る。"],
+[1965,"ボブ・ディラン「Like a Rolling Stone」／電気化","ロック","ニューポートでのエレキ演奏が論争に。フォークとロックの境界が崩れる。"],
+[1965,"ジョン・コルトレーン『A Love Supreme』","ジャズ","スピリチュアル・ジャズの頂点とされる組曲。祈りと即興の融合。"],
+[1966,"「アルバムの時代」へ","ロック","ビーチ・ボーイズ『Pet Sounds』とビートルズ『Revolver』。LP が表現の単位になる。"],
+[1967,"ビートルズ『Sgt. Pepper's』","ロック","コンセプト・アルバムの象徴作。スタジオ技術とポップの野心が結びついた。"],
+[1967,"アレサ・フランクリン「Respect」","ソウル／R&B","「ソウルの女王」の代表曲。時代の自己主張のアンセムにもなった。"],
+[1969,"ウッドストック・フェスティバル","ロック","約40万人が集まった野外公演。ロックが世代文化の中心だったことの象徴。"],
+[1971,"マーヴィン・ゲイ『What's Going On』","ソウル／R&B","社会的な主題を扱うコンセプト作。ソウルが「アルバムの芸術」になる転機。"],
+[1973,"ピンク・フロイド『狂気』","ロック","コンセプトと音響実験の大作。長くチャートに残り続けた世界的ヒット。"],
+[1973,"DJクール・ハークのパーティー","ヒップホップ","ブロンクスでのこの催しが、しばしばヒップホップ文化の起点とされる。"],
+[1976,"ラモーンズ デビュー","パンク","短く速い曲でロックを単純化。以後のパンク／オルタナティブの雛形。"],
+[1977,"セックス・ピストルズ『勝手にしやがれ!!』","パンク","イギリスのパンクを象徴する一枚。音楽産業と若者文化に衝撃を与えた。"],
+[1979,"「Rapper's Delight」ヒット","ヒップホップ","シュガーヒル・ギャング。ラップが初めて大規模な商業的成功を得る。"],
+[1982,"マイケル・ジャクソン『スリラー』","ポップ","史上最も売れたアルバムの一つ。ミュージック・ビデオの時代を決定づけた。"],
+[1986,"Run-D.M.C. × エアロスミス「Walk This Way」","ヒップホップ","ロックとラップの協演ヒットで、ヒップホップが大衆市場へ広がる。"],
+[1988,"パブリック・エナミー／N.W.A の登場","ヒップホップ","社会派の詞と西海岸のストリートの声。表現の中心ジャンルの一つへ。"],
+[1991,"ニルヴァーナ『Nevermind』","ロック","オルタナティヴ・ロックが主流を置き換えた転機。「Smells Like Teen Spirit」。"],
+[1991,"マッシヴ・アタック『Blue Lines』","エレクトロニカ","トリップホップの起点とされる、英ブリストル発のサウンド。"],
+[1994,"ポーティスヘッド『Dummy』","エレクトロニカ","トリップホップを世界的に広めた一枚。映画的で陰のある音像が特徴。"],
+[1997,"レディオヘッド『OK Computer』","ロック","世紀末の不安を描くコンセプト作。90年代ロックの到達点の一つ。"],
+[2001,"Napster 閉鎖と iPod 発売","流通","ファイル共有が違法化され、正規ダウンロードと携帯プレーヤーの時代へ。"],
+[2008,"Spotify サービス開始","流通","定額制ストリーミングが、音楽の聴き方の主流になっていく出発点。"],
+[2016,"ビヨンセ『Lemonade』","ポップ","映像と一体の「ビジュアル・アルバム」。SNS 時代の発表形式の転機。"],
+[2019,"ビリー・アイリッシュ デビュー作","ポップ","自宅録音発の音像が世界のヒットに。ベッドルーム・ポップの象徴。"]
 ];
 /* ================= DATA: graphs ================= */
 const GRAPHS={
@@ -415,9 +434,9 @@ function saveCriteria(){
   data.criteria=c; data.criteriaUpdatedAt=Date.now(); saveLocal(); renderRec();
 }
 function renderTl(){
-  let h='<div class="secttl">音楽の年表</div><div class="note">切れない一本の線の上に、時代の色がグラデーションで移っていく作り。まずはジャズを主軸に、彼の世界に接続する出来事を置いています。</div><div class="tl">';
+  let h='<div class="secttl">音楽の年表</div><div class="note">特定の好みに寄せない、音楽史全体の年表です。古典の蓄積から録音の発明、ジャズ、ロック、ヒップホップ、電子音楽、そして配信の時代まで、誰が読んでも辿れる「転機」だけを並べました。</div><div class="tl">';
   ERAS.forEach(er=>{
-    h+='<div class="tl-era">'+er[0]+'–'+(er[1]-1)+'　'+esc(er[2])+'<span>'+esc(er[3])+'</span></div>';
+    h+='<div class="tl-era">'+(er[0]===0? '〜'+(er[1]-1) : er[0]+'–'+(er[1]>=2030? '現在' : er[1]-1))+'　'+esc(er[2])+'<span>'+esc(er[3])+'</span></div>';
     TIMELINE.filter(ev=>ev[0]>=er[0] && ev[0]<er[1]).forEach(ev=>{
       h+='<div class="tl-ev"><div><span class="tl-year">'+ev[0]+'</span><span class="tl-title">'+esc(ev[1])+'</span></div><div class="tl-note">'+esc(ev[3])+'</div></div>';
     });
