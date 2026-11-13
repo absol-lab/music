@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.8">
+<meta name="app-version" content="2.9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -72,6 +72,7 @@ textarea{ min-height:56px; resize:vertical; }
 
 
 #dsheet{ position:fixed; inset:0; background:rgba(8,6,4,.62); z-index:60; display:none; }
+.herocov{ width:min(74vw,300px); height:auto; aspect-ratio:1/1; object-fit:cover; border-radius:14px; display:block; margin:0 auto; box-shadow:0 10px 34px rgba(0,0,0,.5); }
 #lbox{ position:fixed; inset:0; background:rgba(5,4,3,.94); z-index:90; display:none; align-items:center; justify-content:center; flex-direction:column; padding:24px; box-sizing:border-box; }
 #lbox.on{ display:flex; }
 #lbox img{ max-width:min(88vw,560px); max-height:74vh; border-radius:10px; box-shadow:0 14px 48px rgba(0,0,0,.65); }
@@ -198,7 +199,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.8';
+const APP_VERSION='2.9';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -560,7 +561,28 @@ function renderRec(){
   else if(recMode==='shuffle'){ let seed=(recSeed*7919)%2147483647; if(seed<=0) seed+=2147483646; const rnd=()=>{ seed=(seed*1103515245+12345)%2147483647; return seed/2147483647; }; for(let i=items.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); const tmp=items[i]; items[i]=items[j]; items[j]=tmp; } }
   else items.sort((a,b)=> b.s-a.s);
   const modes=[['match','おすすめ順'],['buzz','世論'],['new','新しい順'],['old','古い順'],['mood','気分'],['shuffle','シャッフル']];
+  const pool=CATALOG.map(c=>({c, s:scoreOf(c,t)})).filter(x=>{ const r=ratingOf(x.c[0]); return !(r && r.s==='heard'); }).sort((a,b)=> b.s-a.s);
+  const heroSrc=pool.length? pool : CATALOG.map(c=>({c, s:scoreOf(c,t)})).sort((a,b)=> b.s-a.s);
+  const topN=heroSrc.slice(0, Math.min(10, heroSrc.length));
+  const nowD=new Date(); const dstr=nowD.getFullYear()+'-'+(nowD.getMonth()+1)+'-'+nowD.getDate();
+  let hsh=0; for(let i=0;i<dstr.length;i++) hsh=(hsh*31+dstr.charCodeAt(i))>>>0;
+  const hero=topN.length? topN[hsh%topN.length] : null;
+  if(hero) items=items.filter(x=>x.c[0]!==hero.c[0]);
   let h='<div class="secttl">おすすめ</div>';
+  if(hero){ const c=hero.c, r=ratingOf(c[0]);
+    h+='<div class="card" style="padding:18px 14px 14px;margin-bottom:14px"><div style="text-align:center;font-size:.82em;letter-spacing:.16em;color:var(--acc);font-weight:700">今日の必聴アルバム</div>'
+      +'<div style="text-align:center;color:var(--sub);font-size:.78em;margin:4px 0 14px">'+(nowD.getMonth()+1)+'月'+nowD.getDate()+'日 ・ MATCH '+hero.s+'</div>'
+      +coverHtml(c,'herocov')
+      +'<div style="text-align:center;margin-top:14px"><div style="font-weight:800;font-size:1.24em;line-height:1.35">'+esc(c[1])+'</div><div class="aartist" style="margin-top:3px;font-size:1em">'+esc(c[2])+'</div>'
+      +'<div class="ameta" style="margin-top:2px">'+c[3]+' ・ '+esc(c[4])+'</div></div>'
+      +'<div style="display:flex;justify-content:center;margin-top:6px">'+scoresHtml(c)+'</div>'
+      +'<div style="display:flex;justify-content:center">'+axesChips(c)+'</div>'
+      +'<div class="areason" style="margin-top:9px">'+esc(c[6])+'</div>'
+      +'<div class="recfoot">'+starsHtml(c[0], r? (r.stars||0):0)
+      +'<div class="btnrow"><button class="btn small'+(r&&r.s==='want'?' on':'')+'" onclick="setRating(\''+c[0]+'\',{s:\'want\'})">気になる</button>'
+      +'<a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="'+amLink(c)+'" target="_blank" rel="noopener">Apple Musicで開く</a></div>'
+      +'</div></div>';
+  }
   h+='<div class="chiprow">'+modes.map(m=>'<button class="tagchip'+(recMode===m[0]?' on':'')+'" onclick="recMode=\''+m[0]+'\';if(recMode===\'shuffle\')recSeed++;renderRec()">'+m[1]+'</button>').join('')+'<button class="tagchip'+(recShowCrit?' on':'')+'" onclick="recShowCrit=!recShowCrit;renderRec()">好みの軸</button></div>';
   if(recMode==='mood') h+='<div class="chiprow">'+AXES.map(([k,l])=>'<button class="tagchip'+(recAxis===k?' on':'')+'" onclick="recAxis=\''+k+'\';renderRec()">'+l+'</button>').join('')+'</div>';
   const genres=['all'].concat([...new Set(CATALOG.map(c=>c[4]))]);
@@ -1053,6 +1075,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['2.9','2026-11-14','おすすめタブの一番上に「今日の必聴アルバム」を大きく表示。日付で決まる日替わりの1枚で、下のリストとは重複しないようにした'],
  ['2.8','2026-11-14','ジャズ系譜図を大幅拡張（37人→92人）。メダリオンと名前を大きくし、開いた時は読める大きさで中心部から表示。メダリオンをタップすると図鑑のアーティスト詳細が開くように。ジャケット写真はタップで拡大表示'],
  ['2.7','2026-11-13','全アプリ一斉で音を消した（サウンド設定と音量は保持。再開は次の更新で）'],
  ['2.6','2026-11-13','ヘッダーの位置を調整。タイトルとベルがステータスバーに被らないよう、安全領域ぶん下げて並びを中央揃えに'],
