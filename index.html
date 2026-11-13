@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="1.4">
+<meta name="app-version" content="1.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -40,6 +40,9 @@ main{ padding:12px 14px 0; max-width:640px; margin:0 auto; }
 .axchip{ font-size:.68em; color:var(--sub); border:1px solid var(--line); border-radius:999px; padding:3px 8px; }
 .axchip b{ color:var(--acc); font-weight:700; }
 .btnrow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:9px; }
+.recfoot{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+.recfoot .stars{ margin-top:0; }
+.recfoot .btnrow{ margin-top:0; margin-left:auto; }
 .btn{ appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:11px 18px; min-height:48px; font-size:.85em; cursor:pointer; }
 .btn.primary{ background:var(--acc); border-color:var(--acc); color:#1c1508; font-weight:700; }
 .btn.small{ min-height:44px; padding:8px 14px; font-size:.8em; }
@@ -122,7 +125,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='1.4';
+const APP_VERSION='1.5';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -393,10 +396,10 @@ function renderRec(){
       +'<div class="atitle">'+(i+1)+'. '+esc(c[1])+'</div><div class="aartist">'+esc(c[2])+'</div>'
       +'<div class="ameta">'+c[3]+' ・ '+esc(c[4])+'</div>'+scoresHtml(c)+axesChips(c)
       +'<div class="areason">'+esc(c[6])+'</div>'
-      +starsHtml(c[0], r? (r.stars||0):0)
+      +'</div></div><div class="recfoot">'+starsHtml(c[0], r? (r.stars||0):0)
       +'<div class="btnrow"><button class="btn small'+(r&&r.s==='want'?' on':'')+'" onclick="setRating(\''+c[0]+'\',{s:\'want\'})">気になる</button>'
       +'<a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="'+amLink(c)+'" target="_blank" rel="noopener">Apple Musicで開く</a></div>'
-      +'</div></div></div>';
+      +'</div></div>';
   });
   $('v-rec').innerHTML=h;
 }
