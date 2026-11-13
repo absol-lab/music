@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.5">
+<meta name="app-version" content="2.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -15,7 +15,7 @@
 html,body{ margin:0; padding:0; background:var(--bg); color:var(--tx); font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif; touch-action:manipulation; }
 body{ padding-bottom:96px; }
 #veil{ position:fixed; inset:0; background:#000; z-index:99; transition:opacity .6s ease; }
-header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backdrop-filter:blur(8px); padding:18px 14px 8px; border-bottom:1px solid var(--line); }
+header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backdrop-filter:blur(8px); padding:calc(env(safe-area-inset-top, 0px) + 16px) 14px 8px; border-bottom:1px solid var(--line); }
 h1{ font-size:1.06em; margin:0; letter-spacing:.14em; font-weight:700; }
 h1 .en{ color:var(--acc); font-size:.72em; letter-spacing:.22em; margin-left:8px; }
 #syncbar{ display:flex; align-items:center; gap:7px; margin-top:7px; background:none; border:none; color:var(--sub); font-size:.8em; padding:4px 0; cursor:pointer; text-align:left; }
@@ -140,8 +140,8 @@ svg .node.sel text{ fill:#141210; font-weight:700; }
 #nav button svg{ width:21px; height:21px; flex:none; }
 #nav button.on{ color:var(--tx); font-weight:700; background:rgba(216,162,74,.22); box-shadow:inset 0 0 0 1px rgba(216,162,74,.55); }
 #verBadge{ position:fixed; top:calc(env(safe-area-inset-top, 0px) + 2px); left:50%; transform:translateX(-50%); font-size:11px; letter-spacing:.03em; color:var(--sub); opacity:.85; z-index:39; pointer-events:none; white-space:nowrap; }
-.hrow{ display:flex; align-items:flex-start; gap:10px; }
-.hrow h1{ flex:1; min-width:0; padding-top:6px; }
+.hrow{ display:flex; align-items:center; gap:10px; }
+.hrow h1{ flex:1; min-width:0; }
 #bell{ position:relative; flex:none; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--tx); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
 #bell svg{ width:20px; height:20px; }
 #bellbdg{ position:absolute; top:-3px; right:-3px; min-width:18px; height:18px; border-radius:9px; background:var(--red); color:#fff; font-size:10px; font-weight:700; display:none; align-items:center; justify-content:center; padding:0 5px; }
@@ -194,7 +194,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.5';
+const APP_VERSION='2.6';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1023,6 +1023,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['2.6','2026-11-13','ヘッダーの位置を調整。タイトルとベルがステータスバーに被らないよう、安全領域ぶん下げて並びを中央揃えに'],
  ['2.5','2026-11-13','アプリの型に合わせた更新。バージョン表記を上部中央へ移し、画面遷移をスライド式＋スワイプで戻れる形に。通知ベルと更新履歴、設定の行リスト形式、ピルタブのアイコン、サウンド設定を追加'],
  ['2.4','2026-11-13','系譜図の自動追加：アーティストを追加すると、世界観系譜図にも自動で追加されるように'],
  ['2.3','2026-11-13','ライブ情報を独立タブから図鑑のアーティスト詳細の中へ移設。ピルタブの表示方式も安定化'],
