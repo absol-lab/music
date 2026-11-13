@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="1.1">
+<meta name="app-version" content="1.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -113,7 +113,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='1.1';
+const APP_VERSION='1.2';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -325,7 +325,31 @@ function moveInd(){
   if(b && ind){ ind.style.left=b.offsetLeft+4+'px'; ind.style.width=(b.offsetWidth-8)+'px'; }
 }
 function amLink(c){ return c[8] || ('https://music.apple.com/jp/search?term='+encodeURIComponent(c[2]+' '+c[1])); }
-const SCORES={};
+const SCORES={
+"kind-of-blue":{pf:"10.0",rs:31},
+"love-supreme":{rs:66},
+"bitches-brew":{rs:87},
+"in-a-silent-way":{pf:"9.5"},
+"dummy":{pf:"9.5"},
+"third":{pf:"8.8"},
+"tidal":{pf:"9.0"},
+"when-the-pawn":{pf:"9.4",rs:108},
+"idler-wheel":{pf:"9.0",rs:213},
+"fetch-bolt-cutters":{pf:"10.0"},
+"nevermind":{pf:"10.0",rs:6},
+"in-utero":{pf:"10.0"},
+"grace":{pf:"9.0"},
+"homogenic":{pf:"10.0"},
+"vespertine":{pf:"7.2"},
+"hounds-of-love":{pf:"10.0",rs:68},
+"alice-waits":{pf:"9.0"},
+"aeroplane":{pf:"10.0"},
+"heaven-or-las-vegas":{pf:"10.0",rs:245},
+"mezzanine":{pf:"9.3"},
+"selected-ambient":{pf:"9.4"},
+"voodoo":{pf:"10.0",rs:28},
+"whats-going-on":{rs:1}
+};
 function scoresHtml(c){
   const s=SCORES[c[0]]; if(!s) return '';
   const parts=[];
@@ -352,7 +376,7 @@ function renderRec(){
   const t=targetProfile();
   const items=CATALOG.map(c=>({c, s:scoreOf(c,t)})).filter(x=>{ const r=ratingOf(x.c[0]); return !(r && r.s==='heard'); }).sort((a,b)=>b.s-a.s);
   let h='<div class="secttl">おすすめ <span style="color:var(--sub);font-size:.78em">— 好みの軸で採点（RYM×Pitchfork 風）</span></div>';
-  h+='<div class="note">2つの層で表示しています。<b style="color:var(--acc)">MATCH＝主観層</b>：官能・不穏・哀愁・美・生々しさ・浮遊の6軸で各盤を採点し、好みプロフィールとの近さで順位付け（★4以上で「聞いた」にするとプロフィールが寄っていきます）。<b style="color:var(--acc2)">世論＝客観層</b>：Pitchfork のスコア、RYM のコミュニティ評価、Rolling Stone 500 への選出など、外部の数字を出典確認できた盤だけに併記します（確認できない盤は空欄）。</div>';
+  h+='<div class="note">2つの層で表示しています。<b style="color:var(--acc)">MATCH＝主観層</b>：官能・不穏・哀愁・美・生々しさ・浮遊の6軸で各盤を採点し、好みプロフィールとの近さで順位付け（★4以上で「聞いた」にするとプロフィールが寄っていきます）。<b style="color:var(--acc2)">世論＝客観層</b>：Pitchfork のスコア、Rolling Stone 500 への選出など、外部の数字を出典確認できた盤だけに併記します（確認できない盤は空欄。RYM は本家ページで直接確認できなかったため未掲載）。</div>';
   h+=criteriaHtml();
   items.forEach((x,i)=>{
     const c=x.c, r=ratingOf(c[0]);
