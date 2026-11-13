@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.6">
+<meta name="app-version" content="2.7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -194,7 +194,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.6';
+const APP_VERSION='2.7';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1008,8 +1008,9 @@ function applyUi(){
   if(document.body) document.body.dataset.lh=uiSet.lh;
 }
 let AC=null;
+const SOUND_MUTED=true; /* 全アプリ一斉ミュート中（本人の指示 2026-11-13）。サウンド設定・保存値は保持し、再生だけを止める。解除はこのフラグを false に */
 function playTap(){
-  if(!uiSet.sndOn) return;
+  if(SOUND_MUTED || !uiSet.sndOn) return;
   try{
     const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
     AC=AC||new Ctx();
@@ -1023,6 +1024,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['2.7','2026-11-13','全アプリ一斉で音を消した（サウンド設定と音量は保持。再開は次の更新で）'],
  ['2.6','2026-11-13','ヘッダーの位置を調整。タイトルとベルがステータスバーに被らないよう、安全領域ぶん下げて並びを中央揃えに'],
  ['2.5','2026-11-13','アプリの型に合わせた更新。バージョン表記を上部中央へ移し、画面遷移をスライド式＋スワイプで戻れる形に。通知ベルと更新履歴、設定の行リスト形式、ピルタブのアイコン、サウンド設定を追加'],
  ['2.4','2026-11-13','系譜図の自動追加：アーティストを追加すると、世界観系譜図にも自動で追加されるように'],
