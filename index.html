@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.4">
+<meta name="app-version" content="2.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -15,16 +15,19 @@
 html,body{ margin:0; padding:0; background:var(--bg); color:var(--tx); font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif; touch-action:manipulation; }
 body{ padding-bottom:96px; }
 #veil{ position:fixed; inset:0; background:#000; z-index:99; transition:opacity .6s ease; }
-header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backdrop-filter:blur(8px); padding:10px 14px 8px; border-bottom:1px solid var(--line); }
+header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backdrop-filter:blur(8px); padding:18px 14px 8px; border-bottom:1px solid var(--line); }
 h1{ font-size:1.06em; margin:0; letter-spacing:.14em; font-weight:700; }
 h1 .en{ color:var(--acc); font-size:.72em; letter-spacing:.22em; margin-left:8px; }
 #syncbar{ display:flex; align-items:center; gap:7px; margin-top:7px; background:none; border:none; color:var(--sub); font-size:.8em; padding:4px 0; cursor:pointer; text-align:left; }
 #syncdot{ width:8px; height:8px; border-radius:50%; background:var(--red); flex:none; }
 .sbhint{ color:var(--acc); }
 main{ padding:12px 14px 0; max-width:640px; margin:0 auto; }
-.view{ display:none; }
-.view.on{ display:block; animation:fadein .25s ease; }
-@keyframes fadein{ from{ opacity:0; transform:translateX(8px);} to{ opacity:1; transform:none;} }
+.view{ display:none; touch-action:pan-y; }
+.view.on{ display:block; }
+.view.on.fwd{ animation:vinR .28s ease; }
+.view.on.bwd{ animation:vinL .28s ease; }
+@keyframes vinR{ from{ opacity:0; transform:translateX(44px);} to{ opacity:1; transform:none;} }
+@keyframes vinL{ from{ opacity:0; transform:translateX(-44px);} to{ opacity:1; transform:none;} }
 .secttl{ font-size:1em; margin:16px 2px 8px; letter-spacing:.06em; }
 .note{ color:var(--sub); font-size:.83em; line-height:1.65; }
 .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px; }
@@ -70,7 +73,7 @@ textarea{ min-height:56px; resize:vertical; }
 
 #dsheet{ position:fixed; inset:0; background:rgba(8,6,4,.62); z-index:60; display:none; }
 #dsheet.on{ display:block; }
-#dcard{ position:absolute; left:0; right:0; bottom:0; max-height:88vh; overflow-y:auto; background:var(--panel); border-top:1px solid var(--line); border-radius:18px 18px 0 0; padding:16px 16px 34px; }
+#dcard{ position:absolute; left:0; right:0; bottom:0; max-height:88vh; overflow-y:auto; background:var(--panel); border-top:1px solid var(--line); border-radius:18px 18px 0 0; padding:16px 16px 34px; touch-action:pan-y; }
 .agrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px 10px; }
 .atile{ appearance:none; background:none; border:none; padding:0; cursor:pointer; text-align:center; }
 .atile img, .atile .aph{ width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; display:block; background:var(--panel2); border:1px solid var(--line); }
@@ -133,9 +136,31 @@ svg .node.sel circle{ fill:var(--acc); }
 svg .node.sel text{ fill:#141210; font-weight:700; }
 /* nav */
 #nav{ position:fixed; left:50%; transform:translateX(-50%); bottom:15px; width:calc(100vw - 24px); max-width:560px; height:56px; background:rgba(30,26,23,.9); backdrop-filter:blur(10px); border:1px solid var(--line); border-radius:999px; display:flex; gap:2px; padding:4px; box-sizing:border-box; z-index:30; overflow:hidden; }
-#nav button{ flex:1; background:none; border:none; border-radius:999px; color:var(--sub); height:100%; cursor:pointer; white-space:nowrap; padding:0 1px; font-size:11px; letter-spacing:-.2px; transition:background .25s; }
+#nav button{ flex:1; background:none; border:none; border-radius:999px; color:var(--sub); height:100%; cursor:pointer; white-space:nowrap; padding:0 1px; font-size:10px; line-height:1.15; transition:background .25s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
+#nav button svg{ width:21px; height:21px; flex:none; }
 #nav button.on{ color:var(--tx); font-weight:700; background:rgba(216,162,74,.22); box-shadow:inset 0 0 0 1px rgba(216,162,74,.55); }
-#verBadge{ position:fixed; right:10px; bottom:10px; font-size:10px; color:var(--sub); opacity:.75; z-index:25; }
+#verBadge{ position:fixed; top:calc(env(safe-area-inset-top, 0px) + 2px); left:50%; transform:translateX(-50%); font-size:11px; letter-spacing:.03em; color:var(--sub); opacity:.85; z-index:39; pointer-events:none; white-space:nowrap; }
+.hrow{ display:flex; align-items:flex-start; gap:10px; }
+.hrow h1{ flex:1; min-width:0; padding-top:6px; }
+#bell{ position:relative; flex:none; width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--panel); color:var(--tx); display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
+#bell svg{ width:20px; height:20px; }
+#bellbdg{ position:absolute; top:-3px; right:-3px; min-width:18px; height:18px; border-radius:9px; background:var(--red); color:#fff; font-size:10px; font-weight:700; display:none; align-items:center; justify-content:center; padding:0 5px; }
+#bellbdg.on{ display:flex; }
+.setgroup{ background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; margin-bottom:12px; }
+.setgroup>*:last-child{ border-bottom:none; }
+.setrow{ display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; border-bottom:1px solid var(--line); padding:13px 14px; color:var(--tx); font-size:.95em; font-family:inherit; cursor:pointer; text-align:left; min-height:52px; }
+.setrow .val{ margin-left:auto; color:var(--sub); font-size:.88em; text-align:right; }
+.setrow .chev{ color:var(--sub); font-size:1.1em; flex:none; transition:transform .2s; }
+.setrow.open .chev{ transform:rotate(90deg); }
+.setpanel{ display:none; padding:2px 14px 14px; border-bottom:1px solid var(--line); }
+.setpanel.open{ display:block; }
+.histrow{ display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+.histrow:last-child{ border-bottom:none; }
+.histv{ flex:none; width:46px; font-weight:800; color:var(--acc); font-size:.92em; }
+.histb{ font-size:.86em; line-height:1.55; }
+.histd{ color:var(--sub); font-size:.76em; margin-top:2px; }
+body[data-lh="narrow"] .note, body[data-lh="narrow"] .areason, body[data-lh="narrow"] .tl-note{ line-height:1.45; }
+body[data-lh="wide"] .note, body[data-lh="wide"] .areason, body[data-lh="wide"] .tl-note{ line-height:1.95; }
 select.textin{ appearance:none; }
 .libempty{ color:var(--sub); font-size:.86em; padding:14px 2px; }
 .savedmark{ color:var(--green); font-size:.75em; margin-left:6px; }
@@ -144,7 +169,7 @@ select.textin{ appearance:none; }
 <body>
 <div id="veil"></div>
 <header>
-  <h1>Musilabo<span class="en">MUSIC ATLAS</span></h1>
+  <div class="hrow"><h1>Musilabo<span class="en">MUSIC ATLAS</span></h1><button id="bell" onclick="openHistory()" aria-label="更新履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="bellbdg"></span></button></div>
   <button id="syncbar" onclick="syncBarTap()"><span id="syncdot"></span><span id="syncmsg">読み込み中…</span></button>
 </header>
 <main>
@@ -158,18 +183,18 @@ select.textin{ appearance:none; }
 </main>
 <div id="dsheet" onclick="if(event.target===this) closeDetail()"><div id="dcard"></div></div>
 <nav id="nav">
-  <button data-v="rec" class="on" onclick="go('rec')">おすすめ</button>
-  <button data-v="tl" onclick="go('tl')">年表</button>
-  <button data-v="graph" onclick="go('graph')">相関図</button>
-  <button data-v="art" onclick="go('art')">図鑑</button>
-  <button data-v="genre" onclick="go('genre')">探す</button>
-  <button data-v="lib" onclick="go('lib')">マイ記録</button>
-  <button data-v="set" onclick="go('set')">設定</button>
-</nav>
+  <button data-v="rec" class="on" onclick="go('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg><span>おすすめ</span></button>
+  <button data-v="tl" onclick="go('tl')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.1 2"/></svg><span>年表</span></button>
+  <button data-v="graph" onclick="go('graph')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>相関図</span></button>
+  <button data-v="art" onclick="go('art')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>図鑑</span></button>
+  <button data-v="genre" onclick="go('genre')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span>探す</span></button>
+  <button data-v="lib" onclick="go('lib')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.3"/></svg><span>マイ記録</span></button>
+  <button data-v="set" onclick="go('set')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 3.2v2.7M12 18.1v2.7M3.2 12h2.7M18.1 12h2.7M5.8 5.8l1.9 1.9M16.3 16.3l1.9 1.9M18.2 5.8l-1.9 1.9M7.7 16.3l-1.9 1.9"/></svg><span>設定</span></button>
+</nav></nav>
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.4';
+const APP_VERSION='2.5';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -441,14 +466,21 @@ function setRating(id, patch){
 }
 function clearRating(id){ data.ratings[id]={s:'',stars:0,memo:'',u:Date.now(),del:true}; saveLocal(); renderRec(); renderLib(); renderSyncStatus(); }
 /* ================= views ================= */
-function go(v){
+const VIEW_ORDER=['rec','tl','graph','art','genre','lib','set'];
+let tabHist=[];
+function go(v, isBack){
+  const prev=curView;
+  if(v!==prev && !isBack){ tabHist.push(prev); if(tabHist.length>30) tabHist.shift(); }
   curView=v;
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
-  $('v-'+v).classList.add('on');
+  document.querySelectorAll('.view').forEach(el=>{ el.classList.remove('on','fwd','bwd'); el.style.transform=''; el.style.transition=''; });
+  const el=$('v-'+v);
+  el.classList.add('on');
+  el.classList.add((isBack || VIEW_ORDER.indexOf(v)<VIEW_ORDER.indexOf(prev))? 'bwd':'fwd');
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
   window.scrollTo(0,0);
   if(v==='art') loadRequests();
 }
+function backTab(){ if(!tabHist.length) return false; const v=tabHist.pop(); go(v, true); return true; }
 function amLink(c){ return c[8] || ('https://music.apple.com/jp/search?term='+encodeURIComponent(c[2]+' '+c[1])); }
 const SCORES={
 "kind-of-blue":{pf:"10.0",rs:31},
@@ -790,7 +822,7 @@ function lev(a,b){
 }
 function artistSearchText(a){ return a[1]+' '+((ALIASES[a[0]]||[]).join(' '))+' '+a[3].join(' ')+' '+(a[5]||''); }
 function findArtistByName(name){ return allArtists().find(a=>a[1]===name) || null; }
-function closeDetail(){ const s=$('dsheet'); if(s) s.classList.remove('on'); document.body.style.overflow=''; }
+function closeDetail(){ const s=$('dsheet'); if(s){ s.classList.remove('on'); s.style.background=''; } document.body.style.overflow=''; const c=$('dcard'); if(c){ c.style.transform=''; c.style.transition=''; } }
 function openSheet(h){ $('dcard').innerHTML=h; $('dsheet').classList.add('on'); document.body.style.overflow='hidden'; $('dcard').scrollTop=0; }
 function openArtist(id){
   const a=allArtists().find(x=>x[0]===id); if(!a) return;
@@ -963,21 +995,118 @@ function addCustom(){
   data.ratings[id]={s:'heard', stars:0, memo:'', u:Date.now(), del:false};
   saveLocal(); renderLib();
 }
+/* ================= ui prefs (font size / line height / sound) ================= */
+const LS_UI='music.ui.v1';
+let uiSet={fs:'m', lh:'std', sndOn:true, sndVol:20};
+try{ const u=JSON.parse(storeGet(LS_UI)||'null'); if(u && typeof u==='object') uiSet=Object.assign(uiSet, u); }catch(e){}
+const FS_LABELS={s:'小', m:'標準', l:'大', xl:'特大'};
+const LH_LABELS={narrow:'狭い', std:'標準', wide:'広い'};
+function saveUi(){ storeSet(LS_UI, JSON.stringify(uiSet)); }
+function applyUi(){
+  const fsMap={s:'15px', m:'16px', l:'17px', xl:'18.5px'};
+  document.documentElement.style.fontSize=fsMap[uiSet.fs]||'16px';
+  if(document.body) document.body.dataset.lh=uiSet.lh;
+}
+let AC=null;
+function playTap(){
+  if(!uiSet.sndOn) return;
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
+    AC=AC||new Ctx();
+    if(AC.state==='suspended') AC.resume();
+    const t=AC.currentTime, o=AC.createOscillator(), g=AC.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(1250, t); o.frequency.exponentialRampToValueAtTime(840, t+0.05);
+    const v=Math.max(0.0012, (uiSet.sndVol/100)*0.25);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0008, t+0.07);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+0.08);
+  }catch(e){}
+}
+/* ================= update history / bell ================= */
+const HISTORY=[
+ ['2.5','2026-11-13','アプリの型に合わせた更新。バージョン表記を上部中央へ移し、画面遷移をスライド式＋スワイプで戻れる形に。通知ベルと更新履歴、設定の行リスト形式、ピルタブのアイコン、サウンド設定を追加'],
+ ['2.4','2026-11-13','系譜図の自動追加：アーティストを追加すると、世界観系譜図にも自動で追加されるように'],
+ ['2.3','2026-11-13','ライブ情報を独立タブから図鑑のアーティスト詳細の中へ移設。ピルタブの表示方式も安定化'],
+ ['2.2','2026-11-13','相関図の余白を縮小。スライダーなどの青（iOS標準色）を金色のカスタム部品に置き換えて除去'],
+ ['2.1','2026-11-13','図鑑を写真＋名前だけのグリッドに簡素化。相関図のパン（移動）に外枠の限界を設定']
+];
+const LS_BELL='music.bell.seen';
+function verCmp(a,b){ const x=String(a).split('.').map(Number), y=String(b).split('.').map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
+function bellUnread(){ const seen=storeGet(LS_BELL)||'0'; return HISTORY.filter(h=>verCmp(h[0], seen)>0).length; }
+function renderBell(){ const b=$('bellbdg'); if(!b) return; const n=bellUnread(); b.textContent=n>0? n:''; b.classList.toggle('on', n>0); }
+function openHistory(){
+  storeSet(LS_BELL, APP_VERSION); renderBell();
+  let h='<div style="display:flex;align-items:flex-start;gap:10px"><div class="atitle" style="font-size:1.1em;flex:1">更新履歴</div><button class="btn small" onclick="closeDetail()">✕</button></div>';
+  h+=HISTORY.map(x=>'<div class="histrow"><div class="histv">v'+x[0]+'</div><div style="flex:1;min-width:0"><div class="histb">'+esc(x[2])+'</div><div class="histd">'+x[1]+'</div></div></div>').join('');
+  openSheet(h);
+}
 /* ================= settings ================= */
+let relayDraft=null;
+function captureRelayDraft(){ const u=$('relay-url-in'), s=$('relay-secret-in'); if(u||s) relayDraft={url:u? u.value:null, secret:s? s.value:null}; }
+function syncValText(){
+  if(!relayReady()) return '未設定';
+  if(syncStatus==='synced') return '同期済み（'+fmtTime(lastSyncAt)+'）';
+  if(syncStatus==='syncing') return '同期中…';
+  if(syncStatus==='error') return 'エラー';
+  return '接続済み（未同期）';
+}
+function setRow(key, label, val, panelHtml, valId){
+  return '<button class="setrow" id="row-'+key+'" onclick="togglePanel(\''+key+'\')"><span>'+label+'</span><span class="val"'+(valId? ' id="'+valId+'"':'')+'>'+val+'</span><span class="chev">›</span></button>'
+    +'<div class="setpanel" id="panel-'+key+'">'+panelHtml+'</div>';
+}
+function openPanelOnly(key){
+  document.querySelectorAll('.setpanel.open').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.setrow.open').forEach(x=>x.classList.remove('open'));
+  const p=$('panel-'+key), r=$('row-'+key);
+  if(p) p.classList.add('open'); if(r) r.classList.add('open');
+}
+function togglePanel(key){
+  captureRelayDraft();
+  const p=$('panel-'+key); if(!p) return;
+  if(p.classList.contains('open')){ p.classList.remove('open'); const r=$('row-'+key); if(r) r.classList.remove('open'); }
+  else openPanelOnly(key);
+}
+function setFs(k){ captureRelayDraft(); uiSet.fs=k; saveUi(); applyUi(); renderSet(); openPanelOnly('font'); }
+function setLh(k){ captureRelayDraft(); uiSet.lh=k; saveUi(); applyUi(); renderSet(); openPanelOnly('lh'); }
+function setSnd(on){ captureRelayDraft(); uiSet.sndOn=on; saveUi(); renderSet(); openPanelOnly('sound'); }
+function setSndVol(v){ uiSet.sndVol=+v; saveUi(); const s=$('sndvolv'); if(s) s.textContent=v+'%'; const val=$('val-sound'); if(val) val.textContent=uiSet.sndOn? 'オン '+v+'%':'オフ'; }
 function renderSet(){
   const rc=relayCfg();
+  const urlVal=(relayDraft && relayDraft.url!=null)? relayDraft.url : (rc? rc.url : RELAY_URL_DEFAULT);
+  const secVal=(relayDraft && relayDraft.secret!=null)? relayDraft.secret : (rc? rc.secret : '');
   let h='<div class="secttl">設定</div>';
-  h+='<div class="card"><div style="font-weight:700">同期（中継）</div>'
-    +'<div class="note" style="margin-top:4px">他のアプリと同じ中継で music.json と同期します。URL は初期値のまま、シークレットだけ貼ってください。</div>'
-    +'<div style="margin-top:8px"><input class="textin" id="relay-url-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="中継の URL" value="'+(rc? escA(rc.url):RELAY_URL_DEFAULT)+'"></div>'
-    +'<div style="margin-top:8px"><input class="textin" id="relay-secret-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="シークレット" value="'+(rc? escA(rc.secret):'')+'"></div>'
-    +'<div class="btnrow"><button class="btn primary" onclick="relaySaveAndTest()">保存して接続テスト</button>'+(rc? '<button class="btn" onclick="relayClear()">中継を解除</button>':'')+'</div>'
-    +'<div class="note" id="relaystat" style="margin-top:6px">'+(rc? '設定済みです。' : '未設定です（この間は端末内に保存されます）。')+'</div></div>';
-  h+='<div class="card"><div style="font-weight:700">データ</div><div class="btnrow">'
-    +'<button class="btn" onclick="exportData()">エクスポート</button>'
-    +'<label class="btn" style="display:inline-flex;align-items:center">インポート<input type="file" accept="application/json" style="display:none" onchange="importData(this)"></label>'
-    +'</div></div>';
-  h+='<div class="card"><div style="font-weight:700">このアプリについて</div><div class="note" style="margin-top:4px">Musilabo v'+APP_VERSION+'。おすすめ／年表／相関図／図鑑／探す／マイ記録を持つ独立版（公演情報は図鑑の各アーティスト詳細の中）。本体は GitHub Pages、データは Google Drive の music.json。</div></div>';
+  h+='<div class="setgroup">'
+    + setRow('sync','Google Drive 同期', esc(syncValText()),
+      '<div class="note">他のアプリと同じ中継で music.json と同期します。URL は初期値のまま、シークレットだけ貼ってください。</div>'
+      +'<div style="margin-top:8px"><input class="textin" id="relay-url-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="中継の URL" value="'+escA(urlVal)+'"></div>'
+      +'<div style="margin-top:8px"><input class="textin" id="relay-secret-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="シークレット" value="'+escA(secVal)+'"></div>'
+      +'<div class="btnrow"><button class="btn primary" onclick="relaySaveAndTest()">保存して接続テスト</button>'+(rc? '<button class="btn" onclick="relayClear()">中継を解除</button>':'')+'</div>'
+      +'<div class="note" id="relaystat" style="margin-top:6px">'+(rc? '設定済みです。' : '未設定です（この間は端末内に保存されます）。')+'</div>',
+      'val-sync')
+    +'</div>';
+  h+='<div class="setgroup">'
+    + setRow('font','文字設定', FS_LABELS[uiSet.fs],
+      '<div class="chiprow" style="margin:2px 0 6px">'+Object.keys(FS_LABELS).map(k=>'<button class="tagchip'+(uiSet.fs===k?' on':'')+'" onclick="setFs(\''+k+'\')">'+FS_LABELS[k]+'</button>').join('')+'</div>'
+      +'<div class="note">文字の大きさを切り替えます（すぐに反映されます）。</div>')
+    + setRow('lh','行間', LH_LABELS[uiSet.lh],
+      '<div class="chiprow" style="margin:2px 0 6px">'+Object.keys(LH_LABELS).map(k=>'<button class="tagchip'+(uiSet.lh===k?' on':'')+'" onclick="setLh(\''+k+'\')">'+LH_LABELS[k]+'</button>').join('')+'</div>'
+      +'<div class="note">本文の行間を切り替えます（すぐに反映されます）。</div>')
+    +'</div>';
+  h+='<div class="setgroup">'
+    + setRow('sound','サウンド', uiSet.sndOn? 'オン '+uiSet.sndVol+'%' : 'オフ',
+      '<div class="chiprow" style="margin:2px 0 6px"><button class="tagchip'+(uiSet.sndOn?' on':'')+'" onclick="setSnd(true)">オン</button><button class="tagchip'+(!uiSet.sndOn?' on':'')+'" onclick="setSnd(false)">オフ</button></div>'
+      +'<div style="display:flex;align-items:center;gap:10px"><span style="font-size:.82em;color:var(--sub)">音量</span><input type="range" min="0" max="100" step="5" value="'+uiSet.sndVol+'" style="flex:1" oninput="setSndVol(this.value)"><span id="sndvolv" style="width:40px;text-align:right;font-size:.85em">'+uiSet.sndVol+'%</span></div>'
+      +'<div class="note" style="margin-top:6px">ボタンを押したときのタップ音です。</div>',
+      'val-sound')
+    +'</div>';
+  h+='<div class="setgroup">'
+    + setRow('data','データ', '',
+      '<div class="btnrow" style="margin-top:2px"><button class="btn" onclick="exportData()">エクスポート</button>'
+      +'<label class="btn" style="display:inline-flex;align-items:center">インポート<input type="file" accept="application/json" style="display:none" onchange="importData(this)"></label></div>'
+      +'<div class="note" style="margin-top:6px">評価・メモ・好みの軸などを music.json として書き出し／読み込みします。</div>')
+    +'<button class="setrow" onclick="openHistory()"><span>更新履歴</span><span class="val">v'+APP_VERSION+'</span><span class="chev">›</span></button>'
+    + setRow('about','このアプリについて', 'v'+APP_VERSION,
+      '<div class="note">Musilabo v'+APP_VERSION+'。おすすめ／年表／相関図／図鑑／探す／マイ記録を持つ独立版（公演情報は図鑑の各アーティスト詳細の中）。本体は GitHub Pages、データは Google Drive の music.json。</div>')
+    +'</div>';
   $('v-set').innerHTML=h;
 }
 function exportData(){
@@ -1006,12 +1135,13 @@ function relaySaveAndTest(){
   const u=$('relay-url-in'), s=$('relay-secret-in'), st=$('relaystat');
   const url=(u? u.value:'').trim()||RELAY_URL_DEFAULT, secret=(s? s.value:'').trim();
   if(!secret){ if(st) st.textContent='シークレットを入力してください'; return; }
+  relayDraft=null;
   storeSet(LS_RELAY, JSON.stringify({url:url, secret:secret}));
   if(st) st.textContent='接続テスト中…';
-  relayCall('ping').then(()=>{ if(st) st.textContent='接続OK — 中継で同期します。'; renderSyncStatus(); syncNow('relay'); renderSet(); })
-    .catch(e=>{ if(st) st.textContent='接続に失敗しました：'+((e&&e.message)||e); });
+  relayCall('ping').then(()=>{ renderSyncStatus(); syncNow('relay'); renderSet(); openPanelOnly('sync'); const nst=$('relaystat'); if(nst) nst.textContent='接続OK — 中継で同期します。'; })
+    .catch(e=>{ const cst=$('relaystat')||st; if(cst) cst.textContent='接続に失敗しました：'+((e&&e.message)||e); });
 }
-function relayClear(){ storeDel(LS_RELAY); syncStatus='disconnected'; renderSyncStatus(); renderSet(); }
+function relayClear(){ relayDraft=null; storeDel(LS_RELAY); syncStatus='disconnected'; renderSyncStatus(); renderSet(); }
 async function syncNow(reason){
   if(syncRunning || !relayReady()) return;
   syncRunning=true; syncStatus='syncing'; renderSyncStatus();
@@ -1039,8 +1169,82 @@ function renderSyncStatus(){
   else if(syncStatus==='error') msg.innerHTML='同期エラー：'+esc(syncErr)+'<span class="sbhint"> ・ タップで再試行</span>';
   else if(relayReady()) msg.innerHTML='中継で接続済み（未同期）<span class="sbhint"> ・ タップで再同期</span>';
   else msg.innerHTML='未設定（端末内に保存中）<span class="sbhint"> ・ タップで設定へ</span>';
+  const vs=$('val-sync'); if(vs) vs.textContent=syncValText();
 }
 function syncBarTap(){ if(syncRunning) return; if(relayReady()) syncNow('manual'); else go('set'); }
+/* ================= swipe back ================= */
+function swallowClick(){
+  const h=e=>{ e.stopPropagation(); e.preventDefault(); document.removeEventListener('click', h, true); };
+  document.addEventListener('click', h, true);
+  setTimeout(()=>document.removeEventListener('click', h, true), 400);
+}
+let tabDrag=null;
+function initSwipe(){
+  document.addEventListener('pointerdown', e=>{
+    if(tabDrag) return;
+    const sh=$('dsheet'); if(sh && sh.classList.contains('on')) return;
+    if(e.target && e.target.closest && e.target.closest('#nav, header, #dsheet, .gview, .gwrap, input, textarea, select')) return;
+    if(e.clientX>28) return;
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    tabDrag={id:e.pointerId, x0:e.clientX, y0:e.clientY, dx:0, mode:null};
+  }, {passive:true});
+  document.addEventListener('pointermove', e=>{
+    if(!tabDrag || e.pointerId!==tabDrag.id) return;
+    const dx=e.clientX-tabDrag.x0, dy=e.clientY-tabDrag.y0;
+    if(!tabDrag.mode){
+      if(Math.abs(dx)>8 || Math.abs(dy)>8) tabDrag.mode=(dx>0 && Math.abs(dx)>Math.abs(dy))? 'h':'v';
+      if(tabDrag.mode==='v'){ tabDrag=null; return; }
+    }
+    if(tabDrag.mode==='h'){
+      tabDrag.dx=Math.max(0, dx);
+      const el=$('v-'+curView);
+      if(el){ el.style.transition='none'; el.style.transform='translateX('+tabDrag.dx+'px)'; }
+    }
+  }, {passive:true});
+  const end=e=>{
+    if(!tabDrag || e.pointerId!==tabDrag.id) return;
+    const d=tabDrag; tabDrag=null;
+    if(d.mode!=='h') return;
+    if(d.dx>80 && backTab()){ swallowClick(); return; }
+    const el=$('v-'+curView);
+    if(el){ el.style.transition='transform .2s ease'; el.style.transform=''; setTimeout(()=>{ el.style.transition=''; }, 230); }
+  };
+  document.addEventListener('pointerup', end);
+  document.addEventListener('pointercancel', end);
+}
+let sheetDrag=null;
+function initSheetSwipe(){
+  const sh=$('dsheet'); if(!sh) return;
+  sh.addEventListener('pointerdown', e=>{
+    if(sheetDrag || !sh.classList.contains('on')) return;
+    sheetDrag={id:e.pointerId, x0:e.clientX, y0:e.clientY, dx:0, mode:null};
+  });
+  sh.addEventListener('pointermove', e=>{
+    if(!sheetDrag || e.pointerId!==sheetDrag.id) return;
+    const dx=e.clientX-sheetDrag.x0, dy=e.clientY-sheetDrag.y0;
+    if(!sheetDrag.mode){
+      if(Math.abs(dx)>8 || Math.abs(dy)>8) sheetDrag.mode=(dx>0 && Math.abs(dx)>Math.abs(dy))? 'h':'v';
+      if(sheetDrag.mode==='v'){ sheetDrag=null; return; }
+    }
+    if(sheetDrag.mode==='h'){
+      sheetDrag.dx=Math.max(0, dx);
+      const card=$('dcard');
+      if(card){ card.style.transition='none'; card.style.transform='translateX('+sheetDrag.dx+'px)'; }
+      sh.style.background='rgba(8,6,4,'+Math.max(0, 0.62*(1-sheetDrag.dx/420)).toFixed(3)+')';
+    }
+  });
+  const end=e=>{
+    if(!sheetDrag || e.pointerId!==sheetDrag.id) return;
+    const d=sheetDrag; sheetDrag=null;
+    if(d.mode!=='h') return;
+    if(d.dx>80){ closeDetail(); swallowClick(); return; }
+    const card=$('dcard');
+    if(card){ card.style.transition='transform .2s ease'; card.style.transform=''; setTimeout(()=>{ card.style.transition=''; }, 230); }
+    sh.style.background='';
+  };
+  sh.addEventListener('pointerup', end);
+  sh.addEventListener('pointercancel', end);
+}
 /* ================= boot ================= */
 function selfUpdate(){
   try{
@@ -1055,11 +1259,13 @@ function selfUpdate(){
 }
 function boot(){
   $('verBadge').textContent='v'+APP_VERSION;
+  applyUi(); renderBell(); initSwipe(); initSheetSwipe();
   renderRec(); renderTl(); renderGraph(); renderLib(); renderSet(); renderArtists(); renderGenre(); renderSyncStatus();
   const veil=$('veil'); if(veil){ veil.style.opacity='0'; setTimeout(()=>veil.remove(), 700); }
   if(relayReady()) syncNow('startup');
   selfUpdate();
 }
+document.addEventListener('click', e=>{ if(e.target && e.target.closest && e.target.closest('button, a.btn, .tagchip, .atile, .ptile, .gchip')) playTap(); });
 document.addEventListener('DOMContentLoaded', boot);
 
 </script>
