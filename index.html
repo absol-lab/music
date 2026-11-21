@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.9">
+<meta name="app-version" content="2.10">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -199,7 +199,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.9';
+const APP_VERSION='2.10';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -614,7 +614,7 @@ function saveCriteria(){
   data.criteria=c; data.criteriaUpdatedAt=Date.now(); saveLocal(); renderRec();
 }
 function renderTl(){
-  let h='<div class="secttl">音楽の年表</div><div class="note">特定の好みに寄せない、音楽史全体の年表です。古典の蓄積から録音の発明、ジャズ、ロック、ヒップホップ、電子音楽、そして配信の時代まで、誰が読んでも辿れる「転機」だけを並べました。</div><div class="tl">';
+  let h='<div class="secttl">音楽の年表</div><div class="tl">';
   ERAS.forEach(er=>{
     h+='<div class="tl-era">'+(er[0]===0? '〜'+(er[1]-1) : er[0]+'–'+(er[1]>=2030? '現在' : er[1]-1))+'　'+esc(er[2])+'<span>'+esc(er[3])+'</span></div>';
     TIMELINE.filter(ev=>ev[0]>=er[0] && ev[0]<er[1]).forEach(ev=>{
@@ -706,7 +706,7 @@ function renderGenre(){
   let h='<div class="secttl">探す</div><div class="chiprow">'+modes.map(m=>'<button class="tagchip'+(browseMode===m[0]?' on':'')+'" onclick="browseMode=\''+m[0]+'\';renderGenre()">'+m[1]+'</button>').join('')+'</div>';
   if(browseMode==='genre'){
     if(!curGenre){
-      h+='<div class="note">ジャンルを選ぶと、そのジャンルのアルバム・アーティスト・年表がまとめて出ます。写真と名前だけの一覧で、タップすると詳細が開きます。</div><div class="gchips">';
+      h+='<div class="gchips">';
       GENRES.forEach(g=>{ const n=genreAlbums(g[0]).length+genreArtists(g[0]).length+genreEvents(g[0]).length; if(n) h+='<button class="gchip" onclick="goGenre(\''+g[0]+'\')">'+esc(g[0])+'<span>'+n+'件</span></button>'; });
       h+='</div>';
     } else {
@@ -715,18 +715,16 @@ function renderGenre(){
       if(al.length) h+='<div class="gseclbl">アルバム</div>'+albumRows(al);
       if(ar.length) h+='<div class="gseclbl">アーティスト</div>'+artistTiles(ar);
       if(ev.length) h+='<div class="gseclbl">年表</div>'+eventRows(ev);
-      if(!al.length&&!ar.length&&!ev.length) h+='<div class="note">まだ収録がありません。</div>';
     }
   } else if(browseMode==='era'){
     if(selDecade===null){
-      h+='<div class="note">年代を選ぶと、その時代のアルバム・アーティスト・出来事が出ます。</div><div class="gchips">'+decadesList().map(d=>'<button class="gchip" onclick="selDecade='+d+';renderGenre()">'+d+'年代<span>'+(eraAlbums(d).length+eraArtists(d).length+eraEvents(d).length)+'件</span></button>').join('')+'</div>';
+      h+='<div class="gchips">'+decadesList().map(d=>'<button class="gchip" onclick="selDecade='+d+';renderGenre()">'+d+'年代<span>'+(eraAlbums(d).length+eraArtists(d).length+eraEvents(d).length)+'件</span></button>').join('')+'</div>';
     } else {
       const d=selDecade, al=eraAlbums(d), ar=eraArtists(d), ev=eraEvents(d);
       h+='<button class="btn small" onclick="selDecade=null;renderGenre()">← 年代一覧</button><div class="secttl" style="margin-top:10px">'+d+'年代</div>';
       if(al.length) h+='<div class="gseclbl">アルバム</div>'+albumRows(al);
       if(ar.length) h+='<div class="gseclbl">アーティスト</div>'+artistTiles(ar);
       if(ev.length) h+='<div class="gseclbl">年表</div>'+eventRows(ev);
-      if(!al.length&&!ar.length&&!ev.length) h+='<div class="note">この年代の収録はまだありません。</div>';
     }
   } else if(browseMode==='mood'){
     const axI=AXES.findIndex(a=>a[0]===selMoodAxis);
@@ -735,14 +733,13 @@ function renderGenre(){
     h+=list.map(c=>'<div class="grow2" onclick="openAlbum(\''+c[0]+'\')" style="cursor:pointer">'+coverHtml(c,'gsm')+'<div style="flex:1;min-width:0"><div style="font-size:.95em">'+esc(c[1])+'</div><div class="ameta">'+esc(c[2])+' ・ '+c[3]+'</div></div><span style="color:var(--acc);font-size:.8em;letter-spacing:2px">'+'●'.repeat(c[5][axI])+'<span style="color:var(--sub)">'+'●'.repeat(5-c[5][axI])+'</span></span></div>').join('');
   } else {
     if(!selTag){
-      h+='<div class="note">細かいカテゴリ（タグ）から探せます。</div><div class="chiprow">'+tagList().map(([t,n])=>'<button class="tagchip" onclick="selTag=\''+t+'\';renderGenre()">'+esc(t)+' ('+n+')</button>').join('')+'</div>';
+      h+='<div class="chiprow">'+tagList().map(([t,n])=>'<button class="tagchip" onclick="selTag=\''+t+'\';renderGenre()">'+esc(t)+' ('+n+')</button>').join('')+'</div>';
     } else {
       const al=tagAlbums(selTag), ar=tagArtists(selTag), ev=tagEvents(selTag);
       h+='<button class="btn small" onclick="selTag=null;renderGenre()">← カテゴリ一覧</button><div class="secttl" style="margin-top:10px">'+esc(selTag)+'</div>';
       if(al.length) h+='<div class="gseclbl">アルバム</div>'+albumRows(al);
       if(ar.length) h+='<div class="gseclbl">アーティスト</div>'+artistTiles(ar);
       if(ev.length) h+='<div class="gseclbl">年表</div>'+eventRows(ev);
-      if(!al.length&&!ar.length&&!ev.length) h+='<div class="note">このカテゴリの収録はまだありません。</div>';
     }
   }
   $('v-genre').innerHTML=h;
@@ -765,7 +762,6 @@ function renderArtists(){
    +'<input id="artq" type="search" placeholder="名前・別名・ジャンルで検索（例：マイルス、bird）" value="'+esc(artQuery)+'" oninput="artQuery=this.value;refreshArtResults()" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);margin-bottom:12px;box-sizing:border-box">'
    +'<div id="artsugg"></div><div id="artgrid"></div><div id="artalbums"></div>'
    +'<div class="secttl" style="margin-top:24px">リクエスト</div>'
-   +'<div class="note">追加してほしいアーティストや、既存の情報への追加・修正を送れます。公式ソースで確認できたものから、順番に登録されます。</div>'
    +'<div style="display:grid;gap:8px"><select id="req-type" class="textin"><option value="add">アーティスト追加</option><option value="info">情報リクエスト</option></select>'
    +'<input id="req-name" class="textin" type="text" placeholder="アーティスト名" autocomplete="off">'
    +'<textarea id="req-note" rows="2" placeholder="補足（任意：代表作、直してほしい点など）"></textarea>'
@@ -801,7 +797,7 @@ function renderGraphJazz(){
   let h='<div class="secttl">相関図</div><div class="chiprow">'
     +'<button class="tagchip on" onclick="curGraph=\'jazz\';selNode=null;renderGraph()">ジャズ系譜図</button>'
     +'<button class="tagchip" onclick="curGraph=\'world\';selNode=null;renderGraph()">世界観系譜図</button></div>';
-  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作）。破線＝<b>系譜・評価</b>。図は<b>ドラッグで移動、ピンチで拡大縮小</b>できます。人物をタップすると各関係の根拠が出ます。写真は Wikipedia／Wikimedia Commons の肖像。</div>';
+  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作）。破線＝<b>系譜・評価</b>。図は<b>ドラッグで移動、ピンチで拡大縮小</b>できます。人物をタップすると各関係の根拠が出ます。</div>';
   const pos={}; g.nodes.forEach(n=>pos[n[0]]={x:n[2],y:n[3]});
   let svg='<svg width="'+g.W+'" height="'+g.H+'" viewBox="0 0 '+g.W+' '+g.H+'" style="display:block">';
   g.edges.forEach(e=>{
@@ -832,7 +828,7 @@ function renderGraphJazz(){
         + rels.join('') + '</div>';
     }
   } else {
-    h+='<div class="note" style="margin-top:8px">ドラッグで図全体を動かせます。太い円が各系譜の中心人物です。</div>';
+    h+='<div class="note" style="margin-top:8px">太い円が各系譜の中心人物です。</div>';
   }
   $('v-graph').innerHTML=h;
   attachPan(); if(!gJazzInit){ gJazzInit=true; focusHub(); } else applyG();
@@ -881,7 +877,7 @@ function openArtist(id){
   const con=CONCERTS.filter(x=>x.a===id);
   h+='<div class="gseclbl">公演</div>';
   if(con.length) h+=con.map(x=>'<div class="grow2"><div style="flex:1;min-width:0"><div style="font-size:.92em">'+x.date+'　'+esc(x.venue)+'（'+esc(x.city)+'）</div><div class="ameta">'+esc(x.title)+'</div></div><a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="'+x.url+'" target="_blank" rel="noopener">公式</a></div>').join('');
-  else h+='<div class="note">現在、確認済みの日本の公演はありません（公式発表で確認できたものだけ載せます）。</div>';
+  else h+='<div class="note">現在、確認済みの日本の公演はありません。</div>';
   h+='<div class="btnrow"><a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="https://www.songkick.com/search?query='+encodeURIComponent(a[1])+'" target="_blank" rel="noopener">Songkickで公演を探す</a></div>';
   ['jazz','world'].forEach(gk=>{
     const g=(gk==='jazz')? jazzMerged() : worldMerged(); if(!g) return;
@@ -979,7 +975,7 @@ function renderGraphOld(){
   let h='<div class="secttl">相関図</div><div class="chiprow">'
     +'<button class="tagchip'+(curGraph==='jazz'?' on':'')+'" onclick="curGraph=\'jazz\';selNode=null;renderGraph()">ジャズ系譜図</button>'
     +'<button class="tagchip'+(curGraph==='world'?' on':'')+'" onclick="curGraph=\'world\';selNode=null;renderGraph()">世界観系譜図</button></div>';
-  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作など、記録で確認できる関係）。破線＝<b>系譜・評価</b>（影響の証言や批評に基づく接続で、編者の読みを含むものはその旨を明示）。人物をタップすると、各関係の根拠が出ます。写真は Wikipedia／Wikimedia Commons の肖像。</div>';
+  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作など、記録で確認できる関係）。破線＝<b>系譜・評価</b>（影響の証言や批評に基づく接続で、編者の読みを含むものはその旨を明示）。人物をタップすると、各関係の根拠が出ます。</div>';
   const pos={}; g.nodes.forEach(n=>pos[n[0]]={x:n[2],y:n[3]});
   let svg='<svg viewBox="0 0 360 '+g.H+'" style="width:100%;height:auto;display:block">';
   g.edges.forEach(e=>{
@@ -1011,7 +1007,7 @@ function renderGraphOld(){
         + rels.join('') + '</div>';
     }
   } else {
-    h+='<div class="note" style="margin-top:8px">人をタップすると関係の内訳と根拠が出ます。太い円が各図の中心人物です。</div>';
+    h+='<div class="note" style="margin-top:8px">太い円が各図の中心人物です。</div>';
   }
   $('v-graph').innerHTML=h;
 }
@@ -1019,8 +1015,8 @@ function renderLib(){
   const heard=[], want=[];
   Object.keys(data.ratings).forEach(id=>{ const r=ratingOf(id); if(!r) return; const c=catById(id); if(!c) return; (r.s==='heard'? heard: want).push({c, r}); });
   heard.sort((a,b)=>(b.r.stars||0)-(a.r.stars||0));
-  let h='<div class="secttl">マイ記録 <span style="color:var(--sub);font-size:.78em">— RYM 風の自分の評価帳</span></div>';
-  h+='<div class="note">聞いた '+(heard.length)+' 件 ／ 気になる '+want.length+' 件。評価とメモは端末と Drive（music.json）にだけ保存され、公開コードには入りません。</div>';
+  let h='<div class="secttl">マイ記録</div>';
+  h+='<div class="note">聞いた '+(heard.length)+' 件 ／ 気になる '+want.length+' 件</div>';
   function row(x){
     const c=x.c, r=x.r;
     return '<div class="card"><div style="display:flex;gap:10px;align-items:flex-start">'+coverHtml(c,'covs')+'<div style="flex:1;min-width:0"><div class="atitle">'+esc(c[1])+'</div><div class="aartist">'+esc(c[2])+'</div><div class="ameta">'+(c[3]||'')+' ・ '+esc(c[4]||'')+'</div>'+scoresHtml(c)+'</div></div>'
@@ -1075,6 +1071,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['2.10','2026-11-21','各画面から、画面自体を説明する文章（年表や探すの導入文、設定の説明など）を削除し、表示を整理'],
  ['2.9','2026-11-14','おすすめタブの一番上に「今日の必聴アルバム」を大きく表示。日付で決まる日替わりの1枚で、下のリストとは重複しないようにした'],
  ['2.8','2026-11-14','ジャズ系譜図を大幅拡張（37人→92人）。メダリオンと名前を大きくし、開いた時は読める大きさで中心部から表示。メダリオンをタップすると図鑑のアーティスト詳細が開くように。ジャケット写真はタップで拡大表示'],
  ['2.7','2026-11-13','全アプリ一斉で音を消した（サウンド設定と音量は保持。再開は次の更新で）'],
@@ -1132,7 +1129,7 @@ function renderSet(){
   let h='<div class="secttl">設定</div>';
   h+='<div class="setgroup">'
     + setRow('sync','Google Drive 同期', esc(syncValText()),
-      '<div class="note">他のアプリと同じ中継で music.json と同期します。URL は初期値のまま、シークレットだけ貼ってください。</div>'
+      '<div class="note">URL は初期値のまま、シークレットだけ貼ってください。</div>'
       +'<div style="margin-top:8px"><input class="textin" id="relay-url-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="中継の URL" value="'+escA(urlVal)+'"></div>'
       +'<div style="margin-top:8px"><input class="textin" id="relay-secret-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="シークレット" value="'+escA(secVal)+'"></div>'
       +'<div class="btnrow"><button class="btn primary" onclick="relaySaveAndTest()">保存して接続テスト</button>'+(rc? '<button class="btn" onclick="relayClear()">中継を解除</button>':'')+'</div>'
@@ -1142,10 +1139,10 @@ function renderSet(){
   h+='<div class="setgroup">'
     + setRow('font','文字設定', FS_LABELS[uiSet.fs],
       '<div class="chiprow" style="margin:2px 0 6px">'+Object.keys(FS_LABELS).map(k=>'<button class="tagchip'+(uiSet.fs===k?' on':'')+'" onclick="setFs(\''+k+'\')">'+FS_LABELS[k]+'</button>').join('')+'</div>'
-      +'<div class="note">文字の大きさを切り替えます（すぐに反映されます）。</div>')
+      )
     + setRow('lh','行間', LH_LABELS[uiSet.lh],
       '<div class="chiprow" style="margin:2px 0 6px">'+Object.keys(LH_LABELS).map(k=>'<button class="tagchip'+(uiSet.lh===k?' on':'')+'" onclick="setLh(\''+k+'\')">'+LH_LABELS[k]+'</button>').join('')+'</div>'
-      +'<div class="note">本文の行間を切り替えます（すぐに反映されます）。</div>')
+      )
     +'</div>';
   h+='<div class="setgroup">'
     + setRow('sound','サウンド', uiSet.sndOn? 'オン '+uiSet.sndVol+'%' : 'オフ',
@@ -1161,7 +1158,7 @@ function renderSet(){
       +'<div class="note" style="margin-top:6px">評価・メモ・好みの軸などを music.json として書き出し／読み込みします。</div>')
     +'<button class="setrow" onclick="openHistory()"><span>更新履歴</span><span class="val">v'+APP_VERSION+'</span><span class="chev">›</span></button>'
     + setRow('about','このアプリについて', 'v'+APP_VERSION,
-      '<div class="note">Musilabo v'+APP_VERSION+'。おすすめ／年表／相関図／図鑑／探す／マイ記録を持つ独立版（公演情報は図鑑の各アーティスト詳細の中）。本体は GitHub Pages、データは Google Drive の music.json。</div>')
+      '<div class="note">Musilabo v'+APP_VERSION+'</div>')
     +'</div>';
   $('v-set').innerHTML=h;
 }
