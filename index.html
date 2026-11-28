@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.1">
+<meta name="app-version" content="3.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -212,6 +212,32 @@ select.textin{ appearance:none; }
 #tunerNeedle{ position:absolute; top:2px; bottom:2px; width:5px; margin-left:-2.5px; border-radius:3px; background:#574c3a; left:50%; transition:left .09s linear, background .09s; }
 .tunerNoteBig{ font-size:3em; font-weight:800; text-align:center; line-height:1.1; color:var(--tx); }
 
+/* play v3.2: fixed song layout + compact controls */
+.songroot{ display:flex; flex-direction:column; height:calc(100vh - 168px); height:calc(100dvh - 168px); min-height:340px; }
+.songhead{ flex:none; padding-bottom:7px; }
+.pctl{ flex:none; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:8px 10px; }
+.prow{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:7px; }
+.prow:first-child{ margin-top:0; }
+.pstep{ display:flex; align-items:center; gap:5px; background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:3px 5px; }
+.pstep>span:first-child{ font-size:.78em; color:var(--sub); padding-left:4px; }
+.pstep button{ appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); width:34px; height:34px; border-radius:50%; font-size:16px; cursor:pointer; line-height:1; padding:0; }
+.pstep .pv{ min-width:28px; text-align:center; font-size:.9em; }
+.pstep .pv b{ color:var(--acc); }
+.ppill{ appearance:none; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:6px 12px; min-height:36px; font-size:.8em; cursor:pointer; font-family:inherit; }
+.ppill.on{ background:var(--acc); color:#1c1508; border-color:var(--acc); font-weight:700; }
+.ppill.pspd{ padding:5px 10px; min-height:30px; font-size:.76em; }
+.peff{ font-size:.78em; color:var(--sub); }
+.peff b{ color:var(--acc); }
+.plbl{ font-size:.78em; color:var(--sub); flex:none; }
+.pslider{ flex:1; min-width:70px; }
+.secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:8px 0; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.secchips::-webkit-scrollbar{ display:none; }
+.secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--sub); border-radius:999px; padding:5px 11px; font-size:.78em; min-height:32px; cursor:pointer; font-family:inherit; }
+.sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; }
+.sheetwrap .sheet{ margin-top:0; }
+.strumstrip{ background:#262019; color:#d9d0bf; border-radius:9px; padding:8px 11px; font-size:.8em; line-height:1.55; margin-bottom:14px; }
+.strumstrip b{ color:var(--acc); margin-right:8px; }
+.sheet-lyr{ font-size:1.05em; line-height:1.5; color:#222; margin:-4px 0 12px; white-space:pre-wrap; }
 </style>
 </head>
 <body>
@@ -245,7 +271,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.1';
+const APP_VERSION='3.2';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1124,6 +1150,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.2','2026-11-28','曲画面を固定レイアウトに変更：操作部は上に固定され、コード譜の枠内だけがスクロールするように。操作ボタンをコンパクト化。内蔵曲『世界は広いよ』に歌詞を貼れる欄を追加（セクションごと、Drive同期）'],
  ['3.1','2026-11-28','「弾く」タブに練習機能とチューナーを追加。セクションのループ再生、50〜125%の速度変更（メトロノームと自動スクロール連動）、大きな図でコードを覚えるコード練習、標準チューニングの基準音とマイク測定チューナー'],
  ['3.0','2026-11-28','「弾く」タブを追加。U-FRET式コード譜：コード名と押さえ方図が歌詞の真上に常時表示され、移調／カポに図ごと連動。かんたんコード変換、自動スクロール、BPMメトロノーム、自分の曲の保存（Drive同期）に対応。1曲目にbetcover!!『世界は広いよ』（進行のみ）を収録'],
  ['2.10','2026-11-21','各画面から、画面自体を説明する文章（年表や探すの導入文、設定の説明など）を削除し、表示を整理'],
@@ -1409,7 +1436,7 @@ function songSections(song){
 }
 function bumpPlays(id){
   const cur=(data.songMeta||{})[id]||{plays:0, last:0, u:0};
-  data.songMeta[id]={plays:(+cur.plays||0)+1, last:Date.now(), u:Date.now()};
+  data.songMeta[id]=Object.assign({}, cur, {plays:(+cur.plays||0)+1, last:Date.now(), u:Date.now()});
   saveLocal();
 }
 function renderPlay(){
@@ -1449,48 +1476,76 @@ function soundingKey(song){
   if(!song.key) return '-';
   return transposeChord(song.key, playState.transpose);
 }
+function builtinLyrics(song){
+  const m=(data.songMeta||{})[song.id];
+  return (m && m.lyrics && typeof m.lyrics==='object')? m.lyrics : {};
+}
+function playOpenLyrics(){
+  const song=playSongById(playState.openId); if(!song || !song.builtin || !song.sections) return;
+  const lyr=builtinLyrics(song);
+  let h='<div style="display:flex;align-items:flex-start;gap:10px"><div class="atitle" style="font-size:1.05em;flex:1">歌詞を貼る</div><button class="btn small" onclick="closeDetail()">✕</button></div>';
+  h+='<div class="note" style="margin:6px 0 4px">セクションごとに歌詞を貼り付けます。1行がコード譜の1行（小節行）に対応し、その行の真下に表示されます。保存すると Drive に同期されます。</div>';
+  song.sections.forEach((sec,si)=>{
+    h+='<div class="playform"><label>'+esc(sec.name)+'</label><textarea id="lyr-'+si+'" style="min-height:74px" placeholder="このセクションの歌詞を歌ネットなどから貼り付け（1行＝1小節行に対応）">'+esc(lyr[si]||'')+'</textarea></div>';
+  });
+  h+='<div class="btnrow"><button class="btn primary" onclick="playSaveLyrics()">保存</button><a class="btn" style="text-decoration:none;display:inline-flex;align-items:center" href="https://www.uta-net.com/song/270979/" target="_blank" rel="noopener">歌詞は歌ネットで</a></div>';
+  openSheet(h);
+}
+function playSaveLyrics(){
+  const song=playSongById(playState.openId); if(!song || !song.builtin || !song.sections) return;
+  const lyrics={};
+  song.sections.forEach((sec,si)=>{ const t=$('lyr-'+si); if(t && t.value.trim()) lyrics[si]=t.value.replace(/\s+$/,''); });
+  const cur=(data.songMeta||{})[song.id]||{plays:0, last:0, u:0};
+  data.songMeta[song.id]=Object.assign({}, cur, {lyrics:lyrics, u:Date.now()});
+  saveLocal(); closeDetail(); renderSong();
+}
 function renderSong(){
   const el=$('v-play'); if(!el) return;
   const song=playSongById(playState.openId); if(!song){ backToPlayList(); return; }
   const secs=songSections(song);
-  let h='<div style="margin-bottom:10px"><button class="btn small" onclick="backToPlayList()">← 曲一覧</button></div>';
-  h+='<div class="atitle" style="font-size:1.25em">'+esc(song.title||'無題')+'</div>';
-  h+='<div class="aartist">'+esc(song.artist||'')+'</div>';
-  h+='<div class="ameta">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実効 <span id="effBpmLbl">'+effectiveBpm()+'</span> ・ 実音キー <b style="color:var(--acc)">'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div>';
-  // controls
-  h+='<div class="card"><div class="ctlgrid">'
-    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="sv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
-    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="sv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
-    +'<button class="tagchip'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
+  const lyrMap=song.builtin? builtinLyrics(song) : {};
+  let h='<div class="songroot">';
+  h+='<div class="songhead"><div style="display:flex;align-items:flex-start;gap:8px"><button class="ppill" onclick="backToPlayList()">← 曲一覧</button>'
+    +'<div style="flex:1;min-width:0"><div class="atitle" style="font-size:1.12em;line-height:1.25">'+esc(song.title||'無題')+'</div>'
+    +'<div class="aartist" style="font-size:.84em">'+esc(song.artist||'')+'</div></div>'
+    +(song.builtin? '' : '<button class="ppill" onclick="playEditSong(\''+song.id+'\')">編集</button><button class="ppill" onclick="playDeleteSong(\''+song.id+'\')">削除</button>')
     +'</div>'
-    +'<div style="display:flex;align-items:center;gap:10px;margin-top:12px"><span style="font-size:.82em;color:var(--sub);flex:none">文字</span><input type="range" min="0.9" max="1.3" step="0.05" value="'+playState.font+'" style="flex:1" oninput="playSetFont(this.value)"><span id="fontLbl" style="font-size:.82em;width:38px;text-align:right">'+Math.round(playState.font*100)+'%</span></div>'
-    +'<div class="ctlgrid" style="margin-top:12px">'
-    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="sv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
-    +'<button class="btn small" id="metroBtn" onclick="toggleMetro()">▶ メトロノーム</button><span id="metroDot"></span>'
+    +'<div class="ameta" style="margin-top:5px">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実効 <span id="effBpmLbl">'+effectiveBpm()+'</span> ・ 実音キー <b style="color:var(--acc)">'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div></div>';
+  h+='<div class="pctl">'
+    +'<div class="prow">'
+    +'<div class="pstep"><span>移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="pv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
+    +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
+    +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
+    +(song.builtin? '<button class="ppill" onclick="playOpenLyrics()">歌詞を貼る</button><a class="ppill" style="text-decoration:none" href="https://www.uta-net.com/song/270979/" target="_blank" rel="noopener">歌詞は歌ネットで</a>' : '')
     +'</div>'
-    +'<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px"><span style="font-size:.82em;color:var(--sub)">練習速度</span>'+[50,75,100,125].map(pct=>'<button class="tagchip speedchip'+(playState.speedPct===pct?' on':'')+'" data-pct="'+pct+'" onclick="playSetSpeed('+pct+')">'+pct+'%</button>').join('')+'<span style="font-size:.82em;color:var(--sub)">実効 <b id="effBpm" style="color:var(--acc)">'+effectiveBpm()+'</b> BPM</span></div>'
-    +'<div class="ctlgrid" style="margin-top:10px"><button class="btn small" id="scrollBtn" onclick="toggleScroll()">▶ 自動スクロール</button>'
-    +'<span style="font-size:.82em;color:var(--sub)">速度</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" style="flex:1;min-width:110px" oninput="playSetScrollSpeed(this.value)"><span id="scrollSpdLbl" style="font-size:.82em">'+playState.scrollSpeed+'</span></div>'
+    +'<div class="prow">'
+    +'<div class="pstep"><span>BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="pv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
+    +[50,75,100,125].map(pct=>'<button class="ppill pspd speedchip'+(playState.speedPct===pct?' on':'')+'" data-pct="'+pct+'" onclick="playSetSpeed('+pct+')">'+pct+'%</button>').join('')
+    +'<span class="peff">実効 <b id="effBpm">'+effectiveBpm()+'</b> BPM</span>'
+    +'</div>'
+    +'<div class="prow">'
+    +'<button class="ppill" id="metroBtn" onclick="toggleMetro()">▶ メトロノーム</button><span id="metroDot"></span>'
+    +'<button class="ppill" id="scrollBtn" onclick="toggleScroll()">▶ 自動スクロール</button>'
+    +'<span class="plbl">速度</span><input class="pslider" type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" oninput="playSetScrollSpeed(this.value)"><span id="scrollSpdLbl" class="peff">'+playState.scrollSpeed+'</span>'
+    +'</div>'
+    +'<div class="prow">'
+    +'<span class="plbl">文字</span><input class="pslider" type="range" min="0.9" max="1.3" step="0.05" value="'+playState.font+'" oninput="playSetFont(this.value)"><span id="fontLbl" class="peff">'+Math.round(playState.font*100)+'%</span>'
+    +'</div>'
     +'</div>';
+  if(secs.some(s=>s.name)){
+    h+='<div class="secchips">'+secs.map((sec,i)=> sec.name? '<button class="secchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
+  }
+  h+='<div class="sheetwrap" id="sheetWrap"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
   const strum=song.strum||song.memo;
-  if(strum) h+='<div class="card"><div style="font-weight:700;font-size:.88em;color:var(--acc);margin-bottom:5px">弾き方メモ</div><div class="note" style="color:#d9d0bf">'+esc(strum)+'</div></div>';
-  // section chips
-  if(secs.length>1 || (secs.length===1 && secs[0].name)){
-    h+='<div class="chiprow">'+secs.map((sec,i)=> sec.name? '<button class="tagchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
-  }
-  if(!song.builtin){
-    h+='<div class="btnrow"><button class="btn small" onclick="playEditSong(\''+song.id+'\')">編集</button><button class="btn small" onclick="playDeleteSong(\''+song.id+'\')">削除</button></div>';
-  }
-  // sheet
-  h+='<div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  if(strum) h+='<div class="strumstrip"><b>弾き方メモ</b>'+esc(strum)+'</div>';
   secs.forEach((sec,si)=>{
     h+='<div class="sheet-sec" id="psec-'+si+'">';
     h+='<div class="sec-bar"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
+    const lyrLines=(lyrMap[si]!=null? String(lyrMap[si]) : '').split('\n');
+    let rowIdx=0;
     sec.lines.forEach(ln=>{
       if(ln.type==='blank'){ h+='<div style="height:8px"></div>'; return; }
       if(ln.type==='bar'){
-        const cells=ln.raw.split('|').map(x=>x.trim()).filter(Boolean);
-        // each cell may contain multiple chords separated by spaces
         let row='<div class="bar-row">';
         ln.raw.split('|').forEach(part=>{
           const toks=part.trim().split(/\s+/).filter(Boolean);
@@ -1499,9 +1554,11 @@ function renderSong(){
             row+='<div class="bar-cell">'+diagramSVG(dc,{easy:playState.easy})+'<div class="cname">'+esc(dc)+(playState.easy && EASY_SHAPES[dc]?' <span style="font-size:.68em;color:#8a6d1a">簡易</span>':'')+'</div></div>';
           });
         });
-        row+='</div>'; h+=row; return;
+        row+='</div>'; h+=row;
+        if(song.builtin){ const lt=(lyrLines[rowIdx]||'').trim(); if(lt) h+='<div class="sheet-lyr">'+esc(lt)+'</div>'; }
+        rowIdx++;
+        return;
       }
-      // lyric
       let lh='<div class="lyr-line">';
       (ln.segs||[]).forEach(sg=>{
         if(sg.chord){
@@ -1513,13 +1570,15 @@ function renderSong(){
       });
       lh+='</div>'; h+=lh;
     });
+    if(song.builtin){ for(let k=rowIdx;k<lyrLines.length;k++){ const lt=(lyrLines[k]||'').trim(); if(lt) h+='<div class="sheet-lyr">'+esc(lt)+'</div>'; } }
     h+='</div>';
   });
   h+='</div>';
-  if(song.builtin) h+='<div class="note" style="margin-top:10px">この曲はコード進行のみの収録です（歌詞は権利の関係で入れていません）。自分の曲は「曲を追加」から歌詞つきで保存できます。</div>';
+  if(song.builtin) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。歌詞は「歌詞を貼る」からセクションごとに貼ると、譜面の各行の下に表示されます。</div>';
+  h+='</div></div>';
   el.innerHTML=h;
 }
-function playScrollToSec(i){ const t=$('psec-'+i); if(t) t.scrollIntoView({behavior:'smooth', block:'start'}); }
+function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTo({top:Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6), behavior:'smooth'}); }
 function playAdjTranspose(d){ playState.transpose=Math.max(-6, Math.min(6, playState.transpose+d)); renderSong(); }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
 function playToggleEasy(){ playState.easy=!playState.easy; renderSong(); }
@@ -1552,20 +1611,24 @@ function toggleMetro(){ if(metroTimer) stopMetro(); else startMetro(); }
 /* auto scroll */
 function scrollStep(ts){
   if(!playState.scrolling) return;
-  if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); window.scrollBy(0, effectiveScrollSpeed()*dt); }
+  const wrap=$('sheetWrap');
+  if(!wrap){ stopScroll(); return; }
+  if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); wrap.scrollTop += effectiveScrollSpeed()*dt; }
   scrollLast=ts;
   if(playState.loopSec>=0){
     const secEl=$('psec-'+playState.loopSec);
     if(secEl){
-      const r=secEl.getBoundingClientRect();
-      if(r.bottom < window.innerHeight/2){
-        window.scrollTo(0, Math.max(0, window.scrollY + r.top - 84));
+      const wr=wrap.getBoundingClientRect(), r=secEl.getBoundingClientRect();
+      const secTop=wrap.scrollTop + (r.top - wr.top);
+      const secBottom=secTop + secEl.offsetHeight;
+      if(secBottom <= wrap.scrollTop + wrap.clientHeight/2 + 1){
+        wrap.scrollTop=Math.max(0, secTop - 4);
         scrollRaf=requestAnimationFrame(scrollStep);
         return;
       }
     }
   }
-  if((window.innerHeight+window.scrollY) >= (document.body.scrollHeight-4)){ stopScroll(); return; }
+  if(wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 4){ stopScroll(); return; }
   scrollRaf=requestAnimationFrame(scrollStep);
 }
 function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; scrollRaf=requestAnimationFrame(scrollStep); const b=$('scrollBtn'); if(b) b.textContent='■ 自動スクロール'; }
