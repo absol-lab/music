@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.12">
+<meta name="app-version" content="3.13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -234,9 +234,9 @@ select.textin{ appearance:none; }
 .tgt-redo{ appearance:none; border:none; background:var(--green); color:#fff; font-weight:800; border-radius:999px; padding:11px 22px; font-size:.92em; cursor:pointer; min-height:48px; font-family:inherit; }
 
 /* play v3.4: song = fixed overlay (only sheet scrolls), compact 2-row toolbar */
-.songroot{ position:absolute; inset:0; display:flex; flex-direction:column; min-height:0; }
+.songroot{ position:absolute; inset:0; display:block; padding:calc(8px + env(safe-area-inset-top)) 14px 0; box-sizing:border-box; }
 /* song overlay covers the whole screen incl. app header (top:0); padding-bottom: #nav height 56 + bottom offset 15 = 71px footprint, +6px clearance = 77px (was 84px) */
-#v-play.songmode{ position:fixed; left:0; right:0; top:0; bottom:0; z-index:25; background:var(--bg); display:flex; flex-direction:column; padding:calc(8px + env(safe-area-inset-top)) 14px 77px; box-sizing:border-box; touch-action:pan-y; overflow:hidden; }
+#v-play.songmode{ position:fixed; left:0; right:0; top:0; bottom:0; z-index:25; background:var(--bg); display:block; padding:calc(8px + env(safe-area-inset-top)) 14px 77px; box-sizing:border-box; touch-action:pan-y; overflow:hidden; }
 html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:none; }
 .songhead{ flex:none; padding-bottom:4px; touch-action:none; }
 .stitle-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -287,7 +287,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
 .dgchip{ background:#ffffff; border-radius:6px; padding:1px 2px; display:inline-flex; line-height:0; }
-.sheetwrap{ flex:1; overflow-y:auto; border-radius:14px; min-height:0; touch-action:pan-y; }
+.sheetwrap{ position:absolute; left:14px; right:14px; bottom:77px; overflow-y:auto; border-radius:14px; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#2e2820; border:1px solid #453b2f; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
 .strumstrip b{ color:var(--acc); flex:none; }
@@ -327,7 +327,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.12';
+const APP_VERSION='3.13';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1219,6 +1219,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.13','2026-11-28','曲画面のスクロールの仕組みを作り替えた（高さの決め方を変更）'],
  ['3.12','2026-11-28','コード図の白枠の余白を詰めた。スクロール不具合の診断表示を追加'],
  ['3.11','2026-11-28','曲画面のスクロールとチューナーのマイクを改善。コード図を白枠＋拡大、セクション移動を設定の下へ'],
  ['3.10','2026-11-28','チューナーのマイク再開と音程検出の精度を改善。曲画面のスクロールまわりも安定化。譜面をダークカラーにした'],
@@ -1616,7 +1617,14 @@ function unlockSongOverlay(){
   document.documentElement.classList.remove('songlock');
   if(document.body) document.body.classList.remove('songlock');
 }
-function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mode==='song' && playState.openId) lockSongOverlay(); }
+function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } }
+function layoutSheetWrap(){
+  const wrap=$('sheetWrap'); if(!wrap) return;
+  const vp=$('v-play'), head=document.querySelector('.songhead');
+  if(!vp || !head){ wrap.style.top='120px'; return; }
+  const vr=vp.getBoundingClientRect(), hr=head.getBoundingClientRect();
+  wrap.style.top=Math.round(hr.bottom - vr.top + 6)+'px';
+}
 window.addEventListener('resize', layoutSongOverlay);
 function onSheetScroll(){
   const w=$('sheetWrap'), row=$('sheetCtl'), btn=$('ctlFloat'); if(!w || !row || !btn) return;
@@ -1703,6 +1711,7 @@ function renderSong(){
   el.innerHTML=h;
   onSheetScroll();
   scheduleScrollDiag();
+  if(window.requestAnimationFrame) requestAnimationFrame(layoutSheetWrap); else layoutSheetWrap();
 }
 /* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic — remove after diagnosis */
 let lastScrollDiag='';
