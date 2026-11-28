@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.6">
+<meta name="app-version" content="3.7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -248,7 +248,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:4px 0; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:none; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--sub); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
-.sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; touch-action:pan-y; }
+.sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; touch-action:pan-y; overscroll-behavior:none; }
 .sheetwrap .sheet{ margin-top:0; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#262019; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
 .strumstrip b{ color:var(--acc); flex:none; }
@@ -288,7 +288,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.6';
+const APP_VERSION='3.7';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1180,6 +1180,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.7','2026-11-28','譜面を端までスクロールした時のバウンス（跳ね返り）を止め、端でピタッと止まるようにした'],
  ['3.6','2026-11-28','自動スクロールとセクション移動がiPhoneで動かない問題を修正（スクロール位置の管理方法を変更）'],
  ['3.5','2026-11-28','コード譜の表示を詰めて見やすくした（図と文字を少し小さくし、1行に複数のコードが流れるU-FRET式の密度に）。曲画面ではアプリのヘッダーも隠れ、譜面が画面のほぼ全体を占める形にした。設定は普段は隠れ、必要な時だけ「設定」で開く形にした。同期表示はタイトル横のドットだけにした（同期バー廃止）。実効表示とメトロノームボタンを外してツールバーをすっきりさせた。自動スクロールは譜面をタップして開始／停止する形に変更。「調整」パネルを廃止し、自分の曲の編集・削除は曲一覧のカードへ移した。下の余白も詰めた。歌詞つきデータが同期で消えないよう保持方法も改善'],
  ['3.4','2026-11-28','曲画面のレイアウトを変更：白い譜面が画面の大部分を占める形にし、設定は上部に2行のツールバーへ圧縮。速度・文字サイズ・歌詞ボタンは「調整」の中に収納。曲画面では譜面の枠内だけがスクロールし、画面全体は固定されるようにした。内蔵曲に歌詞つきデータがある場合は、コードと歌詞をU-FRET式に一体表示'],
@@ -1566,6 +1567,7 @@ function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mod
 window.addEventListener('resize', layoutSongOverlay);
 function playToggleCtl(){ playState.showCtl=!playState.showCtl; renderSong(); }
 function sheetTap(e){ const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip')) return; toggleScroll(); }
+function sheetTrap(){ const w=$('sheetWrap'); if(!w) return; if(w.scrollHeight <= w.clientHeight + 1) return; if(w.scrollTop <= 0) w.scrollTop = 1; else if(w.scrollTop + w.clientHeight >= w.scrollHeight - 1) w.scrollTop = w.scrollHeight - w.clientHeight - 1; else return; if(typeof scrollPos!=='undefined' && scrollPos!==null) scrollPos=w.scrollTop; }
 function playToggleStrum(){
   playState.strumOpen=!playState.strumOpen;
   const st=document.querySelector('.strumstrip');
@@ -1597,7 +1599,7 @@ function renderSong(){
   if(secs.some(s=>s.name)){
     h+='<div class="secchips">'+secs.map((sec,i)=> sec.name? '<button class="secchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
   }
-  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)" ontouchstart="sheetTrap()"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
   const strum=song.strum||song.memo;
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
   secs.forEach((sec,si)=>{
