@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="2.10">
+<meta name="app-version" content="3.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -168,6 +168,32 @@ body[data-lh="wide"] .note, body[data-lh="wide"] .areason, body[data-lh="wide"] 
 select.textin{ appearance:none; }
 .libempty{ color:var(--sub); font-size:.86em; padding:14px 2px; }
 .savedmark{ color:var(--green); font-size:.75em; margin-left:6px; }
+
+/* play / chord sheet */
+.sheet{ background:#ffffff; color:#1a1a1a; border-radius:14px; padding:18px 14px 22px; margin-top:10px; overflow:hidden; }
+.sheet-sec{ margin-bottom:20px; }
+.sheet-sec:last-child{ margin-bottom:4px; }
+.sheet-secname{ font-weight:800; font-size:.92em; color:#7a5a17; border-bottom:2px solid #e8dcc0; padding-bottom:5px; margin-bottom:12px; letter-spacing:.06em; }
+.bar-row{ display:flex; flex-wrap:wrap; align-items:flex-start; margin-bottom:10px; }
+.bar-cell{ display:flex; flex-direction:column; align-items:center; width:60px; padding:2px 2px 4px; border-left:1px solid #ddd6c4; }
+.bar-cell:first-child{ border-left:none; }
+.bar-cell .cname{ font-weight:800; font-size:.92em; color:#14335c; margin-top:2px; line-height:1.2; text-align:center; }
+.lyr-line{ line-height:1.25; margin-bottom:10px; word-break:break-all; }
+.seg{ display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:bottom; }
+.seg-top{ height:62px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:38px; }
+.seg-top .cname{ font-weight:800; font-size:.86em; color:#14335c; line-height:1.15; margin-top:1px; }
+.seg-lyr{ font-size:1.15em; line-height:1.45; white-space:pre-wrap; color:#1a1a1a; min-height:1.45em; }
+.seg.plain .seg-top{ min-width:0; }
+.ctlgrid{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.stepper{ display:flex; align-items:center; gap:6px; background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:4px 6px; }
+.stepper button{ appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); width:36px; height:36px; border-radius:50%; font-size:17px; cursor:pointer; line-height:1; }
+.stepper .sv{ min-width:64px; text-align:center; font-size:.82em; }
+.stepper .sv b{ color:var(--acc); font-size:1.05em; }
+#metroDot{ width:14px; height:14px; border-radius:50%; background:#574c3a; flex:none; transition:background .06s, transform .06s; }
+#metroDot.beat{ background:var(--red); transform:scale(1.35); }
+#metroDot.beat1{ background:var(--acc); transform:scale(1.5); }
+.songcard{ cursor:pointer; }
+.playform label{ display:block; font-size:.8em; color:var(--sub); margin:12px 0 5px; }
 </style>
 </head>
 <body>
@@ -183,6 +209,7 @@ select.textin{ appearance:none; }
   <section class="view" id="v-art"></section>
   <section class="view" id="v-genre"></section>
   <section class="view" id="v-lib"></section>
+  <section class="view" id="v-play"></section>
   <section class="view" id="v-set"></section>
 </main>
 <div id="dsheet" onclick="if(event.target===this) closeDetail()"><div id="dcard"></div></div>
@@ -194,12 +221,13 @@ select.textin{ appearance:none; }
   <button data-v="art" onclick="go('art')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>図鑑</span></button>
   <button data-v="genre" onclick="go('genre')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span>探す</span></button>
   <button data-v="lib" onclick="go('lib')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.3"/></svg><span>マイ記録</span></button>
+  <button data-v="play" onclick="go('play')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg><span>弾く</span></button>
   <button data-v="set" onclick="go('set')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 3.2v2.7M12 18.1v2.7M3.2 12h2.7M18.1 12h2.7M5.8 5.8l1.9 1.9M16.3 16.3l1.9 1.9M18.2 5.8l-1.9 1.9M7.7 16.3l-1.9 1.9"/></svg><span>設定</span></button>
 </nav></nav>
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='2.10';
+const APP_VERSION='3.0';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -413,7 +441,7 @@ const FALLBACK_PROFILE={sen:4,une:4,mel:5,bea:5,raw:3,flo:3};
 let data=loadLocal();
 let syncStatus='disconnected', syncRunning=false, syncTimer=null, lastSyncAt=0;
 let curView='rec', curGraph='jazz', selNode=null;
-function blankData(){ return { version:1, updatedAt:0, ratings:{}, custom:{}, criteria:null, criteriaUpdatedAt:0, artists:{}, world:{nodes:[], edges:[]}, jazz:{nodes:[], edges:[]} }; }
+function blankData(){ return { version:1, updatedAt:0, ratings:{}, custom:{}, criteria:null, criteriaUpdatedAt:0, artists:{}, world:{nodes:[], edges:[]}, jazz:{nodes:[], edges:[]}, songs:{}, songMeta:{} }; }
 function normalizeData(d){
   const b=blankData(); if(!d || typeof d!=='object') return b;
   b.updatedAt=+d.updatedAt||0;
@@ -422,6 +450,8 @@ function normalizeData(d){
   if(d.criteria && typeof d.criteria==='object'){ b.criteria={}; AXES.forEach(([k])=>{ b.criteria[k]=Math.min(5,Math.max(0,+d.criteria[k]||0)); }); }
   b.criteriaUpdatedAt=+d.criteriaUpdatedAt||0;
   if(d.artists && typeof d.artists==='object') b.artists=d.artists;
+  if(d.songs && typeof d.songs==='object') b.songs=d.songs;
+  if(d.songMeta && typeof d.songMeta==='object') b.songMeta=d.songMeta;
   if(d.world && Array.isArray(d.world.nodes) && Array.isArray(d.world.edges)) b.world={nodes:d.world.nodes, edges:d.world.edges};
   if(d.jazz && Array.isArray(d.jazz.nodes) && Array.isArray(d.jazz.edges)) b.jazz={nodes:d.jazz.nodes, edges:d.jazz.edges};
   return b;
@@ -435,6 +465,10 @@ function mergeData(a,b){
   ids.forEach(id=>{ const x=a.ratings[id], y=b.ratings[id]; out.ratings[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
   const cids=new Set([...Object.keys(a.custom||{}),...Object.keys(b.custom||{})]);
   cids.forEach(id=>{ const x=a.custom[id], y=b.custom[id]; out.custom[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
+  const sids=new Set([...Object.keys(a.songs||{}),...Object.keys(b.songs||{})]);
+  sids.forEach(id=>{ const x=(a.songs||{})[id], y=(b.songs||{})[id]; out.songs[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
+  const smids=new Set([...Object.keys(a.songMeta||{}),...Object.keys(b.songMeta||{})]);
+  smids.forEach(id=>{ const x=(a.songMeta||{})[id], y=(b.songMeta||{})[id]; out.songMeta[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
   const aids=new Set([...Object.keys(a.artists||{}),...Object.keys(b.artists||{})]);
   aids.forEach(id=>{ const x=a.artists[id], y=b.artists[id]; out.artists[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
   { const nmap=new Map(); (a.world.nodes||[]).forEach(n=>nmap.set(n[0],n)); (b.world.nodes||[]).forEach(n=>{ if(!nmap.has(n[0])) nmap.set(n[0],n); }); out.world.nodes=[...nmap.values()];
@@ -474,9 +508,10 @@ function setRating(id, patch){
 }
 function clearRating(id){ data.ratings[id]={s:'',stars:0,memo:'',u:Date.now(),del:true}; saveLocal(); renderRec(); renderLib(); renderSyncStatus(); }
 /* ================= views ================= */
-const VIEW_ORDER=['rec','tl','graph','art','genre','lib','set'];
+const VIEW_ORDER=['rec','tl','graph','art','genre','lib','play','set'];
 let tabHist=[];
 function go(v, isBack){
+  if(typeof stopPlayFx==='function') stopPlayFx();
   const prev=curView;
   if(v!==prev && !isBack){ tabHist.push(prev); if(tabHist.length>30) tabHist.shift(); }
   curView=v;
@@ -1071,6 +1106,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.0','2026-11-28','「弾く」タブを追加。U-FRET式コード譜：コード名と押さえ方図が歌詞の真上に常時表示され、移調／カポに図ごと連動。かんたんコード変換、自動スクロール、BPMメトロノーム、自分の曲の保存（Drive同期）に対応。1曲目にbetcover!!『世界は広いよ』（進行のみ）を収録'],
  ['2.10','2026-11-21','各画面から、画面自体を説明する文章（年表や探すの導入文、設定の説明など）を削除し、表示を整理'],
  ['2.9','2026-11-14','おすすめタブの一番上に「今日の必聴アルバム」を大きく表示。日付で決まる日替わりの1枚で、下のリストとは重複しないようにした'],
  ['2.8','2026-11-14','ジャズ系譜図を大幅拡張（37人→92人）。メダリオンと名前を大きくし、開いた時は読める大きさで中心部から表示。メダリオンをタップすると図鑑のアーティスト詳細が開くように。ジャケット写真はタップで拡大表示'],
@@ -1171,6 +1207,374 @@ function importData(inp){
   const f=inp.files && inp.files[0]; if(!f) return;
   f.text().then(tx=>{ try{ data=normalizeData(JSON.parse(tx)); saveLocal(); renderRec(); renderLib(); alert('取り込みました'); }catch(e){ alert('読み込めませんでした：'+e.message); } });
 }
+/* ================= play: chord scores (U-FRET superior) ================= */
+const BUILTIN_SONGS=[{id:'sekai-wa-hiroiyo', title:'世界は広いよ', artist:'betcover!!', bpm:136, key:'B', capo:2, strum:'8ビートで前のめりに刻む。サビは開いて強く、Aメロはミュート気味に。B→Bmの切り替わりが一番効く所。', sections:[
+ {name:'Aメロ', bars:['Bm | B | D#m | C#m','B | E | B | B']},
+ {name:'サビ（基本形）', bars:['E | F# | B | B','E | F# | B | B']},
+ {name:'サビ（変形）', bars:['E | F# | E | F#','B | B | Bm | Bm']},
+ {name:'アウトロ', bars:['B | E | B | E']}
+]}];
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLATMAP={Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#',Cb:'B',Fb:'E'};
+function parseChord(name){
+  if(!name) return null;
+  const m=String(name).trim().match(/^([A-G](?:#|b)?)(.*)$/);
+  if(!m) return null;
+  let root=m[1]; if(FLATMAP[root]) root=FLATMAP[root];
+  const idx=NOTES.indexOf(root); if(idx<0) return null;
+  return {root:root, suffix:m[2]||'', idx:idx};
+}
+function transposeChord(name, semitones){
+  const p=parseChord(name); if(!p) return name;
+  let s=((semitones%12)+12)%12;
+  return NOTES[(p.idx+s)%12]+p.suffix;
+}
+function isMinorSuffix(suf){ return /^m(?!aj)/.test(suf||''); }
+const OPEN_SHAPES={
+ 'C':[-1,3,2,0,1,0],'C7':[-1,3,2,3,1,0],'Cmaj7':[-1,3,2,0,0,0],'Cm':[-1,3,1,0,1,3],
+ 'G':[3,2,0,0,0,3],'G7':[3,2,0,0,0,1],'Gmaj7':[3,2,0,0,0,2],'Gm':[3,1,0,0,3,3],
+ 'A':[-1,0,2,2,2,0],'A7':[-1,0,2,0,2,0],'Amaj7':[-1,0,2,1,2,0],'Am':[-1,0,2,2,1,0],'Am7':[-1,0,2,0,1,0],
+ 'E':[0,2,2,1,0,0],'E7':[0,2,0,1,0,0],'Emaj7':[0,2,1,1,0,0],'Em':[0,2,2,0,0,0],'Em7':[0,2,0,0,0,0],
+ 'D':[-1,-1,0,2,3,2],'D7':[-1,-1,0,2,1,2],'Dmaj7':[-1,-1,0,2,2,2],'Dm':[-1,-1,0,2,3,1],'Dm7':[-1,-1,0,2,1,1],
+ 'F':[1,3,3,2,1,1],'Fmaj7':[-1,-1,3,2,1,0],'F7':[1,3,1,2,1,1],
+ 'B7':[-1,2,1,2,0,2],'Bm7':[-1,2,0,2,0,2]
+};
+const EASY_SHAPES={
+ 'F':[-1,-1,3,2,1,1],
+ 'F#':[-1,-1,4,3,2,2],'Gb':[-1,-1,4,3,2,2],
+ 'B':[-1,-1,4,4,4,2],
+ 'Bm':[-1,-1,4,4,3,2],
+ 'C#m':[-1,-1,6,6,5,4],'Dbm':[-1,-1,6,6,5,4],
+ 'D#m':[-1,-1,8,8,7,6],'Ebm':[-1,-1,8,8,7,6]
+};
+function barreFingering(p){
+  const suf=p.suffix||'';
+  const fam7=(suf==='7'||suf==='9'||suf.indexOf('7')===0);
+  const famm7=(suf==='m7'||suf==='m9');
+  const fammaj7=(suf==='maj7'||suf==='M7');
+  const minor=isMinorSuffix(suf);
+  // E-shape (root on 6th string, open E idx 4)
+  let f=(p.idx-4+12)%12;
+  if(f===0){
+    if(famm7) return OPEN_SHAPES['Em7'].slice();
+    if(fam7) return OPEN_SHAPES['E7'].slice();
+    if(fammaj7) return OPEN_SHAPES['Emaj7'].slice();
+    if(minor) return OPEN_SHAPES['Em'].slice();
+    return OPEN_SHAPES['E'].slice();
+  }
+  // A-shape candidate (root on 5th string, open A idx 9); choose the lower position of E/A shapes
+  let f5=(p.idx-9+12)%12;
+  if(f5===0){
+    if(famm7) return OPEN_SHAPES['Am7'].slice();
+    if(fam7) return OPEN_SHAPES['A7'].slice();
+    if(fammaj7) return OPEN_SHAPES['Amaj7'].slice();
+    if(minor) return OPEN_SHAPES['Am'].slice();
+    return OPEN_SHAPES['A'].slice();
+  }
+  const useA = !(f>=1 && f<=f5);
+  if(useA){
+    if(famm7) return [-1,f5,f5+2,f5,f5+1,f5];
+    if(fam7) return [-1,f5,f5+2,f5,f5+2,f5];
+    if(fammaj7) return [-1,f5,f5+2,f5+1,f5+2,f5];
+    if(minor) return [-1,f5,f5+2,f5+2,f5+1,f5];
+    return [-1,f5,f5+2,f5+2,f5+2,f5];
+  }
+  if(famm7) return [f,f+2,f,f,f,f];
+  if(fam7) return [f,f+2,f,f+1,f,f];
+  if(fammaj7) return [f,f+2,f+1,f+1,f,f];
+  if(minor) return [f,f+2,f+2,f,f,f];
+  return [f,f+2,f+2,f+1,f,f];
+}
+function getFingering(chordName, easy){
+  if(easy && EASY_SHAPES[chordName]) return EASY_SHAPES[chordName].slice();
+  if(OPEN_SHAPES[chordName]) return OPEN_SHAPES[chordName].slice();
+  const p=parseChord(chordName); if(!p) return [-1,-1,-1,-1,-1,-1];
+  // try open shape of normalized root+suffix family
+  return barreFingering(p);
+}
+function diagramSVG(chordName, opts){
+  opts=opts||{};
+  const frets=getFingering(chordName, !!opts.easy);
+  const pos=frets.filter(f=>f>0);
+  let base=1;
+  if(pos.length){ const mn=Math.min.apply(null,pos), mx=Math.max.apply(null,pos); if(mx>5) base=mn; else base=1; }
+  const W=36,H=44, x0=5, dx=5.2, top=13, fh=5.6;
+  let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+  // fret number
+  if(base>1) s+='<text x="1" y="'+(top+fh-1)+'" font-size="6" fill="#555" font-family="sans-serif">'+base+'</text>';
+  // strings + frets grid
+  for(let i=0;i<6;i++){ const x=x0+i*dx; s+='<line x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+(top+fh*5)+'" stroke="#999" stroke-width="0.7"/>'; }
+  for(let r=0;r<=5;r++){ const y=top+r*fh; const w=(r===0&&base===1)?2.2:0.7; s+='<line x1="'+x0+'" y1="'+y+'" x2="'+(x0+dx*5)+'" y2="'+y+'" stroke="#222" stroke-width="'+w+'"/>'; }
+  // barre detection: >=3 strings at base fret (and base is min pos)
+  if(pos.length){
+    const mn=Math.min.apply(null,pos);
+    const barreIdx=[]; frets.forEach((f,i)=>{ if(f===mn) barreIdx.push(i); });
+    if(barreIdx.length>=3 && mn>=base && mn<base+5){
+      const y=top+(mn-base)*fh+fh/2;
+      const xa=x0+Math.min.apply(null,barreIdx)*dx, xb=x0+Math.max.apply(null,barreIdx)*dx;
+      s+='<rect x="'+(xa-3)+'" y="'+(y-3)+'" width="'+(xb-xa+6)+'" height="6" rx="3" fill="#222"/>';
+    }
+  }
+  frets.forEach((f,i)=>{
+    const x=x0+i*dx;
+    if(f===-1){ s+='<text x="'+(x-2.2)+'" y="'+(top-3)+'" font-size="7" fill="#222" font-family="sans-serif">×</text>'; }
+    else if(f===0){ s+='<circle cx="'+x+'" cy="'+(top-5)+'" r="2" fill="none" stroke="#222" stroke-width="0.9"/>'; }
+    else if(f>=base && f<base+5){ const y=top+(f-base)*fh+fh/2; s+='<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
+    else if(f>0){ const y=top+4*fh+fh/2; s+='<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
+  });
+  s+='</svg>';
+  return s;
+}
+function isChordToken(tok){
+  if(!tok) return false;
+  return /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:b5|#5|b9|#9|sus[24]|add[0-9])*(?:\/[A-G](?:#|b)?)?$/.test(tok);
+}
+function isBarLine(line){
+  const toks=line.split('|').join(' ').split(/\s+/).filter(Boolean);
+  if(!toks.length) return false;
+  return toks.every(isChordToken);
+}
+function parseLyricLine(line){
+  const segs=[]; let last=0; const re=/\[([^\]]+)\]/g; let m; let curChord=null; let started=false;
+  // text before first bracket
+  let firstIdx=line.search(/\[/);
+  if(firstIdx>0) segs.push({chord:null, text:line.slice(0,firstIdx)});
+  else if(firstIdx<0){ return [{chord:null, text:line}]; }
+  re.lastIndex=0;
+  const matches=[]; while((m=re.exec(line))!==null){ matches.push({chord:m[1], start:m.index, end:re.lastIndex}); }
+  matches.forEach((mm,i)=>{
+    const nextStart=(i+1<matches.length)? matches[i+1].start : line.length;
+    segs.push({chord:mm.chord, text:line.slice(mm.end, nextStart)});
+  });
+  return segs;
+}
+function parseSongBody(body){
+  const sections=[]; let cur={name:'', lines:[]}; sections.push(cur);
+  String(body||'').split(/\r?\n/).forEach(raw=>{
+    const line=raw.replace(/\s+$/,'');
+    const trimmed=line.trim();
+    if(/^#{1,3}\s*/.test(trimmed)){ const nm=trimmed.replace(/^#{1,3}\s*/,'').trim(); cur={name:nm, lines:[]}; sections.push(cur); return; }
+    if(!trimmed){ cur.lines.push({type:'blank'}); return; }
+    if(isBarLine(trimmed)) cur.lines.push({type:'bar', raw:trimmed});
+    else cur.lines.push({type:'lyric', raw:line, segs:parseLyricLine(line)});
+  });
+  return sections.filter(s=>s.lines.length||s.name);
+}
+function builtinBody(song){
+  // not used for rendering builtin (sections used directly), kept for editor conversion
+  return song.sections.map(sec=> '#'+sec.name+'\n'+sec.bars.join('\n')).join('\n');
+}
+let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false};
+let metroTimer=null, metroBeat=0, metroCtx=null, scrollRaf=null, scrollLast=0;
+function allPlaySongs(){
+  const out=[];
+  BUILTIN_SONGS.forEach(s=>out.push(Object.assign({}, s, {builtin:true})));
+  Object.keys(data.songs||{}).forEach(id=>{ const s=data.songs[id]; if(s && !s.del) out.push(Object.assign({id:id}, s, {builtin:false})); });
+  return out;
+}
+function playSongById(id){
+  const b=BUILTIN_SONGS.find(s=>s.id===id); if(b) return Object.assign({}, b, {builtin:true});
+  const s=(data.songs||{})[id]; if(s && !s.del) return Object.assign({id:id}, s, {builtin:false});
+  return null;
+}
+function songSections(song){
+  if(song.builtin && song.sections){
+    return song.sections.map(sec=>({name:sec.name, lines:sec.bars.map(b=>({type:'bar', raw:b}))}));
+  }
+  return parseSongBody(song.body||'');
+}
+function bumpPlays(id){
+  const cur=(data.songMeta||{})[id]||{plays:0, last:0, u:0};
+  data.songMeta[id]={plays:(+cur.plays||0)+1, last:Date.now(), u:Date.now()};
+  saveLocal();
+}
+function renderPlay(){
+  const el=$('v-play'); if(!el) return;
+  if(playState.mode==='song' && playState.openId){ renderSong(); return; }
+  if(playState.mode==='edit'){ renderSongEditor(); return; }
+  playState.mode='list';
+  let h='<div class="secttl">弾く</div>';
+  h+='<div class="btnrow" style="margin-bottom:12px"><button class="btn primary small" onclick="playNewSong()">＋ 曲を追加</button></div>';
+  const songs=allPlaySongs();
+  if(!songs.length) h+='<div class="libempty">まだ曲がありません。</div>';
+  songs.forEach(s=>{
+    const meta=(data.songMeta||{})[s.id];
+    const plays=meta? (+meta.plays||0):0;
+    h+='<div class="card songcard" onclick="openPlaySong(\''+s.id+'\')"><div class="atitle">'+esc(s.title||'無題')+(s.builtin?' <span class="reqst done">収録曲</span>':'')+'</div>'
+      +'<div class="aartist">'+esc(s.artist||'')+'</div>'
+      +'<div class="ameta">BPM '+(s.bpm||'-')+' ・ キー '+esc(s.key||'-')+' ・ カポ '+(s.capo||0)+(plays?' ・ '+plays+'回弾いた':'')+'</div></div>';
+  });
+  el.innerHTML=h;
+}
+function openPlaySong(id){
+  const s=playSongById(id); if(!s) return;
+  stopPlayFx();
+  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36;
+  bumpPlays(id);
+  renderSong(); window.scrollTo(0,0);
+}
+function backToPlayList(){ stopPlayFx(); playState.mode='list'; playState.openId=null; renderPlay(); }
+function dispChord(orig){
+  const shift=playState.transpose - playState.capo;
+  return transposeChord(orig, shift);
+}
+function soundingKey(song){
+  if(!song.key) return '-';
+  return transposeChord(song.key, playState.transpose);
+}
+function renderSong(){
+  const el=$('v-play'); if(!el) return;
+  const song=playSongById(playState.openId); if(!song){ backToPlayList(); return; }
+  const secs=songSections(song);
+  let h='<div style="margin-bottom:10px"><button class="btn small" onclick="backToPlayList()">← 曲一覧</button></div>';
+  h+='<div class="atitle" style="font-size:1.25em">'+esc(song.title||'無題')+'</div>';
+  h+='<div class="aartist">'+esc(song.artist||'')+'</div>';
+  h+='<div class="ameta">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実音キー <b style="color:var(--acc)">'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div>';
+  // controls
+  h+='<div class="card"><div class="ctlgrid">'
+    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="sv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
+    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="sv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
+    +'<button class="tagchip'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
+    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-top:12px"><span style="font-size:.82em;color:var(--sub);flex:none">文字</span><input type="range" min="0.9" max="1.3" step="0.05" value="'+playState.font+'" style="flex:1" oninput="playSetFont(this.value)"><span id="fontLbl" style="font-size:.82em;width:38px;text-align:right">'+Math.round(playState.font*100)+'%</span></div>'
+    +'<div class="ctlgrid" style="margin-top:12px">'
+    +'<div class="stepper"><span style="font-size:.78em;color:var(--sub)">BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="sv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
+    +'<button class="btn small" id="metroBtn" onclick="toggleMetro()">▶ メトロノーム</button><span id="metroDot"></span>'
+    +'</div>'
+    +'<div class="ctlgrid" style="margin-top:10px"><button class="btn small" id="scrollBtn" onclick="toggleScroll()">▶ 自動スクロール</button>'
+    +'<span style="font-size:.82em;color:var(--sub)">速度</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" style="flex:1;min-width:110px" oninput="playSetScrollSpeed(this.value)"><span id="scrollSpdLbl" style="font-size:.82em">'+playState.scrollSpeed+'</span></div>'
+    +'</div>';
+  const strum=song.strum||song.memo;
+  if(strum) h+='<div class="card"><div style="font-weight:700;font-size:.88em;color:var(--acc);margin-bottom:5px">弾き方メモ</div><div class="note" style="color:#d9d0bf">'+esc(strum)+'</div></div>';
+  // section chips
+  if(secs.length>1 || (secs.length===1 && secs[0].name)){
+    h+='<div class="chiprow">'+secs.map((sec,i)=> sec.name? '<button class="tagchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
+  }
+  if(!song.builtin){
+    h+='<div class="btnrow"><button class="btn small" onclick="playEditSong(\''+song.id+'\')">編集</button><button class="btn small" onclick="playDeleteSong(\''+song.id+'\')">削除</button></div>';
+  }
+  // sheet
+  h+='<div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  secs.forEach((sec,si)=>{
+    h+='<div class="sheet-sec" id="psec-'+si+'">';
+    if(sec.name) h+='<div class="sheet-secname">'+esc(sec.name)+'</div>';
+    sec.lines.forEach(ln=>{
+      if(ln.type==='blank'){ h+='<div style="height:8px"></div>'; return; }
+      if(ln.type==='bar'){
+        const cells=ln.raw.split('|').map(x=>x.trim()).filter(Boolean);
+        // each cell may contain multiple chords separated by spaces
+        let row='<div class="bar-row">';
+        ln.raw.split('|').forEach(part=>{
+          const toks=part.trim().split(/\s+/).filter(Boolean);
+          toks.forEach(tok=>{
+            const dc=dispChord(tok);
+            row+='<div class="bar-cell">'+diagramSVG(dc,{easy:playState.easy})+'<div class="cname">'+esc(dc)+(playState.easy && EASY_SHAPES[dc]?' <span style="font-size:.68em;color:#8a6d1a">簡易</span>':'')+'</div></div>';
+          });
+        });
+        row+='</div>'; h+=row; return;
+      }
+      // lyric
+      let lh='<div class="lyr-line">';
+      (ln.segs||[]).forEach(sg=>{
+        if(sg.chord){
+          const dc=dispChord(sg.chord);
+          lh+='<span class="seg"><span class="seg-top">'+diagramSVG(dc,{easy:playState.easy})+'<span class="cname">'+esc(dc)+'</span></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+        }else{
+          lh+='<span class="seg plain"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+        }
+      });
+      lh+='</div>'; h+=lh;
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  if(song.builtin) h+='<div class="note" style="margin-top:10px">この曲はコード進行のみの収録です（歌詞は権利の関係で入れていません）。自分の曲は「曲を追加」から歌詞つきで保存できます。</div>';
+  el.innerHTML=h;
+}
+function playScrollToSec(i){ const t=$('psec-'+i); if(t) t.scrollIntoView({behavior:'smooth', block:'start'}); }
+function playAdjTranspose(d){ playState.transpose=Math.max(-6, Math.min(6, playState.transpose+d)); renderSong(); }
+function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
+function playToggleEasy(){ playState.easy=!playState.easy; renderSong(); }
+function playSetFont(v){ playState.font=+v; const sh=$('playSheet'); if(sh) sh.style.fontSize=(playState.font*16)+'px'; const l=$('fontLbl'); if(l) l.textContent=Math.round(playState.font*100)+'%'; }
+function playSetScrollSpeed(v){ playState.scrollSpeed=+v; const l=$('scrollSpdLbl'); if(l) l.textContent=v; }
+function playAdjBpm(d){ playState.bpm=Math.max(40, Math.min(240, playState.bpm+d)); const a=$('bpmSv'); if(a) a.textContent=playState.bpm; const b=$('bpmLbl'); if(b) b.textContent=playState.bpm; if(metroTimer){ stopMetro(); startMetro(); } }
+/* metronome (functional audio, independent of SOUND_MUTED / playTap) */
+function metroClick(accent){
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
+    metroCtx=metroCtx||new Ctx(); if(metroCtx.state==='suspended') metroCtx.resume();
+    const t=metroCtx.currentTime, o=metroCtx.createOscillator(), g=metroCtx.createGain();
+    o.type='square'; o.frequency.setValueAtTime(accent?2000:1500, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t+0.004); g.gain.exponentialRampToValueAtTime(0.0001, t+0.05);
+    o.connect(g); g.connect(metroCtx.destination); o.start(t); o.stop(t+0.06);
+  }catch(e){}
+}
+function metroTick(){
+  const accent=(metroBeat%4===0);
+  metroClick(accent); metroBeat++;
+  const dot=$('metroDot');
+  if(dot){ dot.className=''; void dot.offsetWidth; dot.id='metroDot'; dot.classList.add(accent?'beat1':'beat'); setTimeout(()=>{ const d2=$('metroDot'); if(d2){ d2.classList.remove('beat'); d2.classList.remove('beat1'); } }, 110); }
+}
+function startMetro(){ if(metroTimer) return; metroBeat=0; metroTick(); metroTimer=setInterval(metroTick, Math.round(60000/Math.max(1,playState.bpm))); const b=$('metroBtn'); if(b) b.textContent='■ メトロノーム'; }
+function stopMetro(){ if(metroTimer){ clearInterval(metroTimer); metroTimer=null; } const b=$('metroBtn'); if(b) b.textContent='▶ メトロノーム'; const d=$('metroDot'); if(d){ d.classList.remove('beat'); d.classList.remove('beat1'); } }
+function toggleMetro(){ if(metroTimer) stopMetro(); else startMetro(); }
+/* auto scroll */
+function scrollStep(ts){
+  if(!playState.scrolling) return;
+  if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); window.scrollBy(0, playState.scrollSpeed*dt); }
+  scrollLast=ts;
+  if((window.innerHeight+window.scrollY) >= (document.body.scrollHeight-4)){ stopScroll(); return; }
+  scrollRaf=requestAnimationFrame(scrollStep);
+}
+function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; scrollRaf=requestAnimationFrame(scrollStep); const b=$('scrollBtn'); if(b) b.textContent='■ 自動スクロール'; }
+function stopScroll(){ playState.scrolling=false; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const b=$('scrollBtn'); if(b) b.textContent='▶ 自動スクロール'; }
+function toggleScroll(){ if(playState.scrolling) stopScroll(); else startScroll(); }
+function stopPlayFx(){ try{ stopMetro(); }catch(e){} try{ stopScroll(); }catch(e){} }
+/* editor */
+function playNewSong(){ stopPlayFx(); playState.mode='edit'; playState.editingId=null; renderSongEditor(); window.scrollTo(0,0); }
+function playEditSong(id){ stopPlayFx(); playState.mode='edit'; playState.editingId=id; renderSongEditor(); window.scrollTo(0,0); }
+function renderSongEditor(){
+  const el=$('v-play'); if(!el) return;
+  const id=playState.editingId;
+  const s=id? playSongById(id) : null;
+  const isBuiltinBody=(s && s.builtin)? builtinBody(s):'';
+  let h='<div style="margin-bottom:10px"><button class="btn small" onclick="backToPlayList()">← 曲一覧</button></div>';
+  h+='<div class="secttl">'+(s?'曲を編集':'曲を追加')+'</div>';
+  h+='<div class="card playform">'
+    +'<label>タイトル</label><input class="textin" id="pe-title" value="'+escA(s? (s.title||''):'')+'" placeholder="曲名">'
+    +'<label>アーティスト</label><input class="textin" id="pe-artist" value="'+escA(s? (s.artist||''):'')+'" placeholder="アーティスト名">'
+    +'<div style="display:flex;gap:10px"><div style="flex:1"><label>BPM</label><input class="textin" id="pe-bpm" type="number" inputmode="numeric" value="'+(s? (s.bpm||''):'')+'" placeholder="120"></div>'
+    +'<div style="flex:1"><label>キー（原曲）</label><input class="textin" id="pe-key" value="'+escA(s? (s.key||''):'')+'" placeholder="B"></div>'
+    +'<div style="flex:1"><label>推奨カポ</label><input class="textin" id="pe-capo" type="number" inputmode="numeric" value="'+(s? (s.capo||0):0)+'" placeholder="0"></div></div>'
+    +'<label>コード譜（本文）</label><textarea id="pe-body" style="min-height:180px" placeholder="#サビ&#10;[E]ゆめの[F#]つづき を…&#10;&#10;小節だけの行も書けます：&#10;E | F# | B | B&#10;&#10;見出しは #サビ のように # で始めます。歌詞の行は [E] のようにコードを [] で挟むと、その位置の真上に図が出ます。">'+esc(s? (s.builtin? isBuiltinBody : (s.body||'')) : '')+'</textarea>'
+    +'<label>弾き方メモ</label><textarea id="pe-memo" placeholder="ストロークなど">'+esc(s? (s.strum||s.memo||'') : '')+'</textarea>'
+    +'<div class="btnrow"><button class="btn primary" onclick="playSaveSong()">保存</button><button class="btn" onclick="backToPlayList()">キャンセル</button></div>'
+    +'</div>';
+  el.innerHTML=h;
+}
+function playSaveSong(){
+  const title=($('pe-title').value||'').trim(); if(!title){ alert('タイトルを入れてください'); return; }
+  const artist=($('pe-artist').value||'').trim();
+  const bpm=parseInt($('pe-bpm').value,10)||0;
+  const key=($('pe-key').value||'').trim();
+  const capo=Math.max(0, Math.min(12, parseInt($('pe-capo').value,10)||0));
+  const body=$('pe-body').value||'';
+  const memo=($('pe-memo').value||'').trim();
+  const editId=playState.editingId;
+  const _es=editId? playSongById(editId):null; const existing=(_es && !_es.builtin)? (data.songs||{})[editId] : null;
+  const id=existing? editId : ('s'+Date.now());
+  data.songs[id]={title:title, artist:artist, bpm:bpm, key:key, capo:capo, body:body, memo:memo, strum:memo, u:Date.now(), del:false};
+  saveLocal();
+  playState.editingId=null;
+  openPlaySong(id);
+}
+function playDeleteSong(id){
+  if(!confirm('この曲を削除しますか？')) return;
+  const cur=(data.songs||{})[id]; if(!cur) return;
+  data.songs[id]=Object.assign({}, cur, {u:Date.now(), del:true});
+  saveLocal(); backToPlayList();
+}
+
 /* ================= relay + sync ================= */
 const LS_RELAY='music.relay';
 const RELAY_URL_DEFAULT='https://script.google.com/macros/s/AKfycbziV1Wpv7AWSUJJgaKyRzFeBR81Td4CjryGGuq4avt1xAo-e2mbeyS2vBpCuqx4_KI/exec';
@@ -1207,7 +1611,7 @@ async function syncNow(reason){
     if(changed) await relayCall('put', DRIVE_FILE_NAME, JSON.stringify(merged));
     data=merged; storeSet(LS_DATA, JSON.stringify(data));
     syncStatus='synced'; lastSyncAt=Date.now();
-    renderRec(); renderLib(); renderArtists(); renderGenre();
+    renderRec(); renderLib(); renderArtists(); renderGenre(); try{ if(typeof renderPlay==='function') renderPlay(); }catch(e){}
   }catch(e){ syncStatus='error'; syncErr=(e&&e.message)||String(e); }
   syncRunning=false; renderSyncStatus();
 }
@@ -1313,7 +1717,7 @@ function selfUpdate(){
 function boot(){
   $('verBadge').textContent='v'+APP_VERSION;
   applyUi(); renderBell(); initSwipe(); initSheetSwipe();
-  renderRec(); renderTl(); renderGraph(); renderLib(); renderSet(); renderArtists(); renderGenre(); renderSyncStatus();
+  renderRec(); renderTl(); renderGraph(); renderLib(); renderSet(); renderArtists(); renderGenre(); renderSyncStatus(); try{ renderPlay(); }catch(e){}
   const veil=$('veil'); if(veil){ veil.style.opacity='0'; setTimeout(()=>veil.remove(), 700); }
   if(relayReady()) syncNow('startup');
   selfUpdate();
