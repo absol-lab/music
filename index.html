@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.8">
+<meta name="app-version" content="3.9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -198,15 +198,40 @@ select.textin{ appearance:none; }
 .drillbig{ display:flex; flex-direction:column; align-items:center; padding:8px 0 4px; }
 .drilldiag{ background:#ffffff; border-radius:16px; padding:16px 18px; display:inline-block; }
 .drillname{ font-size:2.3em; font-weight:800; color:var(--acc); margin-top:14px; line-height:1.1; }
-.tstrgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.tstrbtn{ appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:12px; padding:10px 4px; min-height:56px; cursor:pointer; font-size:.85em; line-height:1.35; }
-.tstrbtn b{ color:var(--acc); font-size:1.05em; }
-.tstrbtn.near{ border-color:var(--green); box-shadow:inset 0 0 0 1px var(--green); }
-.tgauge{ position:relative; height:28px; background:var(--panel2); border:1px solid var(--line); border-radius:14px; margin-top:10px; }
-.tgauge .tcenter{ position:absolute; left:50%; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--green); opacity:.8; }
-.tgauge .tq{ position:absolute; top:0; bottom:0; width:1px; background:#574c3a; }
-#tunerNeedle{ position:absolute; top:2px; bottom:2px; width:5px; margin-left:-2.5px; border-radius:3px; background:#574c3a; left:50%; transition:left .09s linear, background .09s; }
-.tunerNoteBig{ font-size:3em; font-weight:800; text-align:center; line-height:1.1; color:var(--tx); }
+/* tuner v3.9: GuitarTuna style */
+.tgt-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.tgt-autolbl{ margin-left:auto; display:flex; align-items:center; gap:7px; font-size:.85em; color:var(--sub); }
+.tgt-switch{ position:relative; display:inline-block; width:46px; height:27px; flex:none; }
+.tgt-switch input{ position:absolute; opacity:0; left:0; top:0; width:100%; height:100%; margin:0; cursor:pointer; z-index:2; }
+.tgt-track{ position:absolute; inset:0; background:#3a332a; border-radius:999px; transition:background .15s; pointer-events:none; }
+.tgt-knob{ position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#ece5d8; transition:left .15s; }
+.tgt-switch input:checked + .tgt-track{ background:var(--green); }
+.tgt-switch input:checked + .tgt-track .tgt-knob{ left:22px; }
+.tgt-stage{ position:relative; height:300px; border-radius:16px; overflow:hidden; background-color:#14100c; background-image:repeating-linear-gradient(0deg, rgba(236,229,216,.05) 0 1px, transparent 1px 30px), repeating-linear-gradient(90deg, rgba(236,229,216,.05) 0 1px, transparent 1px 30px); border:1px solid var(--line); }
+.tgt-flat{ position:absolute; top:10px; left:14px; color:var(--sub); font-size:1.25em; }
+.tgt-sharp{ position:absolute; top:10px; right:14px; color:var(--sub); font-size:1.25em; }
+.tgt-center{ position:absolute; top:0; bottom:0; left:50%; width:2px; margin-left:-1px; background:#574c3a; }
+.tgt-center.hit{ background:var(--green); box-shadow:0 0 10px 2px rgba(70,167,88,.75); }
+#tunerTrace{ position:absolute; top:6px; left:0; width:100%; height:90px; pointer-events:none; }
+.tgt-bubble{ position:absolute; top:24px; left:50%; width:46px; height:46px; margin-left:-23px; border-radius:50%; background:#1e1a17; border:2px solid #ece5d8; color:#ece5d8; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.92em; transition:left .12s ease-out, background .12s, border-color .12s; z-index:3; }
+.tgt-bubble.far{ border-color:var(--red); color:var(--red); }
+.tgt-bubble.near{ border-color:var(--acc); color:var(--acc); }
+.tgt-bubble.hit{ background:var(--green); border-color:var(--green); color:#fff; }
+.tgt-msg{ position:absolute; top:86px; left:0; right:0; text-align:center; font-size:1.02em; font-weight:700; color:var(--tx); }
+.tgt-msg.low,.tgt-msg.high{ color:var(--red); }
+.tgt-msg.hit{ color:var(--green); }
+.tgt-notepill{ position:absolute; top:118px; left:50%; transform:translateX(-50%); background:#262019; border:1px solid var(--line); color:var(--tx); border-radius:999px; padding:3px 12px; font-size:.82em; font-weight:700; white-space:nowrap; }
+.tgt-headrow{ display:flex; justify-content:center; align-items:stretch; gap:8px; margin-top:14px; }
+.tgt-col{ display:flex; flex-direction:column; justify-content:space-around; padding:6px 0; }
+.tgt-headsvg{ flex:none; display:flex; align-items:flex-start; }
+.tgt-sbtn{ position:relative; appearance:none; width:58px; height:58px; border-radius:50%; border:2px solid var(--line); background:var(--panel2); color:var(--tx); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; font-family:inherit; padding:0; }
+.tgt-sbtn .tgt-letter{ font-size:1.25em; font-weight:800; }
+.tgt-sbtn .tgt-slabel{ font-size:.62em; color:var(--sub); margin-top:2px; }
+.tgt-sbtn.sel{ border-color:var(--acc); background:#3a2c14; box-shadow:0 0 0 2px rgba(216,162,74,.35); }
+.tgt-sbtn.done{ border-color:var(--green); }
+.tgt-sbtn .tgt-check{ display:none; position:absolute; top:-5px; right:-5px; width:19px; height:19px; border-radius:50%; background:var(--green); color:#fff; font-size:.68em; align-items:center; justify-content:center; font-weight:800; }
+.tgt-sbtn.done .tgt-check{ display:flex; }
+.tgt-redo{ appearance:none; border:none; background:var(--green); color:#fff; font-weight:800; border-radius:999px; padding:11px 22px; font-size:.92em; cursor:pointer; min-height:48px; font-family:inherit; }
 
 /* play v3.4: song = fixed overlay (only sheet scrolls), compact 2-row toolbar */
 .songroot{ display:flex; flex-direction:column; height:100%; min-height:0; }
@@ -243,10 +268,22 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .scrollbadge{ position:fixed; right:22px; bottom:89px; z-index:26; pointer-events:none; transition:opacity .2s; }
 .scrollbadge span{ background:rgba(38,32,25,.88); color:var(--acc); font-size:.72em; padding:5px 11px; border-radius:999px; letter-spacing:.04em; }
 .scrollbadge.off{ opacity:0; }
+/* song settings row lives at the top of the white sheet (v3.9) */
+.sheetctl{ background:#fff; border:1px solid #d8cbb6; border-radius:12px; padding:5px 8px; margin:0 0 6px; min-height:44px; box-sizing:border-box; align-items:center; touch-action:pan-y; }
+.sheetctl .pstep{ background:#faf6ee; border-color:#d8cbb6; }
+.sheetctl .pstep>span:first-child{ color:#5a4a36; }
+.sheetctl .pstep button{ background:#fff; border-color:#d8cbb6; color:#3a2c14; }
+.sheetctl .pstep .pv b{ color:#8a6d1a; }
+.sheetctl .ppill{ background:#fff; border-color:#d8cbb6; color:#3a2c14; }
+.sheetctl .ppill.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
+.sheetctl .sheetctl-lbl{ font-size:.78em; color:#5a4a36; flex:none; }
+.sheetctl input[type=range]{ accent-color:#d8a24a; }
+.ctlfloat{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 54px); right:14px; z-index:5; appearance:none; border:1px solid var(--acc); background:rgba(30,26,23,.92); color:var(--acc); border-radius:999px; padding:8px 16px; min-height:36px; font-size:.82em; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); font-family:inherit; }
+.ctlfloat.off{ display:none; }
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:4px 0; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:none; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--sub); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
-.sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; touch-action:pan-y; overscroll-behavior:none; }
+.sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#262019; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
 .strumstrip b{ color:var(--acc); flex:none; }
@@ -286,7 +323,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.8';
+const APP_VERSION='3.9';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1178,6 +1215,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.9','2026-11-28','チューナーをGuitarTuna方式に作り替え（バブル指標＋ヘッドの絵＋弦ボタン＋自動判定）。マイクはチューナーを開くと自動で始まり、離れると止まる。設定は譜面の先頭に置き、スクロールで隠れたら右上に設定ボタンが出る形にした。自動スクロール中でも手動で前後に動かせるようにした。端で止めるスクロールの仕掛けは取りやめ、自然なスクロールに戻した'],
  ['3.8','2026-11-28','設定はカポ・かんたん・スクロール速度のバーだけに絞った。同期ドットは作家図鑑と同じ大きさ・位置に揃えた'],
  ['3.7','2026-11-28','譜面を端までスクロールした時のバウンス（跳ね返り）を止め、端でピタッと止まるようにした'],
  ['3.6','2026-11-28','自動スクロールとセクション移動がiPhoneで動かない問題を修正（スクロール位置の管理方法を変更）'],
@@ -1452,10 +1490,10 @@ function builtinBody(song){
 }
 let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false, speedPct:100, loopSec:-1, showCtl:false, strumOpen:false};
 let drillState={idx:0, shown:1, ok:0, ng:0, easy:false, auto:false, autoSec:8, timer:null};
-let tunerState={stream:null, raf:null, ctx:null, analyser:null, running:false, lastUpd:0, refCtx:null};
+let tunerState={stream:null, raf:null, ctx:null, analyser:null, running:false, lastUpd:0, refCtx:null, auto:true, target:0, done:{}, trace:[], holdMs:0, lastFrameTs:0, manualUntil:0, denied:false, lastInTune:false};
 function effectiveBpm(){ return Math.max(1, Math.round(playState.bpm*(playState.speedPct||100)/100)); }
 function effectiveScrollSpeed(){ return playState.scrollSpeed*(playState.speedPct||100)/100; }
-let metroTimer=null, metroBeat=0, metroCtx=null, scrollRaf=null, scrollLast=0, scrollPos=null;
+let metroTimer=null, metroBeat=0, metroCtx=null, scrollRaf=null, scrollLast=0, scrollPos=null, scrollLastWritten=null, userHold=false;
 function allPlaySongs(){
   const out=[];
   BUILTIN_SONGS.forEach(s=>out.push(Object.assign({}, s, {builtin:true})));
@@ -1515,7 +1553,7 @@ function renderPlay(){
 function openPlaySong(id){
   const s=playSongById(id); if(!s) return;
   stopPlayFx();
-  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.showCtl=false; playState.strumOpen=false;
+  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.strumOpen=false;
   bumpPlays(id);
   renderSong(); window.scrollTo(0,0);
 }
@@ -1564,9 +1602,21 @@ function unlockSongOverlay(){
 }
 function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mode==='song' && playState.openId) lockSongOverlay(); }
 window.addEventListener('resize', layoutSongOverlay);
-function playToggleCtl(){ playState.showCtl=!playState.showCtl; renderSong(); }
-function sheetTap(e){ const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip')) return; toggleScroll(); }
-function sheetTrap(){ const w=$('sheetWrap'); if(!w) return; if(w.scrollHeight <= w.clientHeight + 1) return; if(w.scrollTop <= 0) w.scrollTop = 1; else if(w.scrollTop + w.clientHeight >= w.scrollHeight - 1) w.scrollTop = w.scrollHeight - w.clientHeight - 1; else return; if(typeof scrollPos!=='undefined' && scrollPos!==null) scrollPos=w.scrollTop; }
+function onSheetScroll(){
+  const w=$('sheetWrap'), row=$('sheetCtl'), btn=$('ctlFloat'); if(!w || !row || !btn) return;
+  const wr=w.getBoundingClientRect(), rr=row.getBoundingClientRect();
+  const visible=(rr.bottom > wr.top + 4) && (rr.top < wr.bottom);
+  btn.classList.toggle('off', visible);
+}
+function playShowSettings(){
+  const w=$('sheetWrap'); if(!w) return;
+  w.scrollTop=0;
+  if(playState.scrolling){ scrollPos=0; scrollLastWritten=0; }
+  onSheetScroll();
+}
+function sheetTap(e){ const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip,.sheetctl')) return; toggleScroll(); }
+function scrollTouchStart(){ userHold=true; }
+function scrollTouchEnd(){ userHold=false; const w=$('sheetWrap'); if(w && playState.scrolling){ scrollPos=w.scrollTop; scrollLastWritten=w.scrollTop; } }
 function playToggleStrum(){
   playState.strumOpen=!playState.strumOpen;
   const st=document.querySelector('.strumstrip');
@@ -1582,20 +1632,16 @@ function renderSong(){
   let h='<div class="songroot">';
   h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
     +'<div class="stitle-main"><span class="stitle">'+esc(song.title||'無題')+'</span>'+(song.artist? '<span class="sartist">'+esc(song.artist)+'</span>':'')+'</div>'
-    +'<button class="ppill'+(playState.showCtl?' on':'')+'" onclick="playToggleCtl()">設定</button></div>'
     +'<div class="smeta">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実効 <span id="effBpmLbl">'+effectiveBpm()+'</span> ・ 実音キー <b>'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div></div>';
-  if(playState.showCtl){
-    h+='<div class="pctl" id="ctlBar">'
-      +'<div class="prow">'
-      +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
-      +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
-      +'<span style="font-size:.78em;color:var(--sub);flex:none">スクロール</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" style="flex:1;min-width:120px" oninput="playSetScrollSpeed(this.value)">'
-      +'</div></div>';
-  }
   if(secs.some(s=>s.name)){
     h+='<div class="secchips">'+secs.map((sec,i)=> sec.name? '<button class="secchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
   }
-  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)" ontouchstart="sheetTrap()"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)" ontouchstart="scrollTouchStart()" ontouchend="scrollTouchEnd()" onscroll="onSheetScroll()"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  h+='<div class="prow sheetctl" id="sheetCtl">'
+    +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
+    +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
+    +'<span class="sheetctl-lbl">スクロール</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" style="flex:1;min-width:120px" oninput="playSetScrollSpeed(this.value)">'
+    +'</div>';
   const strum=song.strum||song.memo;
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
   secs.forEach((sec,si)=>{
@@ -1636,8 +1682,10 @@ function renderSong(){
   h+='</div>';
   if(song.builtin && !aligned) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。</div>';
   h+='<div class="scrollbadge'+(playState.scrolling?'':' off')+'" id="scrollBadge"><span>▶ 自動スクロール中</span></div>';
+  h+='<button class="ctlfloat off" id="ctlFloat" onclick="playShowSettings()">設定</button>';
   h+='</div></div>';
   el.innerHTML=h;
+  onSheetScroll();
 }
 function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
@@ -1671,7 +1719,14 @@ function scrollStep(ts){
   if(!playState.scrolling) return;
   const wrap=$('sheetWrap');
   if(!wrap){ stopScroll(); return; }
-  if(scrollPos==null) scrollPos=wrap.scrollTop;
+  if(scrollPos==null){ scrollPos=wrap.scrollTop; scrollLastWritten=scrollPos; }
+  if(userHold){ scrollLast=ts; scrollRaf=requestAnimationFrame(scrollStep); return; }
+  if(scrollLastWritten!=null && Math.abs(wrap.scrollTop - scrollLastWritten) > 2){
+    /* external movement (finger drag / iOS momentum) wins: adopt the actual position as the new base */
+    scrollPos=wrap.scrollTop; scrollLastWritten=scrollPos; scrollLast=ts;
+    scrollRaf=requestAnimationFrame(scrollStep);
+    return;
+  }
   if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); scrollPos += effectiveScrollSpeed()*dt; }
   scrollLast=ts;
   if(playState.loopSec>=0){
@@ -1682,18 +1737,18 @@ function scrollStep(ts){
       const secBottom=secTop + secEl.offsetHeight;
       if(secBottom <= scrollPos + wrap.clientHeight/2 + 1){
         scrollPos=Math.max(0, secTop - 4);
-        wrap.scrollTop=scrollPos;
+        wrap.scrollTop=scrollPos; scrollLastWritten=scrollPos;
         scrollRaf=requestAnimationFrame(scrollStep);
         return;
       }
     }
   }
-  wrap.scrollTop=scrollPos;
+  wrap.scrollTop=scrollPos; scrollLastWritten=scrollPos;
   if(scrollPos + wrap.clientHeight >= wrap.scrollHeight - 4){ stopScroll(); return; }
   scrollRaf=requestAnimationFrame(scrollStep);
 }
-function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; const wrap=$('sheetWrap'); scrollPos=wrap? wrap.scrollTop : 0; scrollRaf=requestAnimationFrame(scrollStep); const bd=$('scrollBadge'); if(bd) bd.classList.remove('off'); }
-function stopScroll(){ playState.scrolling=false; scrollPos=null; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const bd=$('scrollBadge'); if(bd) bd.classList.add('off'); }
+function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; userHold=false; const wrap=$('sheetWrap'); scrollPos=wrap? wrap.scrollTop : 0; scrollLastWritten=scrollPos; scrollRaf=requestAnimationFrame(scrollStep); const bd=$('scrollBadge'); if(bd) bd.classList.remove('off'); }
+function stopScroll(){ playState.scrolling=false; scrollPos=null; scrollLastWritten=null; userHold=false; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const bd=$('scrollBadge'); if(bd) bd.classList.add('off'); }
 function toggleScroll(){ if(playState.scrolling) stopScroll(); else startScroll(); }
 function stopPlayFx(){ try{ stopMetro(); }catch(e){} try{ stopScroll(); }catch(e){} try{ stopDrillAuto(); }catch(e){} try{ stopTuner(); }catch(e){} try{ unlockSongOverlay(); }catch(e){} }
 /* editor */
@@ -1818,7 +1873,66 @@ function closestString(f){
   TUNER_STRINGS.forEach((st,i)=>{ const c=centsBetween(f, st.freq); if(!best || Math.abs(c)<Math.abs(best.cents)) best={index:i, label:st.label, note:st.note, freq:st.freq, cents:Math.round(c*10)/10}; });
   return best;
 }
-function openTuner(){ stopPlayFx(); playState.mode='tuner'; renderPlay(); window.scrollTo(0,0); }
+function openTuner(){ stopPlayFx(); playState.mode='tuner'; renderPlay(); window.scrollTo(0,0); if(!tunerState.denied) startTunerMic(); }
+const TUNER_DENIED_MSG='マイクが使えない。設定で許可するか、弦ボタンで基準音を聞いて合わせられます。';
+function bubbleLeftPct(cents){
+  const c=Math.max(-50, Math.min(50, +cents||0));
+  return 50 + (c/50)*38;
+}
+function tunerStrBtn(i){
+  const st=TUNER_STRINGS[i];
+  const letter=st.note.replace(/[0-9]/g,'');
+  return '<button class="tgt-sbtn" id="tgtb-'+i+'" onclick="tunerTapString('+i+')"><span class="tgt-letter">'+letter+'</span><span class="tgt-slabel">'+esc(st.label)+'</span><span class="tgt-check">✓</span></button>';
+}
+function tunerHeadSVG(){
+  const nutX=[71,81,91,101,111,119];
+  const pegPos=[{x:34,y:146},{x:30,y:96},{x:34,y:46},{x:156,y:46},{x:160,y:96},{x:156,y:146}];
+  let s='<svg width="190" height="230" viewBox="0 0 190 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+  s+='<defs><linearGradient id="tgtHg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b4226"/><stop offset="1" stop-color="#4a2c17"/></linearGradient></defs>';
+  s+='<path d="M48,14 L142,14 C140,80 132,128 124,168 L124,230 L66,230 L66,168 C58,128 50,80 48,14 Z" fill="url(#tgtHg)" stroke="#2e1c0e" stroke-width="2"/>';
+  pegPos.forEach(p=>{ s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="#2a251f" stroke="#574c3a" stroke-width="1.5"/><circle cx="'+p.x+'" cy="'+p.y+'" r="3.2" fill="#a99e8c"/>'; });
+  nutX.forEach((x,i)=>{ const p=pegPos[i]; s+='<line x1="'+x+'" y1="167" x2="'+p.x+'" y2="'+p.y+'" stroke="#b9ac93" stroke-width="'+(i<3?1.5:1)+'"/>'; });
+  s+='<rect x="66" y="163" width="58" height="6" rx="2" fill="#d8cfb8"/>';
+  nutX.forEach((x,i)=>{ s+='<line x1="'+x+'" y1="169" x2="'+x+'" y2="230" stroke="#b9ac93" stroke-width="'+(i<3?1.5:1)+'"/>'; });
+  s+='</svg>';
+  return s;
+}
+function tunerPaintButtons(){
+  TUNER_STRINGS.forEach((st,i)=>{
+    const b=$('tgtb-'+i); if(!b) return;
+    b.classList.toggle('sel', tunerState.target===i);
+    b.classList.toggle('done', !!tunerState.done[i]);
+  });
+  const all=TUNER_STRINGS.every((st,i)=>tunerState.done[i]);
+  const pill=$('tunerAllDone'); if(pill) pill.style.display=all? 'block':'none';
+}
+function tunerSetAuto(on){ tunerState.auto=!!on; tunerState.holdMs=0; }
+function tunerTapString(i){
+  tunerState.target=i; tunerState.holdMs=0;
+  tunerState.manualUntil=performance.now()+4000;
+  tunerPaintButtons();
+  playRefTone(TUNER_STRINGS[i].freq);
+}
+function tunerResetStrings(){ tunerState.done={}; tunerState.target=0; tunerState.holdMs=0; tunerPaintButtons(); }
+function tunerMicBtnTap(){ tunerState.denied=false; startTunerMic(); }
+function tunerDrawTrace(){
+  const cv=$('tunerTrace'); if(!cv || !cv.getContext) return;
+  const ctx=cv.getContext('2d'); if(!ctx) return;
+  const W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const tr=tunerState.trace; if(tr.length<2) return;
+  const off=60-tr.length;
+  ctx.beginPath();
+  let started=false;
+  tr.forEach((c,idx)=>{
+    if(c===null || c===undefined){ started=false; return; }
+    const x=(off+idx)/59*W;
+    const y=H/2 - (Math.max(-50,Math.min(50,c))/50)*(H/2-4);
+    if(!started){ ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle=tunerState.lastInTune? '#46a758' : '#d8a24a';
+  ctx.lineWidth=2; ctx.stroke();
+}
 function playRefTone(freq){
   try{
     const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx) return;
@@ -1835,22 +1949,30 @@ function playRefTone(freq){
 }
 function renderTuner(){
   const el=$('v-play'); if(!el) return;
-  let h='<div style="margin-bottom:10px"><button class="btn small" onclick="backToPlayList()">← 曲一覧</button></div>';
-  h+='<div class="secttl">チューナー</div>';
-  h+='<div class="card"><div style="font-weight:700;font-size:.88em;color:var(--acc);margin-bottom:8px">基準音（標準チューニング）</div>'
-    +'<div class="tstrgrid">'
-    +TUNER_STRINGS.map((st,i)=>'<button class="tstrbtn" id="tstr-'+i+'" onclick="playRefTone('+st.freq+')">'+esc(st.label)+' <b>'+esc(st.note)+'</b><br>'+st.freq.toFixed(2)+' Hz</button>').join('')
-    +'</div><div class="note" style="margin-top:8px">タップで1.5秒鳴ります。音に合わせて弦を合わせてください。</div></div>';
-  h+='<div class="card"><div style="font-weight:700;font-size:.88em;color:var(--acc);margin-bottom:8px">マイクで測る</div>'
-    +'<div class="btnrow" style="margin-top:0"><button class="btn primary small" id="tunerMicBtn" onclick="toggleTunerMic()">マイクで測る</button></div>'
-    +'<div class="note" id="tunerStatus" style="margin-top:8px">まだ測っていません。弦を1本だけ弾いてください。</div>'
-    +'<div class="tunerNoteBig" id="tunerNote" style="margin-top:12px">—</div>'
-    +'<div style="text-align:center;font-size:.9em;color:var(--sub)"><span id="tunerFreq">— Hz</span> ・ <span id="tunerCents">±0 cents</span></div>'
-    +'<div class="tgauge"><span class="tq" style="left:25%"></span><span class="tq" style="left:75%"></span><span class="tcenter"></span><span id="tunerNeedle"></span></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:.7em;color:var(--sub);margin-top:4px"><span>-50（低い）</span><span>0</span><span>+50（高い）</span></div>'
-    +'<div style="text-align:center;font-size:.88em;margin-top:10px" id="tunerString">近い弦：—</div>'
+  const running=tunerState.running;
+  let h='<div class="tgt-head"><button class="btn small" onclick="backToPlayList()">← 一覧</button>'
+    +'<div class="secttl" style="margin:0">チューナー</div>'
+    +'<label class="tgt-autolbl">自動<span class="tgt-switch"><input type="checkbox" id="tunerAutoSw" '+(tunerState.auto?'checked':'')+' onchange="tunerSetAuto(this.checked)"><span class="tgt-track"><span class="tgt-knob"></span></span></span></label></div>';
+  h+='<div class="tgt-stage" id="tunerStage">'
+    +'<span class="tgt-flat">♭</span><span class="tgt-sharp">♯</span>'
+    +'<div class="tgt-center" id="tunerLine"></div>'
+    +'<canvas id="tunerTrace" width="600" height="90"></canvas>'
+    +'<div class="tgt-bubble" id="tunerBubble"><span id="tunerBubbleTxt"></span></div>'
+    +'<div class="tgt-msg" id="tunerMsg">'+(running? '弦を弾いて' : 'マイクを開始して弦を弾いて')+'</div>'
+    +'<div class="tgt-notepill" id="tunerNotePill" style="visibility:hidden">—</div>'
     +'</div>';
+  h+='<div class="note" id="tunerStatus" style="margin-top:8px">'+(tunerState.denied? esc(TUNER_DENIED_MSG) : (running? '測定中… 弦を1本だけ弾いてください。' : 'マイクは自動で始まります。'))+'</div>'
+    +'<div class="btnrow" id="tunerMicRow" style="margin-top:6px;'+(running?'display:none':'')+'"><button class="btn small" id="tunerMicBtn" onclick="tunerMicBtnTap()">マイクを開始</button></div>';
+  h+='<div class="tgt-headrow"><div class="tgt-col">'
+    +tunerStrBtn(2)+tunerStrBtn(1)+tunerStrBtn(0)
+    +'</div><div class="tgt-headsvg">'+tunerHeadSVG()+'</div><div class="tgt-col">'
+    +tunerStrBtn(3)+tunerStrBtn(4)+tunerStrBtn(5)
+    +'</div></div>';
+  h+='<div id="tunerAllDone" style="display:none;text-align:center;margin-top:10px"><button class="tgt-redo" onclick="tunerResetStrings()">最初からやり直す</button></div>';
+  h+='<div class="note" style="margin-top:10px">弦ボタンをタップすると基準音が鳴ります。自動オンでは、弾いた弦を自動で選んで判定します。</div>';
   el.innerHTML=h;
+  tunerPaintButtons();
+  tunerDrawTrace();
 }
 function autoCorrelate(buf, sampleRate){
   let SIZE=buf.length, rms=0;
@@ -1878,63 +2000,99 @@ function tunerUpdate(){
   if(!tunerState.running) return;
   tunerState.raf=requestAnimationFrame(tunerUpdate);
   const now=performance.now();
-  if(now-tunerState.lastUpd<100) return;
-  tunerState.lastUpd=now;
+  if(now-tunerState.lastUpd<80) return;
+  const dt=tunerState.lastFrameTs? Math.min(500, now-tunerState.lastFrameTs) : 80;
+  tunerState.lastUpd=now; tunerState.lastFrameTs=now;
   if(!tunerState.analyser) return;
+  const bubble=$('tunerBubble'); if(!bubble) return;
+  const bTxt=$('tunerBubbleTxt'), msg=$('tunerMsg'), pill=$('tunerNotePill'), line=$('tunerLine');
   const buf=new Float32Array(tunerState.analyser.fftSize);
   tunerState.analyser.getFloatTimeDomainData(buf);
   const freq=autoCorrelate(buf, tunerState.ctx.sampleRate);
-  const noteEl=$('tunerNote'), freqEl=$('tunerFreq'), centsEl=$('tunerCents'), needle=$('tunerNeedle'), strEl=$('tunerString'), stEl=$('tunerStatus');
-  if(!noteEl) return;
-  document.querySelectorAll('.tstrbtn').forEach(b=>b.classList.remove('near'));
   if(freq<=0 || freq<40 || freq>1200){
-    noteEl.textContent='—'; freqEl.textContent='— Hz'; centsEl.textContent='±0 cents'; needle.style.left='50%'; needle.style.background='#574c3a'; strEl.textContent='近い弦：—';
-    if(stEl) stEl.textContent='音が検出できません。弦を1本だけ弾いてください。';
+    tunerState.trace.push(null); if(tunerState.trace.length>60) tunerState.trace.shift();
+    tunerState.holdMs=0; tunerState.lastInTune=false;
+    bubble.style.left='50%'; bubble.className='tgt-bubble';
+    if(bTxt) bTxt.textContent='';
+    if(msg){ msg.textContent='弦を弾いて'; msg.className='tgt-msg'; }
+    if(pill) pill.style.visibility='hidden';
+    if(line) line.classList.remove('hit');
+    tunerDrawTrace();
     return;
   }
   const info=noteFromFreq(freq); if(!info) return;
-  const cents=info.cents;
-  const col=Math.abs(cents)<=6? 'var(--green)' : (Math.abs(cents)<=15? 'var(--acc)' : 'var(--red)');
-  noteEl.textContent=info.name; noteEl.style.color=col;
-  freqEl.textContent=freq.toFixed(1)+' Hz';
-  centsEl.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents'; centsEl.style.color=col;
-  needle.style.left=Math.max(0, Math.min(100, 50+cents))+'%'; needle.style.background=col;
-  const cs=closestString(freq);
-  if(cs && Math.abs(cs.cents)<=100){
-    strEl.innerHTML='近い弦：<b style="color:var(--acc)">'+esc(cs.label)+' '+esc(cs.note)+'</b>（基準との差 '+(cs.cents>0?'+':'')+cs.cents.toFixed(1)+' cents）';
-    const btn=$('tstr-'+cs.index); if(btn) btn.classList.add('near');
-  } else strEl.textContent='近い弦：—';
-  if(stEl) stEl.textContent='測っています… もう一度弾くと更新されます。';
+  if(tunerState.auto && now>tunerState.manualUntil){
+    const cs=closestString(freq);
+    if(cs && Math.abs(cs.cents)<=300 && cs.index!==tunerState.target){ tunerState.target=cs.index; tunerState.holdMs=0; tunerPaintButtons(); }
+  }
+  const ti=tunerState.target;
+  const cents=centsBetween(freq, TUNER_STRINGS[ti].freq);
+  const ac=Math.abs(cents);
+  const inTune=ac<=6;
+  tunerState.lastInTune=inTune;
+  tunerState.trace.push(Math.max(-50, Math.min(50, cents))); if(tunerState.trace.length>60) tunerState.trace.shift();
+  bubble.style.left=bubbleLeftPct(cents)+'%';
+  bubble.className='tgt-bubble'+(inTune? ' hit' : (ac>25? ' far' : (ac<=10? ' near' : '')));
+  if(bTxt) bTxt.textContent=inTune? '✓' : String(Math.round(cents));
+  if(line) line.classList.toggle('hit', inTune);
+  if(msg){
+    if(inTune){ msg.textContent='合ってる'; msg.className='tgt-msg hit'; }
+    else if(cents<0){ msg.textContent=Math.round(cents)+' チューンアップ'; msg.className='tgt-msg low'; }
+    else{ msg.textContent='+'+Math.round(cents)+' チューンダウン'; msg.className='tgt-msg high'; }
+  }
+  if(pill){ pill.style.visibility='visible'; pill.textContent=info.name+' ・ '+freq.toFixed(1)+' Hz'; }
+  if(!tunerState.done[ti]){
+    if(inTune){
+      tunerState.holdMs+=dt;
+      if(tunerState.holdMs>=600){
+        tunerState.done[ti]=true; tunerState.holdMs=0;
+        if(tunerState.auto){
+          let nxt=-1;
+          for(let k=1;k<=6;k++){ const cand=(ti+k)%6; if(!tunerState.done[cand]){ nxt=cand; break; } }
+          if(nxt>=0){ tunerState.target=nxt; tunerState.manualUntil=now+2500; }
+        }
+        tunerPaintButtons();
+      }
+    } else tunerState.holdMs=0;
+  }
+  tunerDrawTrace();
 }
 async function startTunerMic(){
   const stEl=$('tunerStatus');
+  if(tunerState.running) return;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    if(stEl) stEl.textContent='この端末ではマイク測定が使えません。上の基準音で合わせてください。';
+    tunerState.denied=true;
+    if(stEl) stEl.textContent=TUNER_DENIED_MSG;
     return;
   }
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
+    if(playState.mode!=='tuner'){ try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){} return; }
     const Ctx=window.AudioContext||window.webkitAudioContext;
     tunerState.ctx=tunerState.ctx||new Ctx(); if(tunerState.ctx.state==='suspended') await tunerState.ctx.resume();
     const src=tunerState.ctx.createMediaStreamSource(stream);
     tunerState.analyser=tunerState.ctx.createAnalyser(); tunerState.analyser.fftSize=2048;
     src.connect(tunerState.analyser);
-    tunerState.stream=stream; tunerState.running=true; tunerState.lastUpd=0;
-    const b=$('tunerMicBtn'); if(b) b.textContent='■ 止める';
-    if(stEl) stEl.textContent='測っています… 弦を1本だけ弾いてください。';
+    tunerState.stream=stream; tunerState.running=true; tunerState.lastUpd=0; tunerState.lastFrameTs=0;
+    const row=$('tunerMicRow'); if(row) row.style.display='none';
+    const msg=$('tunerMsg'); if(msg && msg.textContent.indexOf('マイクを開始')===0){ msg.textContent='弦を弾いて'; }
+    if(stEl) stEl.textContent='測定中… 弦を1本だけ弾いてください。';
     tunerState.raf=requestAnimationFrame(tunerUpdate);
   }catch(e){
-    if(stEl) stEl.textContent='マイクを使えませんでした（許可が必要です）。上の基準音で合わせてください。';
+    tunerState.denied=true;
+    if(stEl) stEl.textContent=TUNER_DENIED_MSG;
+    const row=$('tunerMicRow'); if(row) row.style.display='';
   }
 }
 function stopTuner(){
-  tunerState.running=false;
+  tunerState.running=false; tunerState.holdMs=0;
   if(tunerState.raf){ cancelAnimationFrame(tunerState.raf); tunerState.raf=null; }
   if(tunerState.stream){ try{ tunerState.stream.getTracks().forEach(t=>t.stop()); }catch(e){} tunerState.stream=null; }
   tunerState.analyser=null;
-  const b=$('tunerMicBtn'); if(b) b.textContent='マイクで測る';
+  const row=$('tunerMicRow'); if(row) row.style.display='';
+  const b=$('tunerMicBtn'); if(b) b.textContent='マイクを開始';
 }
-function toggleTunerMic(){ if(tunerState.running) stopTuner(); else startTunerMic(); }
+function toggleTunerMic(){ if(tunerState.running) stopTuner(); else tunerMicBtnTap(); }
 
 /* ================= relay + sync ================= */
 const LS_RELAY='music.relay';
