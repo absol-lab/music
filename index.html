@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.20">
+<meta name="app-version" content="3.21">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -296,7 +296,12 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .cetabs{ display:flex; gap:6px; margin:12px 0 4px; }
 .cetab{ appearance:none; flex:1; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:7px 10px; min-height:36px; font-size:.85em; cursor:pointer; font-family:inherit; font-weight:700; }
 .cetab.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
-.fretboard{ margin-top:8px; overflow-x:auto; padding-bottom:2px; }
+.fretboard{ margin-top:8px; overflow-x:auto; overflow-y:hidden; padding-bottom:2px; scrollbar-gutter:stable; }
+/* fretboard input stability (v3.21): the areas whose contents change on every tap
+   keep one declared height, so the board above them never reflows under a finger. */
+#ceTabBoard, #ceTabBoard *, #revWrap .fretboard, #revWrap .fbnotes, #revWrap .fbcands{ transition:none !important; animation:none !important; }
+#dcard.fbstable{ overflow-anchor:none; }
+#revWrap.fbstable-wrap{ overflow-anchor:none; }
 .fbhead,.fbrow{ display:flex; align-items:stretch; gap:2px; margin-bottom:2px; min-width:318px; }
 .fbhead span{ flex:1; text-align:center; font-size:.6em; color:var(--sub); line-height:1.4; }
 .fbhead .fbmark{ font-size:.6em; color:var(--sub); display:flex; align-items:center; justify-content:center; }
@@ -304,14 +309,14 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .fbmark.set{ border-color:#d8a24a; color:#d8a24a; }
 .fbcell{ appearance:none; flex:1; height:26px; background:#241e18; border:1px solid #3a332a; border-radius:4px; position:relative; cursor:pointer; padding:0; font-family:inherit; }
 .fbcell .fbdot{ position:absolute; left:50%; top:50%; width:17px; height:17px; margin:-8.5px 0 0 -8.5px; border-radius:50%; background:#d8a24a; box-shadow:0 0 0 2px rgba(216,162,74,.25); }
-.fbnotes{ font-size:.85em; color:var(--sub); margin-top:9px; line-height:1.5; }
+.fbnotes{ font-size:.85em; color:var(--sub); margin-top:9px; height:21px; line-height:21px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .fbnotes b{ color:var(--tx); }
-.fbcands{ display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+.fbcands{ display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; margin-top:7px; height:74px; min-height:74px; max-height:74px; overflow-x:hidden; overflow-y:auto; box-sizing:border-box; scrollbar-gutter:stable; }
 .candchip{ appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:6px 12px; min-height:34px; font-size:.88em; cursor:pointer; font-family:inherit; font-weight:700; }
 .candchip .fit{ color:var(--sub); font-size:.8em; font-weight:400; margin-left:4px; }
 .candchip.sel{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
 .candchip.sel .fit{ color:#5a4512; }
-.fbsel{ font-size:.9em; margin-top:9px; color:var(--sub); }
+.fbsel{ font-size:.9em; margin-top:9px; color:var(--sub); height:22px; line-height:22px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 .fbsel b{ color:#d8a24a; font-size:1.05em; }
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:2px 0; margin:2px 0 8px; scrollbar-width:none; touch-action:pan-x; }
 .secchips::-webkit-scrollbar{ display:none; }
@@ -386,7 +391,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.20';
+const APP_VERSION='3.21';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1068,7 +1073,7 @@ function lev(a,b){
 }
 function artistSearchText(a){ return a[1]+' '+((ALIASES[a[0]]||[]).join(' '))+' '+a[3].join(' ')+' '+(a[5]||''); }
 function findArtistByName(name){ return allArtists().find(a=>a[1]===name) || null; }
-function closeDetail(){ const s=$('dsheet'); if(s){ s.classList.remove('on'); s.style.background=''; } document.body.style.overflow=''; const c=$('dcard'); if(c){ c.style.transform=''; c.style.transition=''; } }
+function closeDetail(){ const s=$('dsheet'); if(s){ s.classList.remove('on'); s.style.background=''; } document.body.style.overflow=''; const c=$('dcard'); if(c){ c.style.transform=''; c.style.transition=''; c.classList.remove('fbstable'); } }
 function openSheet(h){ $('dcard').innerHTML=h; $('dsheet').classList.add('on'); document.body.style.overflow='hidden'; $('dcard').scrollTop=0; }
 function openArtist(id){
   const a=allArtists().find(x=>x[0]===id); if(!a) return;
@@ -1279,6 +1284,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.21','2026-11-28','指板入力のときに画面が動かないようにした'],
  ['3.20','2026-11-28','編集モードでコードを削除できるようにした。譜面の行間を広げて、コードと歌詞の組が分かるようにした'],
  ['3.19','2026-11-28','『世界は広いよ』はカポなしで開くようにした'],
  ['3.18','2026-11-28','編集モードでコード追加と指板入力（コード名の自動判定）、コード逆引きページを追加'],
@@ -1824,7 +1830,7 @@ function renderRevChord(){
   let h='<div class="songroot">';
   h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
     +'<div class="stitle-main"><span class="stitle">コード逆引き</span></div></div></div>';
-  h+='<div class="guidewrap" id="revWrap">';
+  h+='<div class="guidewrap fbstable-wrap" id="revWrap">';
   h+='<div class="gnote">指板をタップして押さえ方を作ると、コード名の候補が適合度順に出ます。左端のボタンで開放（○）とミュート（×）を切り替えます。分かる弦だけでも大丈夫です。候補をタップすると大きな図で確認できます。</div>';
   h+='<div id="rcBoard"></div><div class="fbnotes" id="rcNotes"></div><div class="fbcands" id="rcCands"></div>';
   h+='<div style="margin-top:10px"><button class="btn small" onclick="fbClear(\'rc\')">クリア</button></div>';
@@ -1837,14 +1843,16 @@ function renderRevChord(){
 }
 function renderRevResult(){
   const box=$('rcResult'); if(!box) return;
+  const scrollSnap=(typeof fbScrollSnapshot==='function')? fbScrollSnapshot() : null;
   const sess=fbSessions.rc;
-  if(!sess || !sess.sel){ box.innerHTML=''; return; }
+  if(!sess || !sess.sel){ box.innerHTML=''; if(scrollSnap) fbRestoreScroll(scrollSnap); return; }
   const notes=chordNotesOf(sess.sel);
   box.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;padding-top:14px">'
     +'<div class="drilldiag">'+diagramSVG(sess.sel,{scale:3})+'</div>'
     +'<div class="drillname">'+esc(sess.sel)+'</div>'
     +(notes.length? '<div class="fbnotes" style="text-align:center">構成音：<b>'+notes.join('・')+'</b></div>':'')
     +'</div>';
+  if(scrollSnap) fbRestoreScroll(scrollSnap);
 }
 function dispChord(orig){
   // annotated tokens (v3.18): transpose only the name part; the annotation is physical
@@ -2085,8 +2093,37 @@ function fbBoardHTML(id, sess){
   }
   return '<div class="fretboard">'+hd+rows+'</div>';
 }
+/* Rebuilding the board replaces the tapped button itself; without restoring the
+   surrounding scrollers, the browser can jump the sheet/page between taps (v3.21). */
+function fbScrollSnapshot(){
+  const snap={card:null, rev:null, doc:null, body:null, boards:{}};
+  const card=$('dcard'); if(card) snap.card=card.scrollTop;
+  const rev=$('revWrap'); if(rev) snap.rev=rev.scrollTop;
+  if(document.documentElement) snap.doc=document.documentElement.scrollTop;
+  if(document.body) snap.body=document.body.scrollTop;
+  ['ce','rc'].forEach(id=>{
+    const box=$(id+'Board');
+    const board=box && box.querySelector? box.querySelector('.fretboard') : null;
+    if(board) snap.boards[id]=board.scrollLeft;
+  });
+  return snap;
+}
+function fbRestoreScroll(snap){
+  if(!snap) return;
+  ['ce','rc'].forEach(id=>{
+    if(!(id in snap.boards)) return;
+    const box=$(id+'Board');
+    const board=box && box.querySelector? box.querySelector('.fretboard') : null;
+    if(board) board.scrollLeft=snap.boards[id];
+  });
+  const rev=$('revWrap'); if(rev && snap.rev!=null) rev.scrollTop=snap.rev;
+  const card=$('dcard'); if(card && snap.card!=null) card.scrollTop=snap.card;
+  if(document.documentElement && snap.doc!=null) document.documentElement.scrollTop=snap.doc;
+  if(document.body && snap.body!=null) document.body.scrollTop=snap.body;
+}
 function fbRender(id){
   const sess=fbSessions[id]; if(!sess) return;
+  const scrollSnap=fbScrollSnapshot();
   const b=$(id+'Board'); if(b) b.innerHTML=fbBoardHTML(id, sess);
   const info=fbPitchInfo(sess);
   const n=$(id+'Notes');
@@ -2103,6 +2140,7 @@ function fbRender(id){
   }
   const sn=$(id+'Sel');
   if(sn) sn.innerHTML='選択中：'+(sess.sel? '<b>'+esc(sess.sel)+'</b>' : '候補をタップしてください');
+  fbRestoreScroll(scrollSnap);
 }
 function fbTap(id, strIdx, fret){
   const sess=fbSessions[id]; if(!sess) return;
@@ -2152,6 +2190,7 @@ function chordEditTab(t){
   if(b) b.style.display=(t==='board')? '' : 'none';
   if(bn) bn.classList.toggle('on', t==='name');
   if(bb) bb.classList.toggle('on', t==='board');
+  const card=$('dcard'); if(card) card.classList.toggle('fbstable', t==='board');
   if(t==='board') fbRender('ce');
 }
 function openChordEditor(ctx){
@@ -2213,6 +2252,7 @@ function openChordEditor(ctx){
   }
   chordEditCtx=ctx;
   openSheet(h);
+  const card=$('dcard'); if(card) card.classList.remove('fbstable');
   fbRender('ce');
 }
 function chordEditPreview(){
