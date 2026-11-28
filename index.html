@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.5">
+<meta name="app-version" content="3.6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -288,7 +288,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.5';
+const APP_VERSION='3.6';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1180,6 +1180,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.6','2026-11-28','自動スクロールとセクション移動がiPhoneで動かない問題を修正（スクロール位置の管理方法を変更）'],
  ['3.5','2026-11-28','コード譜の表示を詰めて見やすくした（図と文字を少し小さくし、1行に複数のコードが流れるU-FRET式の密度に）。曲画面ではアプリのヘッダーも隠れ、譜面が画面のほぼ全体を占める形にした。設定は普段は隠れ、必要な時だけ「設定」で開く形にした。同期表示はタイトル横のドットだけにした（同期バー廃止）。実効表示とメトロノームボタンを外してツールバーをすっきりさせた。自動スクロールは譜面をタップして開始／停止する形に変更。「調整」パネルを廃止し、自分の曲の編集・削除は曲一覧のカードへ移した。下の余白も詰めた。歌詞つきデータが同期で消えないよう保持方法も改善'],
  ['3.4','2026-11-28','曲画面のレイアウトを変更：白い譜面が画面の大部分を占める形にし、設定は上部に2行のツールバーへ圧縮。速度・文字サイズ・歌詞ボタンは「調整」の中に収納。曲画面では譜面の枠内だけがスクロールし、画面全体は固定されるようにした。内蔵曲に歌詞つきデータがある場合は、コードと歌詞をU-FRET式に一体表示'],
  ['3.3','2026-11-28','コードの押さえ方図を90度反時計回りに回転し、横向き（ナットが左、高い弦が上）に変更して見やすくした'],
@@ -1454,7 +1455,7 @@ let drillState={idx:0, shown:1, ok:0, ng:0, easy:false, auto:false, autoSec:8, t
 let tunerState={stream:null, raf:null, ctx:null, analyser:null, running:false, lastUpd:0, refCtx:null};
 function effectiveBpm(){ return Math.max(1, Math.round(playState.bpm*(playState.speedPct||100)/100)); }
 function effectiveScrollSpeed(){ return playState.scrollSpeed*(playState.speedPct||100)/100; }
-let metroTimer=null, metroBeat=0, metroCtx=null, scrollRaf=null, scrollLast=0;
+let metroTimer=null, metroBeat=0, metroCtx=null, scrollRaf=null, scrollLast=0, scrollPos=null;
 function allPlaySongs(){
   const out=[];
   BUILTIN_SONGS.forEach(s=>out.push(Object.assign({}, s, {builtin:true})));
@@ -1640,7 +1641,7 @@ function renderSong(){
   h+='</div></div>';
   el.innerHTML=h;
 }
-function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTo({top:Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6), behavior:'smooth'}); }
+function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
 function playAdjTranspose(d){ playState.transpose=Math.max(-6, Math.min(6, playState.transpose+d)); renderSong(); }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
 function playToggleEasy(){ playState.easy=!playState.easy; renderSong(); }
@@ -1675,26 +1676,29 @@ function scrollStep(ts){
   if(!playState.scrolling) return;
   const wrap=$('sheetWrap');
   if(!wrap){ stopScroll(); return; }
-  if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); wrap.scrollTop += effectiveScrollSpeed()*dt; }
+  if(scrollPos==null) scrollPos=wrap.scrollTop;
+  if(scrollLast){ const dt=Math.min(0.1,(ts-scrollLast)/1000); scrollPos += effectiveScrollSpeed()*dt; }
   scrollLast=ts;
   if(playState.loopSec>=0){
     const secEl=$('psec-'+playState.loopSec);
     if(secEl){
       const wr=wrap.getBoundingClientRect(), r=secEl.getBoundingClientRect();
-      const secTop=wrap.scrollTop + (r.top - wr.top);
+      const secTop=scrollPos + (r.top - wr.top);
       const secBottom=secTop + secEl.offsetHeight;
-      if(secBottom <= wrap.scrollTop + wrap.clientHeight/2 + 1){
-        wrap.scrollTop=Math.max(0, secTop - 4);
+      if(secBottom <= scrollPos + wrap.clientHeight/2 + 1){
+        scrollPos=Math.max(0, secTop - 4);
+        wrap.scrollTop=scrollPos;
         scrollRaf=requestAnimationFrame(scrollStep);
         return;
       }
     }
   }
-  if(wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 4){ stopScroll(); return; }
+  wrap.scrollTop=scrollPos;
+  if(scrollPos + wrap.clientHeight >= wrap.scrollHeight - 4){ stopScroll(); return; }
   scrollRaf=requestAnimationFrame(scrollStep);
 }
-function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; scrollRaf=requestAnimationFrame(scrollStep); const bd=$('scrollBadge'); if(bd) bd.classList.remove('off'); }
-function stopScroll(){ playState.scrolling=false; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const bd=$('scrollBadge'); if(bd) bd.classList.add('off'); }
+function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; const wrap=$('sheetWrap'); scrollPos=wrap? wrap.scrollTop : 0; scrollRaf=requestAnimationFrame(scrollStep); const bd=$('scrollBadge'); if(bd) bd.classList.remove('off'); }
+function stopScroll(){ playState.scrolling=false; scrollPos=null; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const bd=$('scrollBadge'); if(bd) bd.classList.add('off'); }
 function toggleScroll(){ if(playState.scrolling) stopScroll(); else startScroll(); }
 function stopPlayFx(){ try{ stopMetro(); }catch(e){} try{ stopScroll(); }catch(e){} try{ stopDrillAuto(); }catch(e){} try{ stopTuner(); }catch(e){} try{ unlockSongOverlay(); }catch(e){} }
 /* editor */
