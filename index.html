@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.7">
+<meta name="app-version" content="3.8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -19,9 +19,7 @@ header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backd
 h1{ font-size:1.06em; margin:0; letter-spacing:.14em; font-weight:700; }
 h1 .en{ color:var(--acc); font-size:.72em; letter-spacing:.22em; margin-left:8px; }
 /* sync dot in title line: 9px visual, ~29px hit area via padding + background-clip */
-#syncdot{ display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--acc); vertical-align:middle; margin:-10px -10px -10px -2px; padding:10px; background-clip:content-box; cursor:pointer; }
-#syncdot.err{ animation:syncpulse 1.1s ease-in-out infinite; }
-@keyframes syncpulse{ 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.35); opacity:.55; } }
+#syncdot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-left:3px; background:#e5484d; vertical-align:2px; flex:none; cursor:pointer; }
 main{ padding:12px 14px 0; max-width:640px; margin:0 auto; }
 .view{ display:none; touch-action:pan-y; }
 .view.on{ display:block; }
@@ -288,7 +286,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.7';
+const APP_VERSION='3.8';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1180,6 +1178,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.8','2026-11-28','設定はカポ・かんたん・スクロール速度のバーだけに絞った。同期ドットは作家図鑑と同じ大きさ・位置に揃えた'],
  ['3.7','2026-11-28','譜面を端までスクロールした時のバウンス（跳ね返り）を止め、端でピタッと止まるようにした'],
  ['3.6','2026-11-28','自動スクロールとセクション移動がiPhoneで動かない問題を修正（スクロール位置の管理方法を変更）'],
  ['3.5','2026-11-28','コード譜の表示を詰めて見やすくした（図と文字を少し小さくし、1行に複数のコードが流れるU-FRET式の密度に）。曲画面ではアプリのヘッダーも隠れ、譜面が画面のほぼ全体を占める形にした。設定は普段は隠れ、必要な時だけ「設定」で開く形にした。同期表示はタイトル横のドットだけにした（同期バー廃止）。実効表示とメトロノームボタンを外してツールバーをすっきりさせた。自動スクロールは譜面をタップして開始／停止する形に変更。「調整」パネルを廃止し、自分の曲の編集・削除は曲一覧のカードへ移した。下の余白も詰めた。歌詞つきデータが同期で消えないよう保持方法も改善'],
@@ -1588,12 +1587,9 @@ function renderSong(){
   if(playState.showCtl){
     h+='<div class="pctl" id="ctlBar">'
       +'<div class="prow">'
-      +'<div class="pstep"><span>移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="pv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
       +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
       +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
-      +'<div class="pstep"><span>BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="pv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
-      +'<span class="pdiv"></span>'
-      +[50,75,100,125].map(pct=>'<button class="ppill pspd speedchip'+(playState.speedPct===pct?' on':'')+'" data-pct="'+pct+'" onclick="playSetSpeed('+pct+')">'+pct+'%</button>').join('')
+      +'<span style="font-size:.78em;color:var(--sub);flex:none">スクロール</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" style="flex:1;min-width:120px" oninput="playSetScrollSpeed(this.value)">'
       +'</div></div>';
   }
   if(secs.some(s=>s.name)){
@@ -1644,14 +1640,11 @@ function renderSong(){
   el.innerHTML=h;
 }
 function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
-function playAdjTranspose(d){ playState.transpose=Math.max(-6, Math.min(6, playState.transpose+d)); renderSong(); }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
 function playToggleEasy(){ playState.easy=!playState.easy; renderSong(); }
 function playSetFont(v){ playState.font=+v; const sh=$('playSheet'); if(sh) sh.style.fontSize=(playState.font*16)+'px'; const l=$('fontLbl'); if(l) l.textContent=Math.round(playState.font*100)+'%'; }
 function playSetScrollSpeed(v){ playState.scrollSpeed=+v; const l=$('scrollSpdLbl'); if(l) l.textContent=v; }
-function playAdjBpm(d){ playState.bpm=Math.max(40, Math.min(240, playState.bpm+d)); const a=$('bpmSv'); if(a) a.textContent=playState.bpm; const b=$('bpmLbl'); if(b) b.textContent=playState.bpm; updEffBpm(); if(metroTimer){ stopMetro(); startMetro(); } }
 function updEffBpm(){ const e=effectiveBpm(); const a=$('effBpm'); if(a) a.textContent=e; const b=$('effBpmLbl'); if(b) b.textContent=e; }
-function playSetSpeed(pct){ playState.speedPct=pct; document.querySelectorAll('.speedchip').forEach(c=>c.classList.toggle('on', +c.dataset.pct===pct)); updEffBpm(); if(metroTimer){ stopMetro(); startMetro(); } }
 function playToggleLoop(i){ playState.loopSec=(playState.loopSec===i)? -1 : i; document.querySelectorAll('.loopbtn').forEach(b=>{ const on=+b.dataset.sec===playState.loopSec; b.classList.toggle('on', on); b.textContent='↻ ループ'+(on?' ON':''); }); }
 /* metronome (functional audio, independent of SOUND_MUTED / playTap) */
 function metroClick(accent){
@@ -1988,14 +1981,14 @@ function scheduleSync(){ if(!relayReady()) return; if(syncTimer) clearTimeout(sy
 function fmtTime(ts){ const d=new Date(ts); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
 function renderSyncStatus(){
   const dot=$('syncdot'); if(!dot) return;
-  let col='var(--acc)', err=false, ttl='タップで同期';
-  if(syncStatus==='error'){ col='var(--red)'; err=true; ttl='同期エラー（タップで再試行）'; }
-  else if(syncStatus==='synced'){ col='var(--green)'; ttl='同期済み '+fmtTime(lastSyncAt)+'（タップで再同期）'; }
+  let ttl='タップで同期';
+  const ok=relayReady() && syncStatus!=='error';
+  if(syncStatus==='error'){ ttl='同期エラー（タップで再試行）'; }
+  else if(syncStatus==='synced'){ ttl='同期済み '+fmtTime(lastSyncAt)+'（タップで再同期）'; }
   else if(syncStatus==='syncing'){ ttl='同期中'; }
   else if(relayReady()){ ttl='未同期（タップで同期）'; }
   else { ttl='この端末内に保存中（タップで設定へ）'; }
-  dot.style.background=col;
-  dot.classList.toggle('err', err);
+  dot.style.background=ok? '#46a758' : '#e5484d';
   dot.title=ttl;
   const vs=$('val-sync'); if(vs) vs.textContent=syncValText();
 }
