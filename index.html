@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.25">
+<meta name="app-version" content="3.26">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -181,6 +181,10 @@ select.textin{ appearance:none; }
 .lyr-line{ line-height:1.25; margin-bottom:16px; word-break:break-all; }
 .seg{ display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:bottom; }
 .seg-top{ height:64px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:60px; }
+/* seg-row (v3.26): chip and its ＋ sit in one horizontal row — ＋ immediately
+   to the RIGHT of the diagram, vertically centered on it; the name goes below. */
+.seg-row{ display:flex; flex-direction:row; align-items:center; }
+.sec-bar-left{ display:flex; align-items:center; gap:6px; min-width:0; }
 .seg-top .cname{ font-weight:800; font-size:.82em; color:#d8a24a; line-height:1.15; margin-top:1px; }
 .seg-lyr{ font-size:.95em; line-height:1.35; white-space:pre-wrap; color:#ece5d8; min-height:1.35em; }
 .seg.plain .seg-top{ min-width:0; }
@@ -301,9 +305,14 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
    bottom:121px keeps it clear of the auto-scroll badge band (fixed, bottom:89px). */
 .editfab{ position:fixed; right:26px; bottom:121px; z-index:27; width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:rgba(42,36,29,.95); color:#d8a24a; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); padding:0; font-family:inherit; }
 .editfab.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
-.ced{ cursor:pointer; }
-.ced .cname{ text-decoration:underline dashed #d8a24a; text-underline-offset:3px; }
-.ced .dgchip{ outline:1px dashed rgba(216,162,74,.7); outline-offset:1px; }
+/* edit affordances (v3.26): the ＋ buttons and dashed outlines are ALWAYS in
+   the sheet DOM; edit mode only flips .editing on #sheetWrap and CSS shows or
+   hides them. Toggling edit mode never rebuilds the sheet (a full rebuild
+   while scrolled made iOS WebKit ghost rows and lose the scroll position). */
+.sheetwrap:not(.editing) .insbtn{ display:none; }
+.sheetwrap.editing .ced{ cursor:pointer; }
+.sheetwrap.editing .ced .cname{ text-decoration:underline dashed #d8a24a; text-underline-offset:3px; }
+.sheetwrap.editing .ced .dgchip{ outline:1px dashed rgba(216,162,74,.7); outline-offset:1px; }
 /* chord insert + fretboard input + reverse lookup (v3.18) */
 .insbtn{ appearance:none; border:1px dashed rgba(216,162,74,.65); background:rgba(216,162,74,.13); color:#d8a24a; border-radius:50%; width:20px; height:20px; font-size:13px; line-height:1; cursor:pointer; padding:0; margin:0 1px; vertical-align:bottom; font-family:inherit; flex:none; align-self:center; }
 /* insmark (v3.25): temporary insertion marker shown in the sheet while the
@@ -407,7 +416,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.25';
+const APP_VERSION='3.26';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1089,7 +1098,7 @@ function lev(a,b){
 }
 function artistSearchText(a){ return a[1]+' '+((ALIASES[a[0]]||[]).join(' '))+' '+a[3].join(' ')+' '+(a[5]||''); }
 function findArtistByName(name){ return allArtists().find(a=>a[1]===name) || null; }
-function closeDetail(){ const s=$('dsheet'); if(s){ s.classList.remove('on'); s.style.background=''; } document.body.style.overflow=''; const c=$('dcard'); if(c){ c.style.transform=''; c.style.transition=''; c.classList.remove('fbstable'); } if(insMarkCtx){ insMarkCtx=null; if(typeof playState!=='undefined' && playState.mode==='song') renderSong(); } if(chordEditCtx) restoreEditScroll(); }
+function closeDetail(){ const s=$('dsheet'); if(s){ s.classList.remove('on'); s.style.background=''; } document.body.style.overflow=''; const c=$('dcard'); if(c){ c.style.transform=''; c.style.transition=''; c.classList.remove('fbstable'); } if(typeof insMarkCtx!=='undefined' && insMarkCtx){ insMarkCtx=null; hideInsMark(); } if(typeof chordEditCtx!=='undefined') chordEditCtx=null; }
 function openSheet(h){ if(typeof closeCtlPop==='function') closeCtlPop(); $('dcard').innerHTML=h; $('dsheet').classList.add('on'); document.body.style.overflow='hidden'; $('dcard').scrollTop=0; }
 function openArtist(id){
   const a=allArtists().find(x=>x[0]===id); if(!a) return;
@@ -1300,6 +1309,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.26','2026-11-29','編集しても表示と位置が崩れないようにした'],
  ['3.25','2026-11-28','設定を右側のポップアップで開くようにした'],
  ['3.24','2026-11-28','設定ボタンを譜面の上に重ねて固定した'],
  ['3.23','2026-11-28','新しい版が出たら自動で切り替わるようにした'],
@@ -1988,7 +1998,7 @@ function renderSong(){
   h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
     +'<div class="stitle-main"><span class="stitle">'+esc(song.title||'無題')+'</span>'+(song.artist? '<span class="sartist">'+esc(song.artist)+'</span>':'')+'</div>'
     +'<div class="smeta">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実効 <span id="effBpmLbl">'+effectiveBpm()+'</span> ・ 実音キー <b>'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div></div>';
-  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)" onscroll="onSheetScroll()"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  h+='<div class="sheetwrap'+(playState.chordEdit?' editing':'')+'" id="sheetWrap" onclick="sheetTap(event)" onscroll="onSheetScroll()"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
   h+='<div class="prow sheetctl" id="sheetCtl">'
     +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
     +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
@@ -2001,48 +2011,31 @@ function renderSong(){
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
   secs.forEach((sec,si)=>{
     h+='<div class="sheet-sec" id="psec-'+si+'">';
-    h+='<div class="sec-bar"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
+    /* section-start ＋ (v3.26): lives in the header row, right after the title —
+       it used to float at the far left of the first line, far from its target. */
+    let secStartIns='';
+    const firstLn=sec.lines[0];
+    if(firstLn && firstLn.type==='lyric') secStartIns='<button class="insbtn" onclick="playInsertChord(event,'+si+',0,0)" aria-label="先頭にコードを追加">＋</button>';
+    else if(firstLn && firstLn.type==='bar') secStartIns=barInsHTML(si, 0, -1, 0, '先頭にコードを追加');
+    h+='<div class="sec-bar"><span class="sec-bar-left"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span>'+secStartIns+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
     const lyrLines=(lyrMap[si]!=null? String(lyrMap[si]) : '').split('\n');
     let rowIdx=0;
     sec.lines.forEach((ln, li)=>{
       if(ln.type==='blank'){ h+='<div style="height:5px"></div>'; return; }
       if(ln.type==='bar'){
-        let row='<div class="bar-row">';
+        let row='<div class="bar-row" data-li="'+li+'">';
         const bparts=barLineTokens(ln.raw);
-        if(playState.chordEdit && li===0) row+='<button class="insbtn" onclick="playInsertChordBar(event,'+si+','+li+',-1,0)" aria-label="先頭にコードを追加">＋</button>';
         bparts.forEach((toks, pi)=>{
-          if(insMarkCtx && insMarkCtx.si===si && insMarkCtx.li===li && insMarkCtx.before===pi) row+='<span class="insmark" id="insMark"></span>';
-          toks.forEach((tok, ti)=>{
-            const cd=chordDiagram(tok, 44), dc=cd.name;
-            const cell='<span class="dgchip">'+cd.svg+'</span><div class="cname">'+esc(dc)+((!cd.annotated && playState.easy && EASY_SHAPES[dc])?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div>';
-            row+= playState.chordEdit
-              ? '<div class="bar-cell ced" onclick="playEditChordBar(event,'+si+','+li+','+pi+','+ti+')">'+cell+'</div>'
-              : '<div class="bar-cell">'+cell+'</div>';
-          });
-          if(playState.chordEdit) row+='<button class="insbtn" onclick="playInsertChordBar(event,'+si+','+li+','+pi+','+toks.length+')" aria-label="このセルの後にコードを追加">＋</button>';
+          toks.forEach((tok, ti)=>{ row+=barCellHTML(si, li, pi, ti, tok); });
+          row+=barInsHTML(si, li, pi, toks.length, 'このセルの後にコードを追加');
         });
-        if(insMarkCtx && insMarkCtx.si===si && insMarkCtx.li===li && insMarkCtx.before===bparts.length) row+='<span class="insmark" id="insMark"></span>';
         row+='</div>'; h+=row;
         if(song.builtin && !aligned){ const lt=(lyrLines[rowIdx]||'').trim(); if(lt) h+='<div class="sheet-lyr">'+esc(lt)+'</div>'; }
         rowIdx++;
         return;
       }
-      let lh='<div class="lyr-line">';
-      if(playState.chordEdit && li===0) lh+='<button class="insbtn" onclick="playInsertChord(event,'+si+','+li+',0)" aria-label="先頭にコードを追加">＋</button>';
-      (ln.segs||[]).forEach((sg, sgi)=>{
-        if(insMarkCtx && insMarkCtx.si===si && insMarkCtx.li===li && insMarkCtx.before===sgi) lh+='<span class="insmark" id="insMark"></span>';
-        if(sg.chord){
-          const cd=chordDiagram(sg.chord, 48), dc=cd.name;
-          const ins=playState.chordEdit? '<button class="insbtn" onclick="playInsertChord(event,'+si+','+li+','+(sgi+1)+')" aria-label="'+esc(dc)+'の後にコードを追加">＋</button>' : '';
-          const top='<span class="dgchip">'+cd.svg+'</span>'+ins+'<span class="cname">'+esc(dc)+'</span>';
-          lh+= playState.chordEdit
-            ? '<span class="seg"><span class="seg-top ced" onclick="playEditChord(event,'+si+','+li+','+sgi+')">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>'
-            : '<span class="seg"><span class="seg-top">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
-        }else{
-          lh+='<span class="seg plain"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
-        }
-      });
-      if(insMarkCtx && insMarkCtx.si===si && insMarkCtx.li===li && insMarkCtx.before===(ln.segs||[]).length) lh+='<span class="insmark" id="insMark"></span>';
+      let lh='<div class="lyr-line" data-li="'+li+'">';
+      (ln.segs||[]).forEach((sg, sgi)=>{ lh+=segHTML(si, li, sgi, sg); });
       lh+='</div>'; h+=lh;
     });
     if(song.builtin && !aligned){ for(let k=rowIdx;k<lyrLines.length;k++){ const lt=(lyrLines[k]||'').trim(); if(lt) h+='<div class="sheet-lyr">'+esc(lt)+'</div>'; } }
@@ -2060,11 +2053,10 @@ function renderSong(){
     +'<div class="ctlpop-row"><span class="ctlpop-lbl">スクロール</span><input type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" oninput="playSetScrollSpeed(this.value)"></div>'
     +'</div>';
   h+='</div>';
-  const prevWrap=$('sheetWrap'); const prevScroll=prevWrap? prevWrap.scrollTop : null;
   el.innerHTML=h;
-  if(prevScroll!=null){ const nw=$('sheetWrap'); if(nw) nw.scrollTop=prevScroll; }
   onSheetScroll();
   if(window.requestAnimationFrame) requestAnimationFrame(layoutSheetWrap); else layoutSheetWrap();
+  if(insMarkCtx) showInsMark();
 }
 function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
@@ -2077,20 +2069,198 @@ function playToggleLoop(i){ playState.loopSec=(playState.loopSec===i)? -1 : i; d
    The user edits what he sees: the panel works in DISPLAYED chord names (after capo/transpose);
    on apply the name is converted back to the stored (sounding) name before saving. */
 let chordEditCtx=null;
-/* insMarkCtx (v3.25): where the add-chord panel will land — {si, li, before}
-   (segment index for lyric lines, cell index for bar lines). renderSong draws
-   the .insmark slot there while the panel is open; cleared when it closes. */
+/* insMarkCtx (v3.25, local-DOM since v3.26): where the add-chord panel will
+   land — {si, li, before, bar} (segment index for lyric lines, cell-group
+   index for bar lines). The .insmark slot is a real element inserted into /
+   removed from the sheet DOM by showInsMark/hideInsMark; no re-render. */
 let insMarkCtx=null;
-/* editScroll (v3.25): snapshot the sheet scroll when the chord editor opens
-   and restore it when the panel closes / after the post-edit re-render, so
-   save, cancel, add and delete land back where the user was editing. */
-let editScrollSnap=null;
-function snapEditScroll(){ const w=$('sheetWrap'); editScrollSnap=w? w.scrollTop : null; }
-function restoreEditScroll(){ if(editScrollSnap==null) return; const w=$('sheetWrap'); if(w) w.scrollTop=editScrollSnap; editScrollSnap=null; }
+/* ============ sheet segment builders + local DOM patching (v3.26) ============
+   renderSong and the edit flows share these builders, so a locally patched
+   node is byte-identical to what a full render would produce. Edit save /
+   add / delete patch ONLY the affected segment or bar-cell node in place:
+   the rest of the sheet DOM (and the scroll position) is never touched.
+   iOS WebKit ghosts/duplicates painted rows when #sheetWrap's innerHTML is
+   rebuilt while scrolled, which is why the full rebuild had to go. */
+function segHTML(si, li, sgi, sg){
+  if(!sg.chord) return '<span class="seg plain" data-idx="'+sgi+'"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+  const cd=chordDiagram(sg.chord, 48), dc=cd.name;
+  const ins='<button class="insbtn" onclick="playInsertChord(event,'+si+','+li+','+(sgi+1)+')" aria-label="'+esc(dc)+'の後にコードを追加">＋</button>';
+  const top='<span class="seg-row"><span class="dgchip">'+cd.svg+'</span>'+ins+'</span><span class="cname">'+esc(dc)+'</span>';
+  return '<span class="seg" data-idx="'+sgi+'"><span class="seg-top ced" onclick="playEditChord(event,'+si+','+li+','+sgi+')">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+}
+function barCellHTML(si, li, pi, ti, tok){
+  const cd=chordDiagram(tok, 44), dc=cd.name;
+  const cell='<span class="dgchip">'+cd.svg+'</span><div class="cname">'+esc(dc)+((!cd.annotated && playState.easy && EASY_SHAPES[dc])?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div>';
+  return '<div class="bar-cell ced" data-pi="'+pi+'" data-ti="'+ti+'" onclick="playEditChordBar(event,'+si+','+li+','+pi+','+ti+')">'+cell+'</div>';
+}
+function barInsHTML(si, li, pi, ti, label){
+  return '<button class="insbtn" data-pi="'+pi+'" onclick="playInsertChordBar(event,'+si+','+li+','+pi+','+ti+')" aria-label="'+label+'">＋</button>';
+}
+function elFromHTML(html){
+  const t=document.createElement('div');
+  t.innerHTML=html;
+  return t.firstElementChild || t.firstChild;
+}
+function sheetLineEl(si, li, cls){
+  const sec=$('psec-'+si); if(!sec) return null;
+  const kids=sec.children;
+  for(let i=0;i<kids.length;i++){
+    const k=kids[i];
+    if(k.classList && k.classList.contains(cls) && k.getAttribute && k.getAttribute('data-li')===String(li)) return k;
+  }
+  return null;
+}
+function segEls(line){
+  const out=[], kids=line.children;
+  for(let i=0;i<kids.length;i++) if(kids[i].classList && kids[i].classList.contains('seg')) out.push(kids[i]);
+  return out;
+}
+function cellEls(row){
+  const out=[], kids=row.children;
+  for(let i=0;i<kids.length;i++) if(kids[i].classList && kids[i].classList.contains('bar-cell')) out.push(kids[i]);
+  return out;
+}
+/* After a local insert/delete the positional indices baked into the onclick
+   attributes of the following siblings shift; rewrite them for one line. */
+function renumberLyricLine(line, si, li){
+  segEls(line).forEach((segEl, i)=>{
+    segEl.setAttribute('data-idx', i);
+    const top=segEl.querySelector('.seg-top');
+    if(top && top.getAttribute('onclick')) top.setAttribute('onclick', 'playEditChord(event,'+si+','+li+','+i+')');
+    const ins=segEl.querySelector('.insbtn');
+    if(ins) ins.setAttribute('onclick', 'playInsertChord(event,'+si+','+li+','+(i+1)+')');
+  });
+}
+function renumberBarRow(row, si, li){
+  let pi=-1, ti=0, lastPi=null;
+  const kids=row.children;
+  for(let i=0;i<kids.length;i++){
+    const el=kids[i];
+    if(!el.classList) continue;
+    if(el.classList.contains('bar-cell')){
+      const cur=el.getAttribute('data-pi');
+      if(cur!==lastPi){ pi++; ti=0; lastPi=cur; }
+      el.setAttribute('data-pi', pi); el.setAttribute('data-ti', ti);
+      el.setAttribute('onclick', 'playEditChordBar(event,'+si+','+li+','+pi+','+ti+')');
+      ti++;
+    }else if(el.classList.contains('insbtn')){
+      if(el.getAttribute('data-pi')==='-1'){
+        el.setAttribute('onclick', 'playInsertChordBar(event,'+si+','+li+',-1,0)');
+      }else{
+        el.setAttribute('data-pi', pi);
+        el.setAttribute('onclick', 'playInsertChordBar(event,'+si+','+li+','+pi+','+ti+')');
+      }
+    }
+  }
+}
+function showInsMark(){
+  hideInsMark();
+  if(!insMarkCtx) return;
+  const mk=document.createElement('span');
+  mk.className='insmark'; mk.id='insMark';
+  if(insMarkCtx.bar){
+    const row=sheetLineEl(insMarkCtx.si, insMarkCtx.li, 'bar-row'); if(!row) return;
+    const cells=cellEls(row);
+    let ref=null;
+    for(let i=0;i<cells.length;i++){ if(+cells[i].getAttribute('data-pi')===insMarkCtx.before){ ref=cells[i]; break; } }
+    if(ref) row.insertBefore(mk, ref); else row.appendChild(mk);
+  }else{
+    const line=sheetLineEl(insMarkCtx.si, insMarkCtx.li, 'lyr-line'); if(!line) return;
+    const segs=segEls(line);
+    if(insMarkCtx.before<segs.length) line.insertBefore(mk, segs[insMarkCtx.before]); else line.appendChild(mk);
+  }
+}
+function hideInsMark(){
+  const mk=$('insMark');
+  if(mk && mk.parentNode) mk.parentNode.removeChild(mk);
+}
+/* Patch the sheet DOM after a chord edit / insert (data already persisted).
+   Falls back to a full renderSong only if the expected node is not found. */
+function patchSheetForEdit(ctx){
+  const sec=ctx.sections[ctx.si]; if(!sec) { renderSong(); return; }
+  const ln=sec.lines[ctx.li]; if(!ln) { renderSong(); return; }
+  if(ctx.kind==='seg' || ctx.kind==='ins-seg'){
+    const line=sheetLineEl(ctx.si, ctx.li, 'lyr-line'); if(!line){ renderSong(); return; }
+    if(ctx.kind==='seg'){
+      const old=segEls(line)[ctx.idx];
+      if(!old || !ln.segs || !ln.segs[ctx.idx]){ renderSong(); return; }
+      line.replaceChild(elFromHTML(segHTML(ctx.si, ctx.li, ctx.idx, ln.segs[ctx.idx])), old);
+    }else{
+      if(!ln.segs || !ln.segs[ctx.at]){ renderSong(); return; }
+      const nn=elFromHTML(segHTML(ctx.si, ctx.li, ctx.at, ln.segs[ctx.at]));
+      const segs=segEls(line);
+      if(ctx.at<segs.length) line.insertBefore(nn, segs[ctx.at]); else line.appendChild(nn);
+      renumberLyricLine(line, ctx.si, ctx.li);
+    }
+    return;
+  }
+  const row=sheetLineEl(ctx.si, ctx.li, 'bar-row'); if(!row){ renderSong(); return; }
+  const parts=barLineTokens(ln.raw);
+  if(ctx.kind==='bar'){
+    const cells=cellEls(row);
+    let old=null;
+    for(let i=0;i<cells.length;i++){
+      if(+cells[i].getAttribute('data-pi')===ctx.pi && +cells[i].getAttribute('data-ti')===ctx.ti){ old=cells[i]; break; }
+    }
+    if(!old || !parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null){ renderSong(); return; }
+    row.replaceChild(elFromHTML(barCellHTML(ctx.si, ctx.li, ctx.pi, ctx.ti, parts[ctx.pi][ctx.ti])), old);
+  }else if(ctx.kind==='ins-bar'){
+    const g=ctx.pi+1;
+    if(!parts[g] || !parts[g].length){ renderSong(); return; }
+    const nn=elFromHTML(barCellHTML(ctx.si, ctx.li, 'new', 0, parts[g][0]));
+    const ins=elFromHTML(barInsHTML(ctx.si, ctx.li, 'new', 1, 'このセルの後にコードを追加'));
+    let ref=null;
+    if(ctx.pi<0){
+      const cells=cellEls(row); ref=cells.length? cells[0] : null;
+    }else{
+      const kids=row.children;
+      let anchorFound=false;
+      for(let i=0;i<kids.length;i++){
+        if(kids[i].classList && kids[i].classList.contains('insbtn') && kids[i].getAttribute('data-pi')===String(ctx.pi)){ ref=kids[i].nextElementSibling; anchorFound=true; break; }
+      }
+      if(!anchorFound){ renderSong(); return; }
+    }
+    if(ref){ row.insertBefore(nn, ref); row.insertBefore(ins, ref); }
+    else{ row.appendChild(nn); row.appendChild(ins); }
+    renumberBarRow(row, ctx.si, ctx.li);
+  }
+}
+/* Patch the sheet DOM after a chord delete (data already persisted). */
+function patchSheetForDelete(ctx){
+  const sec=ctx.sections[ctx.si]; if(!sec) { renderSong(); return; }
+  const ln=sec.lines[ctx.li]; if(!ln) { renderSong(); return; }
+  if(ctx.kind==='seg'){
+    const line=sheetLineEl(ctx.si, ctx.li, 'lyr-line'); if(!line){ renderSong(); return; }
+    const old=segEls(line)[ctx.idx];
+    if(!old || !ln.segs || !ln.segs[ctx.idx]){ renderSong(); return; }
+    line.replaceChild(elFromHTML(segHTML(ctx.si, ctx.li, ctx.idx, ln.segs[ctx.idx])), old);
+    return;
+  }
+  if(ctx.kind==='bar'){
+    const row=sheetLineEl(ctx.si, ctx.li, 'bar-row'); if(!row){ renderSong(); return; }
+    const cells=cellEls(row);
+    let old=null;
+    for(let i=0;i<cells.length;i++){
+      if(+cells[i].getAttribute('data-pi')===ctx.pi && +cells[i].getAttribute('data-ti')===ctx.ti){ old=cells[i]; break; }
+    }
+    if(!old){ renderSong(); return; }
+    const groupLeft=cellEls(row).some(c=>c!==old && +c.getAttribute('data-pi')===ctx.pi);
+    row.removeChild(old);
+    if(!groupLeft){
+      /* the emptied cell group goes away together with its trailing ＋ */
+      const kids=row.children;
+      for(let i=0;i<kids.length;i++){
+        if(kids[i].classList && kids[i].classList.contains('insbtn') && kids[i].getAttribute('data-pi')===String(ctx.pi)){ row.removeChild(kids[i]); break; }
+      }
+    }
+    renumberBarRow(row, ctx.si, ctx.li);
+  }
+}
 function playToggleChordEdit(){
   playState.chordEdit=!playState.chordEdit;
   if(playState.chordEdit) stopScroll();
-  renderSong();
+  const w=$('sheetWrap'); if(w) w.classList.toggle('editing', playState.chordEdit);
+  const f=$('editFab'); if(f) f.classList.toggle('on', playState.chordEdit);
 }
 function songHasOverride(id){
   const m=(data.songMeta||{})[id]; if(!m) return false;
@@ -2239,10 +2409,10 @@ function fbInitFromFrets(sess, frets){
     sess.strings[i]=(f==null || f<0)? 'x' : (f===0)? 'o' : f;
   }
 }
-function playEditChord(e, si, li, idx){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'seg', si:si, li:li, idx:idx}); }
-function playEditChordBar(e, si, li, pi, ti){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'bar', si:si, li:li, pi:pi, ti:ti}); }
-function playInsertChord(e, si, li, at){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'ins-seg', si:si, li:li, at:at}); }
-function playInsertChordBar(e, si, li, pi, ti){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'ins-bar', si:si, li:li, pi:pi, ti:ti}); }
+function playEditChord(e, si, li, idx){ if(!playState.chordEdit) return; if(e && e.stopPropagation) e.stopPropagation(); openChordEditor({kind:'seg', si:si, li:li, idx:idx}); }
+function playEditChordBar(e, si, li, pi, ti){ if(!playState.chordEdit) return; if(e && e.stopPropagation) e.stopPropagation(); openChordEditor({kind:'bar', si:si, li:li, pi:pi, ti:ti}); }
+function playInsertChord(e, si, li, at){ if(!playState.chordEdit) return; if(e && e.stopPropagation) e.stopPropagation(); openChordEditor({kind:'ins-seg', si:si, li:li, at:at}); }
+function playInsertChordBar(e, si, li, pi, ti){ if(!playState.chordEdit) return; if(e && e.stopPropagation) e.stopPropagation(); openChordEditor({kind:'ins-bar', si:si, li:li, pi:pi, ti:ti}); }
 function chordEditTab(t){
   if(!chordEditCtx) return;
   chordEditCtx.tab=t;
@@ -2256,7 +2426,6 @@ function chordEditTab(t){
 }
 function openChordEditor(ctx){
   const song=playSongById(playState.openId); if(!song) return;
-  snapEditScroll();
   const src=songEditSource(song);
   const sections=parseSongBody(src.text);
   const sec=sections[ctx.si]; if(!sec) return;
@@ -2279,8 +2448,8 @@ function openChordEditor(ctx){
     else if(ctx.kind==='ins-bar' && ctx.pi>=0){ const parts=barLineTokens(ln.raw); const cell=parts[ctx.pi]; if(cell && cell.length) anchor=dispChord(cell[cell.length-1]); }
     if(anchor) addTitle=anchor+' の後にコードを追加';
     else if((ctx.kind==='ins-seg' && ctx.at===0) || (ctx.kind==='ins-bar' && ctx.pi<0)) addTitle='先頭にコードを追加';
-    insMarkCtx={ si:ctx.si, li:ctx.li, before:(ctx.kind==='ins-bar'? ctx.pi+1 : ctx.at) };
-    renderSong();
+    insMarkCtx={ si:ctx.si, li:ctx.li, before:(ctx.kind==='ins-bar'? ctx.pi+1 : ctx.at), bar:(ctx.kind==='ins-bar') };
+    showInsMark();
   }
   const disp=isAdd? '' : dispChord(cur);
   const seen=[], seenSet=new Set();
@@ -2385,11 +2554,8 @@ function playApplyChordEdit(){
   else return;
   const text=serializeSongBody(ctx.sections);
   if(!persistChordEdit(ctx, text)) return;
-  chordEditCtx=null;
-  insMarkCtx=null;
   closeDetail();
-  renderSong();
-  restoreEditScroll();
+  patchSheetForEdit(ctx);
 }
 /* Chord deletion (v3.20): edit-mode only, two-step confirm on the panel button
    (first tap arms, second executes; a fresh ctx per panel open = closing or
@@ -2420,11 +2586,8 @@ function playDeleteChord(){
   else return;
   const text=serializeSongBody(ctx.sections);
   if(!persistChordEdit(ctx, text)) return;
-  chordEditCtx=null;
-  insMarkCtx=null;
   closeDetail();
-  renderSong();
-  restoreEditScroll();
+  patchSheetForDelete(ctx);
 }
 function playResetSongEdits(){
   const song=playSongById(playState.openId); if(!song || !song.builtin) return;
@@ -2432,11 +2595,10 @@ function playResetSongEdits(){
   const nm=Object.assign({}, cur); delete nm.alignedBody; delete nm.body; nm.u=Date.now();
   data.songMeta[song.id]=nm;
   saveLocal();
-  chordEditCtx=null;
-  insMarkCtx=null;
   closeDetail();
+  /* reset swaps the whole data source (override -> built-in body), so this one
+     still re-renders in full; it is not part of the edit save/add/delete flow. */
   renderSong();
-  restoreEditScroll();
 }
 /* metronome (functional audio, independent of SOUND_MUTED / playTap) */
 function metroClick(accent){
