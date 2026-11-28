@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.26">
+<meta name="app-version" content="3.27">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -393,8 +393,6 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 </header>
 <main>
   <section class="view on" id="v-rec"></section>
-  <section class="view" id="v-tl"></section>
-  <section class="view" id="v-graph"></section>
   <section class="view" id="v-art"></section>
   <section class="view" id="v-genre"></section>
   <section class="view" id="v-lib"></section>
@@ -405,8 +403,6 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="lbox" onclick="closeLbox()"><img id="lboximg" alt=""><div style="margin-top:16px;text-align:center"><div id="lboxt" style="font-weight:700;font-size:1.05em"></div><div id="lboxa" style="color:var(--sub);font-size:.88em;margin-top:3px"></div><div style="color:var(--sub);font-size:.76em;margin-top:12px">タップで閉じる</div></div></div>
 <nav id="nav">
   <button data-v="rec" class="on" onclick="go('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg><span>おすすめ</span></button>
-  <button data-v="tl" onclick="go('tl')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.1 2"/></svg><span>年表</span></button>
-  <button data-v="graph" onclick="go('graph')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>相関図</span></button>
   <button data-v="art" onclick="go('art')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>図鑑</span></button>
   <button data-v="genre" onclick="go('genre')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span>探す</span></button>
   <button data-v="lib" onclick="go('lib')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.3"/></svg><span>マイ記録</span></button>
@@ -416,7 +412,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.26';
+const APP_VERSION='3.27';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -472,7 +468,6 @@ const CATALOG=[
 ];
 const PORTRAITS={"armstrong": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Louis_Armstrong_in_Color_%28restored%29.jpg/500px-Louis_Armstrong_in_Color_%28restored%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ellington": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Duke_Ellington_-_publicity.JPG/500px-Duke_Ellington_-_publicity.JPG?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "hawkins": "https://upload.wikimedia.org/wikipedia/commons/3/33/Coleman_Hawkins.jpg", "parker": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Portrait_of_Charlie_Parker_in_1947.jpg/500px-Portrait_of_Charlie_Parker_in_1947.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "monk": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg/500px-Thelonious_Monk%2C_Minton%27s_Playhouse%2C_New_York%2C_N.Y.%2C_ca._Sept._1947_%28William_P._Gottlieb_06191%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "miles": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Miles_Davis_by_Palumbo_cropped.jpg/500px-Miles_Davis_by_Palumbo_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "mingus": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Charles_Mingus_1976_cropped.jpg/500px-Charles_Mingus_1976_cropped.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "evans": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg/500px-Bill_Evans_%281961_publicity_photo_by_Steve_Schapiro%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "coltrane": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/John_Coltrane_1963_cropped_ver2.jpg/500px-John_Coltrane_1963_cropped_ver2.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "ornette": "https://upload.wikimedia.org/wikipedia/commons/0/03/Ornette-Coleman-2008-Heidelberg-schindelbeck.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "hancock": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Herbie_Hancock_2023.jpg/500px-Herbie_Hancock_2023.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "jarrett": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Keith_Jarrett.jpg/500px-Keith_Jarrett.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "gleason": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Publicity_photo_young_Jackie_Gleason.jpg/500px-Publicity_photo_young_Jackie_Gleason.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "sinatra": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg/500px-Frank_Sinatra_%281957_studio_portrait_close-up%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "lynch": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a9/David_Lynch_%281990%29.jpg/500px-David_Lynch_%281990%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "badalamenti": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Angelo_Badalamenti_%28yearbook%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "cruise": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Julee_Cruise_%28retouch%29_%28cropped%29.jpg/500px-Julee_Cruise_%28retouch%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "walker": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Fenklup1968ScottWalker_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled", "portishead": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Portishead13b.jpg/500px-Portishead13b.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "fiona": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg/500px-Fiona_Apple_by_Sachyn_Mital_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "johnston": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg/500px-Daniel_Johnston_and_British_Sea_Power_%286935765808%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail", "buckley": "https://upload.wikimedia.org/wikipedia/en/1/13/Jeff_Buckley_by_Gahr.jpg", "young": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Lester-Young-LIFE-1944.jpg/330px-Lester-Young-LIFE-1944.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "basie": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Count_Basie_%281955_Kriegsmann_portrait_-_square_crop%29.jpg/330px-Count_Basie_%281955_Kriegsmann_portrait_-_square_crop%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "tatum": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Art_Tatum%2C_Vogue_Room_1948_%28Gottlieb%29.jpg/330px-Art_Tatum%2C_Vogue_Room_1948_%28Gottlieb%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "gillespie": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Portrait_of_Dizzy_Gillespie%2C_Famous_Door%2C_New_York%2C_N.Y.%2C_ca._June_1946_%28cropped%29.jpg/330px-Portrait_of_Dizzy_Gillespie%2C_Famous_Door%2C_New_York%2C_N.Y.%2C_ca._June_1946_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "powell": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Bud_Powell_1960.jpg/330px-Bud_Powell_1960.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "brubeck": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Dave_Brubeck_%281964%29.jpg/330px-Dave_Brubeck_%281964%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "getz": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Stan_Getz%2C_tenor_saxophonist_at_Kastrup_Airport_CPH%2C_Copenhagen_%28cropped%29.jpg/330px-Stan_Getz%2C_tenor_saxophonist_at_Kastrup_Airport_CPH%2C_Copenhagen_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "baker": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/73/Chet_Baker_%281955_portrait%29.jpg/330px-Chet_Baker_%281955_portrait%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "blakey": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Art_blakey_studio_portrait.jpg/330px-Art_blakey_studio_portrait.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "silver": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Horace_Silver_by_Dmitri_Savitski_1989.jpg/330px-Horace_Silver_by_Dmitri_Savitski_1989.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "brown": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Clifford_Brown_1956.jpg/330px-Clifford_Brown_1956.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "rollins": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Sonny_Rollins_1974_press_photo.jpg/330px-Sonny_Rollins_1974_press_photo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "cannonball": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Cannonball_Adderley_press_photo_1966.jpg/330px-Cannonball_Adderley_press_photo_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "tyner": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Mccoy_Tyner_1973_gh_%28cropped%29.jpg/330px-Mccoy_Tyner_1973_gh_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "dolphy": "https://upload.wikimedia.org/wikipedia/en/8/86/Eric_Dolphy.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled", "sunra": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Sun_Ra_%281973_publicity_photo_-_Impulse_ABC_Dunhill%29.jpg/330px-Sun_Ra_%281973_publicity_photo_-_Impulse_ABC_Dunhill%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "cecil": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Cecil_taylor_E5122329-2.jpg/330px-Cecil_taylor_E5122329-2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "alice": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/Alice_Coltrane_1972.jpg/330px-Alice_Coltrane_1972.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "pharoah": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/Pharoah_Sanders_photo.jpg/330px-Pharoah_Sanders_photo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "shorter": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Wayne-Shorter_in_Amsterdam%2C_1980.jpg/330px-Wayne-Shorter_in_Amsterdam%2C_1980.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "hubbard": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Freddie_Hubbard_1976.jpg/330px-Freddie_Hubbard_1976.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "corea": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Chick_Corea_1976.JPG/330px-Chick_Corea_1976.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "metheny": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Pat_metheny_orch2.jpg/330px-Pat_metheny_orch2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "marsalis": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Wynton_Marsalis_2009_09_13.jpg/330px-Wynton_Marsalis_2009_09_13.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "kamasi": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/POS17_%40Kristsll-397_%2836005903335%29_%28cropped%29.jpg/330px-POS17_%40Kristsll-397_%2836005903335%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "bjork": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Bjork_Orkestral_Paris_%28cropped%29.png/330px-Bjork_Orkestral_Paris_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "kate": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Kate_Bush_Hounds_of_Love_%281985_EMI_publicity_photo%29_02_%28cropped%29.jpg/330px-Kate_Bush_Hounds_of_Love_%281985_EMI_publicity_photo%29_02_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "waits": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/TomWaits-byPhilipRomano3.jpg/330px-TomWaits-byPhilipRomano3.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "nina": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Nina_Simone_-1969.jpg/330px-Nina_Simone_-1969.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "paert": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/94/Arvo_P%C3%A4rt.jpg/330px-Arvo_P%C3%A4rt.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail", "krall": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Diana_krall.jpg/330px-Diana_krall.jpg"};
 /* ================= DATA: timeline (public history) ================= */
-const ERAS=[[0,1900,"古典の蓄積","平均律から第九まで——西洋音楽の文法が固まる時代"],[1900,1945,"録音の世紀のはじまり","レコードが音楽を大衆のものにし、ジャズが生まれる"],[1945,1966,"ジャズの成熟とロックの誕生","ビバップからモード・ジャズへ。同時に新しい若者の音楽が爆発する"],[1966,1976,"ロック／ポップの黄金期","LP が芸術形式になり、音楽が文化の中心に来る"],[1976,2000,"分岐と電子化","パンク、ヒップホップ、電子音楽——ジャンルが枝分かれし続ける"],[2000,2030,"配信の時代","ネットが流通を変え、聴くという行為そのものが変わる"]];
 const TIMELINE=[
 [1722,"バッハ『平均律クラヴィーア曲集』第1巻","クラシック","全ての調を巡る鍵盤曲集。以後の西洋音楽の調性システムの土台になる。"],
 [1824,"ベートーヴェン 交響曲第9番 初演","クラシック","合唱入りの交響曲。「歓喜の歌」を擁し、古典派の到達点にしてロマン派の出発点。"],
@@ -517,110 +512,6 @@ const TIMELINE=[
 [2019,"ビリー・アイリッシュ デビュー作","ポップ","自宅録音発の音像が世界のヒットに。ベッドルーム・ポップの象徴。"]
 ];
 /* ================= DATA: graphs ================= */
-const GRAPHS={
-jazz:{ title:"ジャズ系譜図", nodes:[
-["tatum","Art Tatum",100,90,"超絶技巧のピアノ。あらゆるピアニストが影響を受けた。",""],
-["armstrong","Louis Armstrong",295,70,"ジャズの文法を作ったソロイスト。全ての起点。","hub"],
-["hawkins","Coleman Hawkins",490,90,"テナーサックスの父。独奏に物語を持ち込んだ。",""],
-["ellington","Duke Ellington",685,70,"作曲家としてのジャズ。バンドそのものが楽器。",""],
-["basie","Count Basie",880,95,"リズムの経済学。カンザスシティ・スウィングの王。",""],
-["getz","Stan Getz",115,290,"柔らかいテナー。クールとボサノヴァの橋渡し。",""],
-["monk","Thelonious Monk",290,265,"角度のある和声と間。唯一無二のピアノ。",""],
-["parker","Charlie Parker",450,235,"ビバップの革命児。速度と和声の拡張。","hub"],
-["gillespie","Dizzy Gillespie",605,210,"ビバップの共同創始者。ラテン・ジャズの導入者。",""],
-["young","Lester Young",890,250,"軽く浮くテナー。クールな感性の源流。",""],
-["powell","Bud Powell",530,340,"ビバップ・ピアノの完成者。",""],
-["baker","Chet Baker",100,450,"ウェストコーストのクール。歌うトランペット。",""],
-["brubeck","Dave Brubeck",270,415,"変拍子を大衆化した『Time Out』。",""],
-["cannonball","Cannonball Adderley",655,335,"ソウルフルなアルト。Kind of Blue の一翼。",""],
-["miles","Miles Davis",485,480,"クール→モード→電気と、転回ごとに時代を変えた中心人物。","hub"],
-["silver","Horace Silver",690,480,"ハードバップの旋律とグルーヴ。ファンキー・ジャズの父。",""],
-["rollins","Sonny Rollins",800,415,"テナーの巨人。即興の構築力。",""],
-["mingus","Charles Mingus",135,615,"作曲家としての野心とブルースの熱。",""],
-["evans","Bill Evans",320,600,"内省のピアノ。マイルスと相互に影響し合った。",""],
-["blakey","Art Blakey",840,650,"ジャズ・メッセンジャーズ。若手育成の機関。",""],
-["brown","Clifford Brown",905,555,"若くして没したトランペットの完成形。",""],
-["coltrane","John Coltrane",475,655,"探求の人。モードからフリーへ、祈りへ。","hub"],
-["shorter","Wayne Shorter",655,620,"作曲家としてのサックス。Weather Report へ。",""],
-["ornette","Ornette Coleman",120,790,"フリー・ジャズの宣言者。和声の外へ。",""],
-["tyner","McCoy Tyner",320,795,"コルトレーン・カルテットの屋台骨。四度のパワー。",""],
-["dolphy","Eric Dolphy",585,795,"アウトサイドな跳躍。アウト・ジャズの先駆。",""],
-["hancock","Herbie Hancock",700,760,"マイルス五重奏団の鍵盤。フュージョンと電子へ。",""],
-["hubbard","Freddie Hubbard",905,760,"ハードバップからモードまでを貫くトランペット。",""],
-["sunra","Sun Ra",70,880,"宇宙を名乗ったバンドリーダー。アフロフューチャリズムの源流。",""],
-["cecil","Cecil Taylor",170,940,"打楽器としてのピアノ。前衛の極北。",""],
-["metheny","Pat Metheny",300,950,"叙情的なギター。フュージョン以後の中心のひとり。",""],
-["alice","Alice Coltrane",470,945,"ハープとオルガンのスピリチュアル・ジャズ。",""],
-["pharoah","Pharoah Sanders",600,945,"咆哮するテナー。スピリチュアル・ジャズの象徴。",""],
-["jarrett","Keith Jarrett",720,905,"完全即興のソロ・ピアノ。『ケルン・コンサート』。",""],
-["corea","Chick Corea",845,880,"マイルス門下の鍵盤。Return to Forever を率いた。",""],
-["marsalis","Wynton Marsalis",915,905,"新伝統派の旗手。ジャズの制度化を進めた。",""],
-["kamasi","Kamasi Washington",520,1055,"2010年代に大編成ジャズを大衆へ戻した。",""]
-], edges:[
-["armstrong","hawkins","共演 1924–25","fact","フレッチャー・ヘンダーソン楽団で共演"],
-["armstrong","ellington","同時代の両巨頭","lineage","1920年代ジャズの二大中心。時代の対比として"],
-["ellington","tatum","同時代","lineage","作曲のエリントンと即興のテイタム、対照的な頂点"],
-["hawkins","young","テナーの二大源流","lineage","重厚なホーキンスと軽やかなヤング。以後のテナーは両者の間にある"],
-["basie","young","在籍 1936–43","fact","カウント・ベイシー楽団の花形テナーだった"],
-["tatum","parker","影響（証言あり）","lineage","パーカーはテイタムの技巧と和声から強い影響を受けたと証言が残る"],
-["parker","gillespie","共演 1945","fact","ビバップを生んだコンビ。ミントンでの実験と録音"],
-["parker","miles","共演 1945–48","fact","若きマイルスがパーカーのバンドで学んだ"],
-["parker","getz","影響（証言あり）","lineage","ゲッツはパーカーの影響を公言。クールな音色で消化した"],
-["monk","powell","影響（証言あり）","lineage","パウエルはモンクの和声をビバップ・ピアノに翻訳した"],
-["monk","miles","共演 1954","fact","『Bags' Groove』などの録音で共演"],
-["baker","miles","クールの系譜","lineage","直接の師弟ではないが、抑制の美学を共有する系譜として"],
-["miles","evans","共演 1958–61","fact","『Kind of Blue』（1959）で頂点。相互影響の関係"],
-["miles","cannonball","共演 1958–59","fact","マイルス六重奏団のアルト。『Somethin' Else』でも共演"],
-["cannonball","coltrane","共演 1959","fact","『Kind of Blue』の同じセッションに参加"],
-["miles","coltrane","在籍 1955–61","fact","第一期クインテット／セクステットの中核"],
-["miles","hancock","在籍 1963–68","fact","第二期クインテット（黄金の五重奏団）の鍵盤"],
-["miles","shorter","在籍 1964–70","fact","第二期クインテットの作曲の中心"],
-["miles","corea","在籍 1968–70","fact","エレクトリック期の鍵盤。『Bitches Brew』に参加"],
-["miles","jarrett","在籍 1970–71","fact","エレクトリック・バンドでオルガン／ピアノを担当"],
-["evans","jarrett","系譜","lineage","内省的なピアノの系譜として批評で結ばれる"],
-["mingus","ellington","共演 1962","fact","『Money Jungle』でエリントンとトリオ共演"],
-["mingus","dolphy","共演 1964","fact","1964年の欧州ツアーと録音で共演"],
-["mingus","miles","同時代の対極","lineage","作曲家型のミンガスと演出家型のマイルス。時代の対比として"],
-["blakey","silver","共同創設 1954","fact","ジャズ・メッセンジャーズの母体を共に作った"],
-["blakey","shorter","在籍 1959–64","fact","メッセンジャーズの音楽監督を務めた"],
-["blakey","hubbard","在籍 1961–64","fact","メッセンジャーズのトランペット"],
-["blakey","marsalis","在籍 1980–82","fact","メッセンジャーズ出身。新伝統派の出発点"],
-["rollins","brown","共演 1956","fact","ブラウン＝ローチ五重奏団に在籍"],
-["coltrane","tyner","在籍 1960–65","fact","「カルテット」のピアノ。四度の響きが土台"],
-["coltrane","dolphy","共演 1961","fact","ヴィレッジ・ヴァンガード録音と『Africa/Brass』"],
-["coltrane","pharoah","共演 1965–66","fact","晩年のグループに参加。咆哮のテナーが加わった"],
-["coltrane","alice","在籍 1966–67","fact","妻。晩年のバンドでピアノ／オルガンを担当"],
-["coltrane","ornette","影響（根拠あり）","lineage","コルトレーンはオーネットに学び、交流と録音が残る"],
-["hancock","corea","バンドの後任 1968","fact","マイルス・バンドの鍵盤の椅子をハンコックから引き継いだ"],
-["ornette","metheny","共演 1985","fact","『Song X』で共演"],
-["sunra","cecil","同時代の前衛","lineage","フリー／前衛の両極として並べられる"],
-["coltrane","kamasi","影響（公言）","lineage","カマシはスピリチュアル・ジャズの継承を公言している"]
-]},world:{ title:"世界観系譜図", nodes:[
- ["gleason","Jackie Gleason",64,40,"官能の系譜の原点。絹の弦＋Hackett のトランペット。","hub"],
- ["sinatra","Frank Sinatra / Riddle",262,40,"夜の歌の編曲術。Gleason と並ぶムードの両輪。",""],
- ["lynch","David Lynch",180,130,"映像側の中心。美しさの下に間違いを埋める人。","hub"],
- ["badalamenti","Angelo Badalamenti",52,232,"Lynch の音。半分ラブテーマ、半分死のテーマ。",""],
- ["cruise","Julee Cruise",268,232,"Badalamenti の歌声。浮遊と死の気配。",""],
- ["walker","Scott Walker",64,330,"絹と不穏。Fiona と Portishead の祖先。",""],
- ["portishead","Portishead",262,330,"官能ノワールを90年代の闇で再演。",""],
- ["fiona","Fiona Apple",180,442,"現在の中心。全ノードがここへ収束する。","hub"],
- ["buckley","Jeff Buckley",40,520,"哀愁の声。Fiona と対になる存在。",""],
- ["johnston","Daniel Johnston",300,520,"粗さと存在。正しさより存在が勝つ極。",""]
-], edges:[
- ["gleason","sinatra","同時代（Capitol）","lineage","同じ Capitol のムード／ポップス市場を担った並行存在。直接の共演関係ではない（編者の整理）"],
- ["lynch","badalamenti","作曲担当 1986–","fact","『ブルーベルベット』（1986）以降、Lynch の長編ほぼ全作の音楽を担当"],
- ["badalamenti","cruise","作曲・制作 1989","fact","『Floating into the Night』の全曲を作曲・プロデュース（作詞は Lynch）"],
- ["lynch","cruise","作詞・制作","fact","『Twin Peaks』の Falling も Lynch 作詞／Badalamenti 作曲／Cruise 歌唱"],
- ["cruise","portishead","系譜（編者の読み）","lineage","事実関係ではなく、浮遊する歌声と闇の音響という共通項で結ぶ編者の系譜読み"],
- ["walker","portishead","系譜（編者の読み）","lineage","絹の弦と不穏さの系譜として接続（編者の読み）"],
- ["walker","fiona","系譜（編者の読み）","lineage","直接の影響の証言に基づく線ではない（編者の読み）"],
- ["gleason","fiona","系譜（編者の読み）","lineage","官能の系譜として結ぶ編者の読み。事実関係ではない"],
- ["portishead","fiona","系譜（編者の読み）","lineage","90年代の闇と官能を共有する核として接続（編者の読み）"],
- ["lynch","fiona","系譜（編者の読み）","lineage","『美しい表面の下に間違いがある』という構造の共通項（編者の読み）"],
- ["buckley","fiona","系譜（編者の読み）","lineage","哀愁の声の対として並置（編者の読み）"],
- ["johnston","fiona","系譜（編者の読み）","lineage","『正しさより存在が勝つ』という極の共通項（編者の読み）"]
-]}
-};
 </script>
 <script>
 /* ================= app state ================= */
@@ -629,7 +520,7 @@ const DRIVE_FILE_NAME='music.json';
 const FALLBACK_PROFILE={sen:4,une:4,mel:5,bea:5,raw:3,flo:3};
 let data=loadLocal();
 let syncStatus='disconnected', syncRunning=false, syncTimer=null, lastSyncAt=0;
-let curView='rec', curGraph='jazz', selNode=null;
+let curView='rec';
 function blankData(){ return { version:1, updatedAt:0, ratings:{}, custom:{}, criteria:null, criteriaUpdatedAt:0, artists:{}, world:{nodes:[], edges:[]}, jazz:{nodes:[], edges:[]}, songs:{}, songMeta:{} }; }
 function normalizeData(d){
   const b=blankData(); if(!d || typeof d!=='object') return b;
@@ -643,6 +534,7 @@ function normalizeData(d){
   if(d.songMeta && typeof d.songMeta==='object') b.songMeta=d.songMeta;
   if(d.world && Array.isArray(d.world.nodes) && Array.isArray(d.world.edges)) b.world={nodes:d.world.nodes, edges:d.world.edges};
   if(d.jazz && Array.isArray(d.jazz.nodes) && Array.isArray(d.jazz.edges)) b.jazz={nodes:d.jazz.nodes, edges:d.jazz.edges};
+  Object.keys(d).forEach(k=>{ if(!(k in b)) b[k]=d[k]; });
   return b;
 }
 function loadLocal(){ try{ return normalizeData(JSON.parse(storeGet(LS_DATA)||'null')); }catch(e){ return blankData(); } }
@@ -679,6 +571,7 @@ function mergeData(a,b){
   const cside=(b.criteriaUpdatedAt>a.criteriaUpdatedAt)?b:a;
   out.criteria=cside.criteria; out.criteriaUpdatedAt=Math.max(a.criteriaUpdatedAt,b.criteriaUpdatedAt);
   out.updatedAt=Math.max(a.updatedAt,b.updatedAt);
+  [...Object.keys(a),...Object.keys(b)].forEach(k=>{ if(!(k in out)) out[k]=(k in b)? b[k] : a[k]; });
   return out;
 }
 /* ================= recommendation ================= */
@@ -709,7 +602,7 @@ function setRating(id, patch){
 }
 function clearRating(id){ data.ratings[id]={s:'',stars:0,memo:'',u:Date.now(),del:true}; saveLocal(); renderRec(); renderLib(); renderSyncStatus(); }
 /* ================= views ================= */
-const VIEW_ORDER=['rec','tl','graph','art','genre','lib','play','set'];
+const VIEW_ORDER=['rec','art','genre','lib','play','set'];
 let tabHist=[];
 function go(v, isBack){
   if(typeof stopPlayFx==='function') stopPlayFx();
@@ -851,24 +744,6 @@ function saveCriteria(){
   const c={}; AXES.forEach(([k])=>{ c[k]=+($('crit-'+k)? $('crit-'+k).value : FALLBACK_PROFILE[k]); });
   data.criteria=c; data.criteriaUpdatedAt=Date.now(); saveLocal(); renderRec();
 }
-function renderTl(){
-  let h='<div class="secttl">音楽の年表</div><div class="tl">';
-  ERAS.forEach(er=>{
-    h+='<div class="tl-era">'+(er[0]===0? '〜'+(er[1]-1) : er[0]+'–'+(er[1]>=2030? '現在' : er[1]-1))+'　'+esc(er[2])+'<span>'+esc(er[3])+'</span></div>';
-    TIMELINE.filter(ev=>ev[0]>=er[0] && ev[0]<er[1]).forEach(ev=>{
-      h+='<div class="tl-ev"><div><span class="tl-year">'+ev[0]+'</span><span class="tl-title">'+esc(ev[1])+'</span></div><div class="tl-note">'+esc(ev[3])+'</div></div>';
-    });
-  });
-  h+='</div>';
-  $('v-tl').innerHTML=h;
-}
-function splitLabel(s){
-  if(s.length<=13) return [s];
-  const mid=Math.floor(s.length/2); let best=-1,bd=1e9;
-  for(let i=0;i<s.length;i++){ if(s[i]===' '||s[i]==='/'){ const d=Math.abs(i-mid); if(d<bd){bd=d;best=i;} } }
-  if(best<0) return [s];
-  return [s.slice(0,best).trim(), s.slice(best+(s[best]==='/'?1:0)).trim()];
-}
 
 const ARTISTS=[
 ["armstrong","Louis Armstrong","1901–1971",["ジャズ"],"トランペットと歌でジャズの独奏表現を確立した中心人物。","West End Blues／Hot Five & Seven 録音"],
@@ -1008,70 +883,6 @@ function renderArtists(){
    +'<div id="reqhist" style="margin-top:6px"></div>';
   refreshArtResults(); renderReqHist();
 }
-let gX=0, gY=0, gS=1, gFitDone=false, gJazzInit=false;
-let gDims={W:980,H:1120};
-function clampAxis(pos, view, span){ const over=28; if(span<=view) return (view-span)/2; return Math.max(view-span-over, Math.min(over, pos)); }
-function gFitScale(){ const v=$('gview'); const w=(v&&v.clientWidth)||340, h=(v&&v.clientHeight)||430; return Math.min(w/gDims.W, h/gDims.H); }
-function clampPan(){ const v=$('gview'); if(!v || !v.clientWidth) return; gX=clampAxis(gX, v.clientWidth, gDims.W*gS); gY=clampAxis(gY, v.clientHeight, gDims.H*gS); }
-function applyG(){ clampPan(); const st=$('gstage'); if(st) st.style.transform='translate('+gX+'px,'+gY+'px) scale('+gS+')'; }
-function fitGraph(){ const v=$('gview'); if(!v) return; const w=v.clientWidth||340, hgt=v.clientHeight||430; gS=Math.min(w/gDims.W, hgt/gDims.H); gX=(w-gDims.W*gS)/2; gY=(hgt-gDims.H*gS)/2; gFitDone=true; applyG(); }
-function focusHub(){ const v=$('gview'); if(!v) return; const w=v.clientWidth||340, hgt=v.clientHeight||430; gS=Math.min(0.9, Math.max(gFitScale(), 0.72)); gX=w/2-485*gS; gY=hgt/2-480*gS; applyG(); }
-function tapNode(id){ if(Date.now()-(window.__gMovedT||0)<300) return; selNode=id; renderGraph(); if(allArtists().some(x=>x[0]===id)) openArtist(id); }
-function zoomG(f){ const v=$('gview'); if(!v) return; const cx=v.clientWidth/2, cy=v.clientHeight/2; const ns=Math.max(gFitScale(), Math.min(2.6, gS*f)); gX=cx-(cx-gX)*(ns/gS); gY=cy-(cy-gY)*(ns/gS); gS=ns; applyG(); }
-function attachPan(){
-  const v=$('gview'); if(!v) return; const pts=new Map(); let lastD=0, moved=0;
-  v.onpointerdown=e=>{ pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; try{ v.setPointerCapture(e.pointerId); }catch(err){} };
-  v.onpointermove=e=>{
-    if(!pts.has(e.pointerId)) return;
-    const p=pts.get(e.pointerId); const dx=e.clientX-p.x, dy=e.clientY-p.y; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(pts.size===1){ moved+=Math.abs(dx)+Math.abs(dy); if(moved>7) window.__gMovedT=Date.now(); gX+=dx; gY+=dy; applyG(); }
-    else if(pts.size===2){ const a=[...pts.values()]; const d=Math.hypot(a[0].x-a[1].x, a[0].y-a[1].y); if(lastD){ const r=v.getBoundingClientRect(); const mx=(a[0].x+a[1].x)/2-r.left, my=(a[0].y+a[1].y)/2-r.top; const ns=Math.max(gFitScale(), Math.min(2.6, gS*(d/lastD))); gX=mx-(mx-gX)*(ns/gS); gY=my-(my-gY)*(ns/gS); gS=ns; applyG(); } lastD=d; window.__gMovedT=Date.now(); }
-  };
-  const up=e=>{ pts.delete(e.pointerId); if(pts.size<2) lastD=0; };
-  v.onpointerup=up; v.onpointercancel=up;
-}
-function renderGraphJazz(){
-  const g=jazzMerged(); gDims={W:g.W, H:g.H};
-  let h='<div class="secttl">相関図</div><div class="chiprow">'
-    +'<button class="tagchip on" onclick="curGraph=\'jazz\';selNode=null;renderGraph()">ジャズ系譜図</button>'
-    +'<button class="tagchip" onclick="curGraph=\'world\';selNode=null;renderGraph()">世界観系譜図</button></div>';
-  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作）。破線＝<b>系譜・評価</b>。図は<b>ドラッグで移動、ピンチで拡大縮小</b>できます。人物をタップすると各関係の根拠が出ます。</div>';
-  const pos={}; g.nodes.forEach(n=>pos[n[0]]={x:n[2],y:n[3]});
-  let svg='<svg width="'+g.W+'" height="'+g.H+'" viewBox="0 0 '+g.W+' '+g.H+'" style="display:block">';
-  g.edges.forEach(e=>{
-    const a=pos[e[0]], b=pos[e[1]]; if(!a||!b) return;
-    svg+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="'+(e[3]==='lineage'? '#6e5a35':'#5a5041')+'" stroke-width="1.6"'+(e[3]==='lineage'? ' stroke-dasharray="6 5"':'')+'/>';
-    svg+='<text x="'+((a.x+b.x)/2)+'" y="'+((a.y+b.y)/2-5)+'" text-anchor="middle" fill="#9a8c76" font-size="13">'+esc(e[2])+'</text>';
-  });
-  svg+='</svg>';
-  let nodes='';
-  g.nodes.forEach(n=>{
-    const r=(n[5]==='hub'? 36:28);
-    nodes+='<div class="gnode2'+(selNode===n[0]?' sel':'')+'" style="left:'+n[2]+'px;top:'+n[3]+'px;width:'+(2*r)+'px;height:'+(2*r)+'px" onclick="tapNode(\''+n[0]+'\')">'
-      +(graphPortrait(n[0])? '<img src="'+graphPortrait(n[0])+'" alt="" loading="lazy">' : '')
-      +'</div>';
-    nodes+='<div class="gname2" style="left:'+n[2]+'px;top:'+(n[3]+r+6)+'px">'+splitLabel(n[1]).map(esc).join('<br>')+'</div>';
-  });
-  h+='<div class="gview" id="gview"><div class="gstage2" id="gstage" style="width:'+g.W+'px;height:'+g.H+'px">'+svg+nodes+'</div><div class="gzoom"><button onclick="zoomG(1.3)">＋</button><button onclick="zoomG(1/1.3)">−</button><button onclick="fitGraph()">全体</button></div></div>';
-  if(selNode){
-    const n=g.nodes.find(x=>x[0]===selNode);
-    if(n){
-      const rels=g.edges.filter(e=>e[0]===selNode||e[1]===selNode).map(e=>{
-        const other=g.nodes.find(x=>x[0]===(e[0]===selNode? e[1]:e[0]));
-        return '<div style="margin-top:9px"><span class="reltag '+e[3]+'">'+(e[3]==='fact'?'事実':'系譜')+'</span><b style="font-size:.86em">'+esc(other? other[1]:'')+' — '+esc(e[2])+'</b><div class="ameta" style="margin-top:2px">'+esc(e[4]||'')+'</div></div>';
-      });
-      h+='<div class="card" style="margin-top:10px"><div style="display:flex;gap:12px;align-items:flex-start">'
-        +(graphPortrait(n[0])? '<img class="cov" src="'+graphPortrait(n[0])+'" alt="" onerror="this.style.display=\'none\'">':'')
-        +'<div style="flex:1;min-width:0"><div class="atitle">'+esc(n[1])+'</div><div class="areason">'+esc(n[4])+'</div></div></div>'
-        + rels.join('') + '</div>';
-    }
-  } else {
-    h+='<div class="note" style="margin-top:8px">太い円が各系譜の中心人物です。</div>';
-  }
-  $('v-graph').innerHTML=h;
-  attachPan(); if(!gJazzInit){ gJazzInit=true; focusHub(); } else applyG();
-}
-function renderGraphDispatch(){ if(curGraph==='jazz') renderGraphJazz(); else renderGraphOld(); }
 
 const ALIASES={"armstrong": ["ルイ・アームストロング", "サッチモ", "Satchmo"], "ellington": ["デューク・エリントン"], "hawkins": ["コールマン・ホーキンス"], "basie": ["カウント・ベイシー"], "young": ["レスター・ヤング", "プレズ"], "tatum": ["アート・テイタム"], "parker": ["チャーリー・パーカー", "バード", "Bird"], "gillespie": ["ディジー・ガレスピー"], "monk": ["セロニアス・モンク"], "powell": ["バド・パウエル"], "getz": ["スタン・ゲッツ"], "brubeck": ["デイヴ・ブルーベック"], "baker": ["チェット・ベイカー"], "miles": ["マイルス・デイヴィス", "マイルス・デウィス"], "mingus": ["チャールズ・ミンガス"], "evans": ["ビル・エヴァンス", "ビル・エバンス"], "cannonball": ["キャノンボール・アダレイ"], "silver": ["ホレス・シルヴァー"], "rollins": ["ソニー・ロリンズ"], "brown": ["クリフォード・ブラウン"], "blakey": ["アート・ブレイキー"], "coltrane": ["ジョン・コルトレーン", "トレーン", "Trane"], "shorter": ["ウェイン・ショーター"], "tyner": ["マッコイ・タイナー"], "ornette": ["オーネット・コールマン"], "dolphy": ["エリック・ドルフィー"], "sunra": ["サン・ラ"], "cecil": ["セシル・テイラー"], "alice": ["アリス・コルトレーン"], "pharoah": ["ファラオ・サンダース"], "hancock": ["ハービー・ハンコック"], "hubbard": ["フレディ・ハバード"], "corea": ["チック・コリア"], "jarrett": ["キース・ジャレット"], "metheny": ["パット・メセニー"], "marsalis": ["ウィントン・マルサリス"], "kamasi": ["カマシ・ワシントン"], "gleason": ["ジャッキー・グリーソン"], "badalamenti": ["アンジェロ・バダラメンティ"], "cruise": ["ジュリー・クルーズ"], "fiona": ["フィオナ・アップル"], "buckley": ["ジェフ・バックリィ", "ジェフ・バックリー"], "walker": ["スコット・ウォーカー"], "johnston": ["ダニエル・ジョンストン"], "bjork": ["ビョーク"], "kate": ["ケイト・ブッシュ"], "waits": ["トム・ウェイツ"], "nina": ["ニーナ・シモン"], "paert": ["アルヴォ・ペルト"], "krall": ["ダイアナ・クラール"], "morton": ["ジェリー・ロール・モートン"], "oliver": ["キング・オリヴァー"], "bechet": ["シドニー・ベシェ"], "henderson": ["フレッチャー・ヘンダーソン"], "goodman": ["ベニー・グッドマン"], "django": ["ジャンゴ・ラインハルト"], "christian": ["チャーリー・クリスチャン"], "hines": ["アール・ハインズ"], "marylouwilliams": ["メアリー・ルー・ウィリアムズ"], "hodges": ["ジョニー・ホッジス"], "webster": ["ベン・ウェブスター"], "eldridge": ["ロイ・エルドリッジ"], "holiday": ["ビリー・ホリデイ", "レディ・デイ"], "ella": ["エラ・フィッツジェラルド"], "vaughan": ["サラ・ヴォーン"], "natkingcole": ["ナット・キング・コール"], "roach": ["マックス・ローチ"], "kennyclarke": ["ケニー・クラーク"], "gordon": ["デクスター・ゴードン"], "navarro": ["ファッツ・ナヴァロ"], "morgan": ["リー・モーガン"], "joehenderson": ["ジョー・ヘンダーソン"], "elvin": ["エルヴィン・ジョーンズ"], "roncarter": ["ロン・カーター"], "chambers": ["ポール・チェンバース"], "wes": ["ウェス・モンゴメリー"], "gilevans": ["ギル・エヴァンス"], "jamal": ["アーマッド・ジャマル"], "peterson": ["オスカー・ピーターソン"], "miltjackson": ["ミルト・ジャクソン"], "mulligan": ["ジェリー・マリガン"], "konitz": ["リー・コニッツ"], "pepper": ["アート・ペッパー"], "ayler": ["アルバート・アイラー"], "doncherry": ["ドン・チェリー"], "shepp": ["アーチー・シェップ"], "haden": ["チャーリー・ヘイデン"], "carlabley": ["カーラ・ブレイ"], "braxton": ["アンソニー・ブラクストン"], "tonywilliams": ["トニー・ウィリアムス"], "mclaughlin": ["ジョン・マクラフリン"], "zawinul": ["ジョー・ザヴィヌル"], "jaco": ["ジャコ・パストリアス"], "frisell": ["ビル・フリゼール"], "scofield": ["ジョン・スコフィールド"], "mehldau": ["ブラッド・メルドー"], "glasper": ["ロバート・グラスパー"], "spalding": ["エスペランサ・スポルディング"], "nubya": ["ヌビア・ガルシア"], "makaya": ["マカヤ・マクレイヴン"], "vijay": ["ヴィジェイ・アイヤー"], "toshiko": ["秋吉敏子"], "sadao": ["渡辺貞夫"], "hino": ["日野皓正"], "yamashita": ["山下洋輔"]};
 const CONCERTS=[{"a": "krall", "name": "Diana Krall", "date": "2026-12-03", "venue": "Niterra日本特殊陶業市民会館 ビレッジホール", "city": "名古屋", "title": "DIANA KRALL 2026", "url": "https://www.udo.jp/shows/DianaKrall26"}, {"a": "krall", "name": "Diana Krall", "date": "2026-12-04", "venue": "グランキューブ大阪（大阪国際会議場）", "city": "大阪", "title": "DIANA KRALL 2026", "url": "https://www.udo.jp/shows/DianaKrall26"}, {"a": "krall", "name": "Diana Krall", "date": "2026-12-07", "venue": "Kanadevia Hall（東京ドームシティホール）", "city": "東京", "title": "DIANA KRALL 2026", "url": "https://www.udo.jp/shows/DianaKrall26"}, {"a": "krall", "name": "Diana Krall", "date": "2026-12-09", "venue": "Kanadevia Hall（東京ドームシティホール）", "city": "東京", "title": "DIANA KRALL 2026", "url": "https://www.udo.jp/shows/DianaKrall26"}, {"a": "krall", "name": "Diana Krall", "date": "2026-12-10", "venue": "Kanadevia Hall（東京ドームシティホール）", "city": "東京", "title": "DIANA KRALL 2026（追加公演）", "url": "https://www.udo.jp/shows/DianaKrall26"}, {"a": "metheny", "name": "Pat Metheny（ゲスト出演）", "date": "2027-03-06", "venue": "東京国際フォーラム ホールA", "city": "東京", "title": "矢野顕子 50th Anniversary Live 〜ピアノ弾き語り 2027〜", "url": "https://www.sma.co.jp/s/sma/news/detail/115466"}, {"a": "metheny", "name": "Pat Metheny（ゲスト出演）", "date": "2027-03-08", "venue": "大阪国際会議場（グランキューブ大阪）メインホール", "city": "大阪", "title": "矢野顕子 50th Anniversary Live 〜ピアノ弾き語り 2027〜", "url": "https://www.sma.co.jp/s/sma/news/detail/115466"}];
@@ -1117,14 +928,6 @@ function openArtist(id){
   if(con.length) h+=con.map(x=>'<div class="grow2"><div style="flex:1;min-width:0"><div style="font-size:.92em">'+x.date+'　'+esc(x.venue)+'（'+esc(x.city)+'）</div><div class="ameta">'+esc(x.title)+'</div></div><a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="'+x.url+'" target="_blank" rel="noopener">公式</a></div>').join('');
   else h+='<div class="note">現在、確認済みの日本の公演はありません。</div>';
   h+='<div class="btnrow"><a class="btn small" style="text-decoration:none;display:inline-flex;align-items:center" href="https://www.songkick.com/search?query='+encodeURIComponent(a[1])+'" target="_blank" rel="noopener">Songkickで公演を探す</a></div>';
-  ['jazz','world'].forEach(gk=>{
-    const g=(gk==='jazz')? jazzMerged() : worldMerged(); if(!g) return;
-    const rels=g.edges.filter(e=>e[0]===id||e[1]===id);
-    if(rels.length) h+='<div class="gseclbl">'+(gk==='jazz'?'ジャズ系譜での関係':'世界観系譜での関係')+'</div>'+rels.map(e=>{
-      const oid=(e[0]===id? e[1]:e[0]); const o=g.nodes.find(n=>n[0]===oid);
-      return '<div style="margin-top:7px"><span class="reltag '+e[3]+'">'+(e[3]==='fact'?'事実':'系譜')+'</span><b style="font-size:.86em">'+esc(o? o[1]:oid)+' — '+esc(e[2])+'</b><div class="ameta" style="margin-top:2px">'+esc(e[4]||'')+'</div></div>';
-    }).join('');
-  });
   h+='<div class="btnrow" style="margin-top:14px"><button class="btn small" onclick="closeDetail();go(\'art\');setTimeout(()=>prefillRequest(\'info\',\''+esc(a[1]).replace(/'/g,"\\'")+'\'),80)">この人の情報をリクエスト</button></div>';
   openSheet(h);
 }
@@ -1187,68 +990,7 @@ function eventRows(list){
   return list.slice().sort((a,b)=>a[0]-b[0]).map(e=>'<div class="grow2"><span class="tl-year">'+e[0]+'</span><div style="font-size:.92em">'+esc(e[1])+'</div></div>').join('');
 }
 
-function renderGraph(){ return renderGraphDispatch(); }
 
-function graphPortrait(id){ if(PORTRAITS[id]) return PORTRAITS[id]; const x=(data.artists||{})[id]; return (x && x.portrait) || ''; }
-function jazzMerged(){
-  const base=GRAPHS.jazz; const ex=(data.jazz&&data.jazz.nodes)? data.jazz : {nodes:[], edges:[]};
-  const ids=new Set(base.nodes.map(n=>n[0]));
-  const nodes=base.nodes.concat(ex.nodes.filter(n=>!ids.has(n[0])));
-  const ekey=e=>e[0]+'|'+e[1]+'|'+e[2]; const seen=new Set(base.edges.map(ekey));
-  const edges=base.edges.concat(ex.edges.filter(e=>!seen.has(ekey(e))));
-  const maxX=nodes.reduce((m,n)=>Math.max(m,n[2]),0), maxY=nodes.reduce((m,n)=>Math.max(m,n[3]),0);
-  return { nodes:nodes, edges:edges, W:Math.max(980, maxX+90), H:Math.max(1120, maxY+110) };
-}
-function worldMerged(){
-  const base=GRAPHS.world; const ex=(data.world&&data.world.nodes)? data.world : {nodes:[], edges:[]};
-  const ids=new Set(base.nodes.map(n=>n[0]));
-  const nodes=base.nodes.concat(ex.nodes.filter(n=>!ids.has(n[0])));
-  const ekey=e=>e[0]+'|'+e[1]+'|'+e[2]; const seen=new Set(base.edges.map(ekey));
-  const edges=base.edges.concat(ex.edges.filter(e=>!seen.has(ekey(e))));
-  const maxY=nodes.reduce((m,n)=>Math.max(m,n[3]),0);
-  return { nodes:nodes, edges:edges, H:Math.max(584, maxY+84) };
-}
-function renderGraphOld(){
-  const g=worldMerged();
-  let h='<div class="secttl">相関図</div><div class="chiprow">'
-    +'<button class="tagchip'+(curGraph==='jazz'?' on':'')+'" onclick="curGraph=\'jazz\';selNode=null;renderGraph()">ジャズ系譜図</button>'
-    +'<button class="tagchip'+(curGraph==='world'?' on':'')+'" onclick="curGraph=\'world\';selNode=null;renderGraph()">世界観系譜図</button></div>';
-  h+='<div class="note">実線＝<b>事実関係</b>（在籍・共演・制作など、記録で確認できる関係）。破線＝<b>系譜・評価</b>（影響の証言や批評に基づく接続で、編者の読みを含むものはその旨を明示）。人物をタップすると、各関係の根拠が出ます。</div>';
-  const pos={}; g.nodes.forEach(n=>pos[n[0]]={x:n[2],y:n[3]});
-  let svg='<svg viewBox="0 0 360 '+g.H+'" style="width:100%;height:auto;display:block">';
-  g.edges.forEach(e=>{
-    const a=pos[e[0]], b=pos[e[1]]; if(!a||!b) return;
-    svg+='<line class="edge'+(e[3]==='lineage'?' lin':'')+'" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'"/>';
-    svg+='<text class="elbl" x="'+((a.x+b.x)/2)+'" y="'+((a.y+b.y)/2-3)+'" text-anchor="middle">'+esc(e[2])+'</text>';
-  });
-  svg+='</svg>';
-  let nodes='';
-  g.nodes.forEach(n=>{
-    const r=(n[5]==='hub'?23:18);
-    const lx=(n[2]/360*100).toFixed(2), ly=(n[3]/g.H*100).toFixed(2), w=(2*r/360*100).toFixed(2);
-    nodes+='<div class="gnode'+(selNode===n[0]?' sel':'')+'" style="left:'+lx+'%;top:'+ly+'%;width:'+w+'%;aspect-ratio:1/1" onclick="tapNode(\''+n[0]+'\')">'
-      +(graphPortrait(n[0])? '<img src="'+graphPortrait(n[0])+'" alt="" loading="lazy">' : '')
-      +'</div>';
-    nodes+='<div class="gname" style="left:'+lx+'%;top:'+(((n[3]+r+5)/g.H)*100).toFixed(2)+'%">'+splitLabel(n[1]).map(esc).join('<br>')+'</div>';
-  });
-  h+='<div class="gwrap"><div class="gstage">'+svg+nodes+'</div></div>';
-  if(selNode){
-    const n=g.nodes.find(x=>x[0]===selNode);
-    if(n){
-      const rels=g.edges.filter(e=>e[0]===selNode||e[1]===selNode).map(e=>{
-        const other=g.nodes.find(x=>x[0]===(e[0]===selNode? e[1]:e[0]));
-        return '<div style="margin-top:9px"><span class="reltag '+e[3]+'">'+(e[3]==='fact'?'事実':'系譜')+'</span><b style="font-size:.86em">'+esc(other? other[1]:'')+' — '+esc(e[2])+'</b><div class="ameta" style="margin-top:2px">'+esc(e[4]||'')+'</div></div>';
-      });
-      h+='<div class="card" style="margin-top:10px"><div style="display:flex;gap:12px;align-items:flex-start">'
-        +(graphPortrait(n[0])? '<img class="cov" src="'+graphPortrait(n[0])+'" alt="" onerror="this.style.display=\'none\'">':'')
-        +'<div style="flex:1;min-width:0"><div class="atitle">'+esc(n[1])+'</div><div class="areason">'+esc(n[4])+'</div></div></div>'
-        + rels.join('') + '</div>';
-    }
-  } else {
-    h+='<div class="note" style="margin-top:8px">太い円が各図の中心人物です。</div>';
-  }
-  $('v-graph').innerHTML=h;
-}
 function renderLib(){
   const heard=[], want=[];
   Object.keys(data.ratings).forEach(id=>{ const r=ratingOf(id); if(!r) return; const c=catById(id); if(!c) return; (r.s==='heard'? heard: want).push({c, r}); });
@@ -1309,6 +1051,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.27','2026-11-29','相関図・年表を削除した'],
  ['3.26','2026-11-29','編集しても表示と位置が崩れないようにした'],
  ['3.25','2026-11-28','設定を右側のポップアップで開くようにした'],
  ['3.24','2026-11-28','設定ボタンを譜面の上に重ねて固定した'],
@@ -3124,7 +2867,7 @@ function initSwipe(){
   document.addEventListener('pointerdown', e=>{
     if(tabDrag) return;
     const sh=$('dsheet'); if(sh && sh.classList.contains('on')) return;
-    if(e.target && e.target.closest && e.target.closest('#nav, header, #dsheet, #lbox, .gview, .gwrap, input, textarea, select')) return;
+    if(e.target && e.target.closest && e.target.closest('#nav, header, #dsheet, #lbox, input, textarea, select')) return;
     if(e.clientX>28) return;
     if(e.pointerType==='mouse' && e.button!==0) return;
     tabDrag={id:e.pointerId, x0:e.clientX, y0:e.clientY, dx:0, mode:null};
@@ -3216,7 +2959,7 @@ function selfUpdate(fromFg){
 function boot(){
   $('verBadge').textContent='v'+APP_VERSION;
   applyUi(); renderBell(); initSwipe(); initSheetSwipe();
-  renderRec(); renderTl(); renderGraph(); renderLib(); renderSet(); renderArtists(); renderGenre(); renderSyncStatus(); try{ renderPlay(); }catch(e){}
+  renderRec(); renderLib(); renderSet(); renderArtists(); renderGenre(); renderSyncStatus(); try{ renderPlay(); }catch(e){}
   const veil=$('veil'); if(veil){ veil.style.opacity='0'; setTimeout(()=>veil.remove(), 700); }
   if(relayReady()) syncNow('startup');
   selfUpdate();
