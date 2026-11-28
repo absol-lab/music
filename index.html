@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.15">
+<meta name="app-version" content="3.16">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -289,6 +289,35 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .dgchip{ background:#ffffff; border-radius:6px; padding:2px; display:inline-flex; align-items:center; justify-content:center; line-height:0; }
 .sheetwrap{ position:absolute; left:14px; right:14px; bottom:77px; overflow-y:auto; border-radius:14px; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
+/* guide page (v3.16): same overlay pattern as the song view, content on the sheet panel */
+.gsub{ color:var(--sub); font-size:.83em; margin-top:2px; line-height:1.5; }
+.guidewrap{ position:absolute; left:14px; right:14px; bottom:77px; overflow-y:auto; border-radius:14px; touch-action:pan-y; background:#211c17; border:1px solid #453b2f; color:#ece5d8; padding:14px; box-sizing:border-box; }
+.gsec{ margin-bottom:16px; }
+.gsec:last-child{ margin-bottom:4px; }
+.gtool{ padding:8px 0; border-bottom:1px solid #453b2f; }
+.gtool:last-child{ border-bottom:none; }
+.gtool a{ color:var(--acc2); font-weight:800; font-size:.95em; text-decoration:none; }
+.gnote{ color:#cfc5b2; font-size:.82em; line-height:1.6; margin-top:2px; }
+.gcaution{ background:#2e2820; border:1px solid #453b2f; border-radius:9px; padding:7px 11px; color:#d9d0bf; font-size:.82em; line-height:1.6; margin-top:10px; }
+.gcaution b{ color:var(--acc); }
+.gsteps{ position:relative; margin-top:2px; }
+.gsteps::before{ content:""; position:absolute; left:13px; top:10px; bottom:10px; width:2px; background:#453b2f; }
+.gstep{ position:relative; padding:0 0 12px 40px; }
+.gstep:last-child{ padding-bottom:2px; }
+.gnum{ position:absolute; left:0; top:0; width:28px; height:28px; border-radius:50%; background:#211c17; border:2px solid var(--acc); color:var(--acc); font-weight:800; font-size:.85em; display:flex; align-items:center; justify-content:center; }
+.gstep-t{ font-weight:700; font-size:.92em; line-height:28px; }
+.gtwrap{ overflow-x:auto; }
+.gtable{ border-collapse:collapse; width:100%; font-size:.8em; }
+.gtable th,.gtable td{ border:1px solid #453b2f; padding:5px 6px; text-align:center; white-space:nowrap; }
+.gtable th{ color:var(--acc); background:#2a241d; font-weight:800; }
+.gtable td{ color:#ece5d8; }
+.gtype{ padding:8px 0; border-bottom:1px solid #453b2f; }
+.gtype:last-child{ border-bottom:none; }
+.gtype-t{ font-weight:800; font-size:.92em; }
+.gdeg{ color:var(--sub); font-size:.8em; font-weight:400; margin-left:8px; letter-spacing:.03em; }
+.gflow{ display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-top:6px; }
+.gchord{ background:#2e2820; border:1px solid #574c3a; color:#d8a24a; font-weight:800; border-radius:8px; padding:3px 9px; font-size:.85em; line-height:1.3; }
+.garr{ color:var(--sub); font-size:.8em; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#2e2820; border:1px solid #453b2f; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
 .strumstrip b{ color:var(--acc); flex:none; }
 .strumstrip .strum-txt{ flex:1; min-width:0; }
@@ -327,7 +356,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.15';
+const APP_VERSION='3.16';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -624,7 +653,7 @@ let tabHist=[];
 function go(v, isBack){
   if(typeof stopPlayFx==='function') stopPlayFx();
   if(v!=='play' && typeof unlockSongOverlay==='function') unlockSongOverlay();
-  if(v==='play' && typeof playState!=='undefined' && playState.mode==='song' && playState.openId && typeof lockSongOverlay==='function') lockSongOverlay();
+  if(v==='play' && typeof playState!=='undefined' && ((playState.mode==='song' && playState.openId) || playState.mode==='guide') && typeof lockSongOverlay==='function') lockSongOverlay();
   const prev=curView;
   if(v!==prev && !isBack){ tabHist.push(prev); if(tabHist.length>30) tabHist.shift(); }
   curView=v;
@@ -1219,6 +1248,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.16','2026-11-28','「弾く」にコード進行の割り出し方ページを追加'],
  ['3.15','2026-11-28','バレーコードの開始フレット番号を大きく濃く表示'],
  ['3.14','2026-11-28','スクロール修正を確認し診断表示を撤去。コード図の余白を整えた'],
  ['3.13','2026-11-28','曲画面のスクロールの仕組みを作り替えた（高さの決め方を変更）'],
@@ -1547,12 +1577,14 @@ function bumpPlays(id){
 function renderPlay(){
   const el=$('v-play'); if(!el) return;
   if(playState.mode==='song' && playState.openId){ renderSong(); return; }
+  if(playState.mode==='guide'){ renderGuide(); return; }
   unlockSongOverlay();
   if(playState.mode==='edit'){ renderSongEditor(); return; }
   if(playState.mode==='drill'){ renderDrill(); return; }
   if(playState.mode==='tuner'){ renderTuner(); return; }
   playState.mode='list';
   let h='<div class="secttl">弾く</div>';
+  h+='<div class="card songcard" onclick="openGuide()"><div class="atitle">コード進行の割り出し方</div><div class="gsub">AI・耳コピ・理論で、知らない曲の進行を出す</div></div>';
   const drillMeta=(data.songMeta||{})['__drill']; const drillTotal=drillMeta? (+drillMeta.plays||0):0;
   h+='<div class="btnrow" style="margin-bottom:12px"><button class="btn primary small" onclick="playNewSong()">＋ 曲を追加</button><button class="btn small" onclick="openDrill()">コード練習'+(drillTotal?'（通算'+drillTotal+'回）':'')+'</button><button class="btn small" onclick="openTuner()">チューナー</button></div>';
   const songs=allPlaySongs();
@@ -1577,6 +1609,75 @@ function openPlaySong(id){
   renderSong(); window.scrollTo(0,0);
 }
 function backToPlayList(){ stopPlayFx(); playState.mode='list'; playState.openId=null; renderPlay(); }
+/* guide: コード進行の割り出し方 (v3.16) — same fixed-overlay pattern as the song view */
+function openGuide(){ stopPlayFx(); playState.mode='guide'; renderPlay(); window.scrollTo(0,0); }
+function layoutGuideWrap(){
+  const wrap=$('guideWrap'); if(!wrap) return;
+  const vp=$('v-play'), head=document.querySelector('.songhead');
+  if(!vp || !head){ wrap.style.top='120px'; return; }
+  const vr=vp.getBoundingClientRect(), hr=head.getBoundingClientRect();
+  wrap.style.top=Math.round(hr.bottom - vr.top + 6)+'px';
+}
+function renderGuide(){
+  const el=$('v-play'); if(!el) return;
+  lockSongOverlay();
+  let h='<div class="songroot">';
+  h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
+    +'<div class="stitle-main"><span class="stitle">コード進行の割り出し方</span></div></div></div>';
+  h+='<div class="guidewrap" id="guideWrap">';
+  /* 1. AI */
+  h+='<div class="gsec"><div class="sheet-secname">1. AIに割り出させる（最速の下書き）</div>'
+    +'<div class="gtool"><a href="https://chordify.net/" target="_blank" rel="noopener">Chordify</a><div class="gnote">YouTubeのURLを貼ると自動でコード譜に。無料でも使える。ただし自動解析なので間違いが混ざる前提で使う。</div></div>'
+    +'<div class="gtool"><a href="https://moises.ai/" target="_blank" rel="noopener">Moises</a><div class="gnote">音源ファイルを上げるとコード表示。パート別に音を分ける（ボーカル／ギター等）こともできる。</div></div>'
+    +'<div class="gtool"><span style="font-weight:800;font-size:.95em">Chordino</span><div class="gnote">PCで音源ファイルを解析する無料のオープンソース（Sonic Visualiserのプラグイン）。</div></div>'
+    +'<div class="gcaution">AIの結果は<b>「下書き」</b>。公開譜面と自分の耳で確定させる。</div></div>';
+  /* 2. 耳コピ */
+  const steps=[
+    ['キーを決める','曲の最後のコード、メロディが落ち着く音が手がかり。'],
+    ['ベース音だけ追う','低い音の並びがルート＝進行の骨格になる。'],
+    ['メジャーかマイナーか','各コードの「明るい／暗い」で判別する。'],
+    ['ダイアトニックで確定','キーの中のコード一覧（下の表）から選ぶ。'],
+    ['装飾は最後','7th、sus4、分数コードは骨格が決まってから付ける。']
+  ];
+  h+='<div class="gsec"><div class="sheet-secname">2. 耳コピの手順</div><div class="gsteps">'
+    +steps.map((s,i)=>'<div class="gstep"><div class="gnum">'+(i+1)+'</div><div class="gstep-t">'+s[0]+'</div><div class="gnote">'+s[1]+'</div></div>').join('')
+    +'</div></div>';
+  /* 3. ダイアトニック表 */
+  const diaHeads=['I','ii','iii','IV','V','vi','vii°'];
+  const diaRows=[
+    ['C','C','Dm','Em','F','G','Am','Bdim'],
+    ['G','G','Am','Bm','C','D','Em','F#dim'],
+    ['D','D','Em','F#m','G','A','Bm','C#dim'],
+    ['A','A','Bm','C#m','D','E','F#m','G#dim'],
+    ['E','E','F#m','G#m','A','B','C#m','D#dim'],
+    ['B','B','C#m','D#m','E','F#','G#m','A#dim']
+  ];
+  h+='<div class="gsec"><div class="sheet-secname">3. ダイアトニック早見表</div><div class="gtwrap"><table class="gtable"><tr><th>キー</th>'
+    +diaHeads.map(x=>'<th>'+x+'</th>').join('')+'</tr>'
+    +diaRows.map(r=>'<tr><th>'+r[0]+'</th>'+r.slice(1).map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')
+    +'</table></div><div class="gnote" style="margin-top:8px">進行に出てくるコードは、ほぼこの7つの中にある。表に無いコードが出たら「借り物」（ほかのキーからの借用）の合図。</div></div>';
+  /* 4. 進行の型 */
+  const flows=[
+    ['王道進行','IV → V → iii → vi',['F','G','Em','Am'],'J-POPのサビの定番。いちばんよく聞く盛り上がる並び。'],
+    ['カノン進行','I → V → vi → iii → IV → I → IV → V',['C','G','Am','Em','F','C','F','G'],'パッヘルベルのカノンの流れ（例はキーC）。バラードに多い。'],
+    ['小室進行','vi → IV → V → I',['Am','F','G','C'],'90年代J-POPの定番（例はキーC）。マイナー始まりの疾走感。'],
+    ['丸サ進行','IV → iii → vi',['F','Em','Am'],'「Just The Two of Us」の進行。おしゃれで浮遊感のある響き。']
+  ];
+  h+='<div class="gsec"><div class="sheet-secname">4. よくある進行の型</div>'
+    +flows.map(f=>'<div class="gtype"><div class="gtype-t">'+f[0]+'<span class="gdeg">'+f[1]+'</span></div><div class="gflow">'
+      +f[2].map((c,i)=>(i? '<span class="garr">→</span>':'')+'<span class="gchord">'+c+'</span>').join('')
+      +'</div><div class="gnote">'+f[3]+'</div></div>').join('')
+    +'</div>';
+  /* 5. 答え合わせ */
+  h+='<div class="gsec"><div class="sheet-secname">5. 答え合わせ</div>'
+    +'<div class="gtool"><a href="https://www.ufret.jp/" target="_blank" rel="noopener">U-FRET</a><div class="gnote">公開コード譜の大手。キー変更やカポ表示もできる。</div></div>'
+    +'<div class="gtool"><a href="https://ja.chordwiki.org/" target="_blank" rel="noopener">ChordWiki</a><div class="gnote">みんなで直し合うコード譜のwiki。</div></div>'
+    +'<div class="gtool"><a href="https://music.j-total.net/" target="_blank" rel="noopener">J-Total</a><div class="gnote">歌詞＋コードの老舗データベース。</div></div>'
+    +'<div class="gcaution">2つ以上の材料が一致したら確定。<b>最後は自分の耳。</b></div></div>';
+  h+='</div></div>';
+  el.innerHTML=h;
+  if(window.requestAnimationFrame) requestAnimationFrame(layoutGuideWrap); else layoutGuideWrap();
+}
 function dispChord(orig){
   const shift=playState.transpose - playState.capo;
   return transposeChord(orig, shift);
@@ -1619,7 +1720,7 @@ function unlockSongOverlay(){
   document.documentElement.classList.remove('songlock');
   if(document.body) document.body.classList.remove('songlock');
 }
-function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } }
+function layoutSongOverlay(){ if(typeof playState==='undefined') return; if(playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } else if(playState.mode==='guide'){ lockSongOverlay(); layoutGuideWrap(); } }
 function layoutSheetWrap(){
   const wrap=$('sheetWrap'); if(!wrap) return;
   const vp=$('v-play'), head=document.querySelector('.songhead');
