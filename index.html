@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.23">
+<meta name="app-version" content="3.24">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -282,7 +282,11 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .sheetctl .ppill.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
 .sheetctl .sheetctl-lbl{ font-size:.78em; color:var(--sub); flex:none; }
 .sheetctl input[type=range]{ accent-color:#d8a24a; }
-.ctlfloat{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 54px); right:14px; z-index:5; appearance:none; border:1px solid var(--acc); background:rgba(30,26,23,.92); color:var(--acc); border-radius:999px; padding:8px 16px; min-height:36px; font-size:.82em; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); font-family:inherit; }
+/* ctlfloat (v3.24): fixed overlay like .editfab, NOT inside the scrolling sheet.
+   layoutSheetWrap() sets its top so it sits on the sheet frame's top-right corner
+   (right:14px aligns its right edge with the frame's right edge). The top here is
+   only a pre-layout fallback. */
+.ctlfloat{ position:fixed; top:calc(env(safe-area-inset-top, 0px) + 128px); right:14px; z-index:27; appearance:none; border:1px solid var(--acc); background:rgba(30,26,23,.92); color:var(--acc); border-radius:999px; padding:8px 16px; min-height:36px; font-size:.82em; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); font-family:inherit; }
 .ctlfloat.off{ display:none; }
 /* chord edit (v3.17): round floating edit button inside the sheet frame, bottom-right.
    bottom:121px keeps it clear of the auto-scroll badge band (fixed, bottom:89px). */
@@ -391,7 +395,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.23';
+const APP_VERSION='3.24';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1284,6 +1288,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.24','2026-11-28','設定ボタンを譜面の上に重ねて固定した'],
  ['3.23','2026-11-28','新しい版が出たら自動で切り替わるようにした'],
  ['3.22','2026-11-28','『世界は広いよ』のコード進行を音楽理論で裁定し直した'],
  ['3.21','2026-11-28','指板入力のときに画面が動かないようにした'],
@@ -1921,10 +1926,13 @@ function unlockSongOverlay(){
 function layoutSongOverlay(){ if(typeof playState==='undefined') return; if(playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } else if(playState.mode==='guide'){ lockSongOverlay(); layoutGuideWrap(); } else if(playState.mode==='rev'){ lockSongOverlay(); layoutRevWrap(); } }
 function layoutSheetWrap(){
   const wrap=$('sheetWrap'); if(!wrap) return;
+  const btn=$('ctlFloat');
   const vp=$('v-play'), head=document.querySelector('.songhead');
-  if(!vp || !head){ wrap.style.top='120px'; return; }
+  if(!vp || !head){ wrap.style.top='120px'; if(btn) btn.style.top='128px'; return; }
   const vr=vp.getBoundingClientRect(), hr=head.getBoundingClientRect();
-  wrap.style.top=Math.round(hr.bottom - vr.top + 6)+'px';
+  const topPx=Math.round(hr.bottom - vr.top + 6);
+  wrap.style.top=topPx+'px';
+  if(btn) btn.style.top=(topPx + 8)+'px';
 }
 window.addEventListener('resize', layoutSongOverlay);
 function onSheetScroll(){
@@ -2015,9 +2023,10 @@ function renderSong(){
   h+='</div>';
   if(song.builtin && !aligned) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。</div>';
   h+='<div class="scrollbadge'+(playState.scrolling?'':' off')+'" id="scrollBadge"><span>▶ 自動スクロール中</span></div>';
-  h+='<button class="ctlfloat off" id="ctlFloat" onclick="playShowSettings()">設定</button>';
   h+='<button class="editfab'+(playState.chordEdit?' on':'')+'" id="editFab" onclick="playToggleChordEdit()" aria-label="コード編集"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
-  h+='</div></div>';
+  h+='</div>';
+  h+='<button class="ctlfloat off" id="ctlFloat" onclick="playShowSettings()">設定</button>';
+  h+='</div>';
   el.innerHTML=h;
   onSheetScroll();
   if(window.requestAnimationFrame) requestAnimationFrame(layoutSheetWrap); else layoutSheetWrap();
