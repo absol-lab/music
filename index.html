@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.17">
+<meta name="app-version" content="3.18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -290,6 +290,28 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .ced{ cursor:pointer; }
 .ced .cname{ text-decoration:underline dashed #d8a24a; text-underline-offset:3px; }
 .ced .dgchip{ outline:1px dashed rgba(216,162,74,.7); outline-offset:1px; }
+/* chord insert + fretboard input + reverse lookup (v3.18) */
+.insbtn{ appearance:none; border:1px dashed rgba(216,162,74,.65); background:rgba(216,162,74,.13); color:#d8a24a; border-radius:50%; width:20px; height:20px; font-size:13px; line-height:1; cursor:pointer; padding:0; margin:0 1px; vertical-align:bottom; font-family:inherit; flex:none; align-self:center; }
+.cetabs{ display:flex; gap:6px; margin:12px 0 4px; }
+.cetab{ appearance:none; flex:1; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:7px 10px; min-height:36px; font-size:.85em; cursor:pointer; font-family:inherit; font-weight:700; }
+.cetab.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
+.fretboard{ margin-top:8px; overflow-x:auto; padding-bottom:2px; }
+.fbhead,.fbrow{ display:flex; align-items:stretch; gap:2px; margin-bottom:2px; min-width:318px; }
+.fbhead span{ flex:1; text-align:center; font-size:.6em; color:var(--sub); line-height:1.4; }
+.fbhead .fbmark{ font-size:.6em; color:var(--sub); display:flex; align-items:center; justify-content:center; }
+.fbmark{ appearance:none; width:30px; flex:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:5px; font-size:.95em; font-weight:800; cursor:pointer; padding:0; font-family:inherit; min-height:26px; }
+.fbmark.set{ border-color:#d8a24a; color:#d8a24a; }
+.fbcell{ appearance:none; flex:1; height:26px; background:#241e18; border:1px solid #3a332a; border-radius:4px; position:relative; cursor:pointer; padding:0; font-family:inherit; }
+.fbcell .fbdot{ position:absolute; left:50%; top:50%; width:17px; height:17px; margin:-8.5px 0 0 -8.5px; border-radius:50%; background:#d8a24a; box-shadow:0 0 0 2px rgba(216,162,74,.25); }
+.fbnotes{ font-size:.85em; color:var(--sub); margin-top:9px; line-height:1.5; }
+.fbnotes b{ color:var(--tx); }
+.fbcands{ display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+.candchip{ appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:6px 12px; min-height:34px; font-size:.88em; cursor:pointer; font-family:inherit; font-weight:700; }
+.candchip .fit{ color:var(--sub); font-size:.8em; font-weight:400; margin-left:4px; }
+.candchip.sel{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
+.candchip.sel .fit{ color:#5a4512; }
+.fbsel{ font-size:.9em; margin-top:9px; color:var(--sub); }
+.fbsel b{ color:#d8a24a; font-size:1.05em; }
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:2px 0; margin:2px 0 8px; scrollbar-width:none; touch-action:pan-x; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
@@ -363,7 +385,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.17';
+const APP_VERSION='3.18';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1256,6 +1278,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.18','2026-11-28','編集モードでコード追加と指板入力（コード名の自動判定）、コード逆引きページを追加'],
  ['3.17','2026-11-28','曲画面でコードを編集できるようにした'],
  ['3.16','2026-11-28','「弾く」にコード進行の割り出し方ページを追加'],
  ['3.15','2026-11-28','バレーコードの開始フレット番号を大きく濃く表示'],
@@ -1464,7 +1487,10 @@ function diagramSVG(chordName, opts){
   const ink=opts.ink||'#222';
   const subStr=opts.sub||'#999';
   const subNum=opts.sub||'#555';
-  const frets=getFingering(chordName, !!opts.easy);
+  // opts.frets (v3.18 annotation override): an explicit fingering array in DISPLAY terms
+  // (index 0 = 6th string, -1 mute, 0 open). When given, it wins over the generated fingering
+  // and かんたん (easy) conversion does not apply. Without it the output is unchanged.
+  const frets=(opts.frets && opts.frets.length===6)? opts.frets.slice() : getFingering(chordName, !!opts.easy);
   const pos=frets.filter(f=>f>0);
   let base=1;
   if(pos.length){ const mn=Math.min.apply(null,pos), mx=Math.max.apply(null,pos); if(mx>5) base=mn; else base=1; }
@@ -1510,12 +1536,97 @@ function diagramSVG(chordName, opts){
   s+='</svg>';
   return s;
 }
+/* ================= chord identification + fingering annotations (v3.18) =================
+   Reverse lookup modeled on a-ki's factory revchord: a candidate qualifies when its
+   pitch-class set INCLUDES every specified note; fit = |specified| / |candidate set|.
+   Ranking: fit desc, then root == bass, then simpler quality (table order). */
+const CHORD_FORMULAS=[
+ ['',[0,4,7]],['m',[0,3,7]],['7',[0,4,7,10]],['maj7',[0,4,7,11]],['m7',[0,3,7,10]],
+ ['mMaj7',[0,3,7,11]],['6',[0,4,7,9]],['m6',[0,3,7,9]],['sus4',[0,5,7]],['sus2',[0,2,7]],
+ ['dim',[0,3,6]],['aug',[0,4,8]],['5',[0,7]],['dim7',[0,3,6,9]],['m7b5',[0,3,6,10]],
+ ['7sus4',[0,5,7,10]],['add9',[0,2,4,7]],['madd9',[0,2,3,7]],['9',[0,2,4,7,10]],
+ ['m9',[0,2,3,7,10]],['7b5',[0,4,6,10]],['aug7',[0,4,8,10]]
+];
+const STRING_OPEN_PC=[4,9,2,7,11,4]; // index 0 = 6th string (E A D G B e)
+function identifyChord(pcSet, bassPc){
+  const S=(pcSet instanceof Set)? pcSet : new Set(pcSet||[]);
+  if(!S.size) return [];
+  const out=[];
+  for(let r=0;r<12;r++){
+    for(let fi=0; fi<CHORD_FORMULAS.length; fi++){
+      const suf=CHORD_FORMULAS[fi][0], ivs=CHORD_FORMULAS[fi][1];
+      const set=new Set(ivs.map(v=>(r+v)%12));
+      let all=true; S.forEach(pc=>{ if(!set.has(pc)) all=false; });
+      if(!all) continue;
+      out.push({name:NOTES[r]+suf, root:r, suf:suf, fit:S.size/set.size, bass:(bassPc===r), simp:fi});
+    }
+  }
+  out.sort((a,b)=> (b.fit-a.fit) || ((b.bass?1:0)-(a.bass?1:0)) || (a.simp-b.simp) || (a.root-b.root));
+  return out.slice(0,12);
+}
+function chordNotesOf(name){
+  const p=parseChord(name); if(!p) return [];
+  for(let i=0;i<CHORD_FORMULAS.length;i++){
+    if(CHORD_FORMULAS[i][0]===p.suffix) return CHORD_FORMULAS[i][1].map(v=>NOTES[(p.idx+v)%12]);
+  }
+  return [p.root];
+}
+/* Fingering annotation: a chord token may carry "|hhhhhh" — 6 chars, one per string
+   (index 0 = 6th string … index 5 = 1st string, same order as the fingering arrays).
+   'x' = mute; otherwise a base-36 digit = the fret in capo-0-equivalent terms (F0):
+   open-at-capo string -> F0 = capo at save time; fretted at relative f -> F0 = capo + f. */
+const ANN_RE=/^[0-9a-zx]{6}$/;
+function splitChordToken(tok){
+  if(tok==null) return {name:'', ann:null};
+  const s=String(tok), bar=s.indexOf('|');
+  if(bar<0) return {name:s, ann:null};
+  const ann=s.slice(bar+1);
+  return {name:s.slice(0,bar), ann:ANN_RE.test(ann)? ann : null};
+}
+function annotationFrets(ann, capo){
+  // annotation (F0 terms) -> display frets for the given capo; null when any string
+  // would need a negative fret (annotation invalid at this capo -> caller falls back).
+  if(!ann || !ANN_RE.test(ann)) return null;
+  const out=[];
+  for(let i=0;i<6;i++){
+    const ch=ann[i];
+    if(ch==='x'){ out.push(-1); continue; }
+    const d=parseInt(ch,36)-capo;
+    if(d<0) return null;
+    out.push(d);
+  }
+  return out;
+}
+function boardToAnnotation(strings, capo){
+  // board string states (null | 'o' | 'x' | fret number, display terms) -> annotation (F0 terms).
+  // Unset strings are stored as mute: they contributed no notes, so the voicing is preserved.
+  let s='';
+  for(let i=0;i<6;i++){
+    const st=strings[i];
+    if(st==null || st==='x') s+='x';
+    else s+=(((st==='o')? capo : capo+st)).toString(36);
+  }
+  return s;
+}
+const CHORD_NAME_RE=/^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:b5|#5|b9|#9|sus[24]|add[0-9])*(?:\/[A-G](?:#|b)?)?$/;
+function isChordName(tok){ return !!tok && CHORD_NAME_RE.test(String(tok).trim()); }
 function isChordToken(tok){
   if(!tok) return false;
-  return /^[A-G](?:#|b)?(?:m|maj|min|dim|aug|sus|add|M)?[0-9]*(?:b5|#5|b9|#9|sus[24]|add[0-9])*(?:\/[A-G](?:#|b)?)?$/.test(tok);
+  const s=String(tok).trim();
+  if(s.indexOf('|')>=0){
+    const sp=splitChordToken(s);
+    return sp.ann!=null && isChordName(sp.name);
+  }
+  return CHORD_NAME_RE.test(s);
+}
+function splitBarParts(line){
+  // Split a bar line on its '|' separators WITHOUT breaking fingering annotations:
+  // in 'Name|hhhhhh' the pipe belongs to the token, so protect exact 6-char annotations first.
+  const prot=String(line||'').replace(/\|([0-9a-zx]{6})(?![0-9a-zx])/g, '\u0001$1');
+  return prot.split('|').map(p=>p.split('\u0001').join('|'));
 }
 function isBarLine(line){
-  const toks=line.split('|').join(' ').split(/\s+/).filter(Boolean);
+  const toks=splitBarParts(line).join(' ').split(/\s+/).filter(Boolean);
   if(!toks.length) return false;
   return toks.every(isChordToken);
 }
@@ -1591,6 +1702,7 @@ function renderPlay(){
   const el=$('v-play'); if(!el) return;
   if(playState.mode==='song' && playState.openId){ renderSong(); return; }
   if(playState.mode==='guide'){ renderGuide(); return; }
+  if(playState.mode==='rev'){ renderRevChord(); return; }
   unlockSongOverlay();
   if(playState.mode==='edit'){ renderSongEditor(); return; }
   if(playState.mode==='drill'){ renderDrill(); return; }
@@ -1598,6 +1710,7 @@ function renderPlay(){
   playState.mode='list';
   let h='<div class="secttl">弾く</div>';
   h+='<div class="card songcard" onclick="openGuide()"><div class="atitle">コード進行の割り出し方</div><div class="gsub">AI・耳コピ・理論で、知らない曲の進行を出す</div></div>';
+  h+='<div class="card songcard" onclick="openRevChord()"><div class="atitle">コード逆引き</div><div class="gsub">指板を押さえるとコード名が分かる</div></div>';
   const drillMeta=(data.songMeta||{})['__drill']; const drillTotal=drillMeta? (+drillMeta.plays||0):0;
   h+='<div class="btnrow" style="margin-bottom:12px"><button class="btn primary small" onclick="playNewSong()">＋ 曲を追加</button><button class="btn small" onclick="openDrill()">コード練習'+(drillTotal?'（通算'+drillTotal+'回）':'')+'</button><button class="btn small" onclick="openTuner()">チューナー</button></div>';
   const songs=allPlaySongs();
@@ -1691,9 +1804,63 @@ function renderGuide(){
   el.innerHTML=h;
   if(window.requestAnimationFrame) requestAnimationFrame(layoutGuideWrap); else layoutGuideWrap();
 }
+/* reverse chord lookup page (v3.18): the shared fretboard component as a standalone
+   reference tool — no insert/apply; tapping a candidate shows its big diagram. */
+function openRevChord(){ stopPlayFx(); playState.mode='rev'; fbSessions.rc=fbNewSession(true); renderPlay(); window.scrollTo(0,0); }
+function layoutRevWrap(){
+  const wrap=$('revWrap'); if(!wrap) return;
+  const vp=$('v-play'), head=document.querySelector('.songhead');
+  if(!vp || !head){ wrap.style.top='120px'; return; }
+  const vr=vp.getBoundingClientRect(), hr=head.getBoundingClientRect();
+  wrap.style.top=Math.round(hr.bottom - vr.top + 6)+'px';
+}
+function renderRevChord(){
+  const el=$('v-play'); if(!el) return;
+  lockSongOverlay();
+  if(!fbSessions.rc) fbSessions.rc=fbNewSession(true);
+  let h='<div class="songroot">';
+  h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
+    +'<div class="stitle-main"><span class="stitle">コード逆引き</span></div></div></div>';
+  h+='<div class="guidewrap" id="revWrap">';
+  h+='<div class="gnote">指板をタップして押さえ方を作ると、コード名の候補が適合度順に出ます。左端のボタンで開放（○）とミュート（×）を切り替えます。分かる弦だけでも大丈夫です。候補をタップすると大きな図で確認できます。</div>';
+  h+='<div id="rcBoard"></div><div class="fbnotes" id="rcNotes"></div><div class="fbcands" id="rcCands"></div>';
+  h+='<div style="margin-top:10px"><button class="btn small" onclick="fbClear(\'rc\')">クリア</button></div>';
+  h+='<div id="rcResult"></div>';
+  h+='</div></div>';
+  el.innerHTML=h;
+  fbRender('rc');
+  renderRevResult();
+  if(window.requestAnimationFrame) requestAnimationFrame(layoutRevWrap); else layoutRevWrap();
+}
+function renderRevResult(){
+  const box=$('rcResult'); if(!box) return;
+  const sess=fbSessions.rc;
+  if(!sess || !sess.sel){ box.innerHTML=''; return; }
+  const notes=chordNotesOf(sess.sel);
+  box.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;padding-top:14px">'
+    +'<div class="drilldiag">'+diagramSVG(sess.sel,{scale:3})+'</div>'
+    +'<div class="drillname">'+esc(sess.sel)+'</div>'
+    +(notes.length? '<div class="fbnotes" style="text-align:center">構成音：<b>'+notes.join('・')+'</b></div>':'')
+    +'</div>';
+}
 function dispChord(orig){
+  // annotated tokens (v3.18): transpose only the name part; the annotation is physical
+  // (capo-relative frets) and is resolved separately at diagram render time.
+  const sp=splitChordToken(orig);
   const shift=playState.transpose - playState.capo;
-  return transposeChord(orig, shift);
+  return transposeChord(sp.name, shift);
+}
+function chordDiagram(tok, w){
+  // Resolve one stored chord token to {name (displayed), svg, annotated}.
+  // An annotated occurrence renders its stored fingering (converted to the current capo);
+  // when the annotation is invalid at this capo, fall back to the generated fingering.
+  const sp=splitChordToken(tok);
+  const dc=dispChord(sp.name);
+  if(sp.ann){
+    const fr=annotationFrets(sp.ann, playState.capo);
+    if(fr) return {name:dc, svg:diagramSVG(dc,{frets:fr, w:w}), annotated:true};
+  }
+  return {name:dc, svg:diagramSVG(dc,{easy:playState.easy, w:w}), annotated:false};
 }
 function soundingKey(song){
   if(!song.key) return '-';
@@ -1733,7 +1900,7 @@ function unlockSongOverlay(){
   document.documentElement.classList.remove('songlock');
   if(document.body) document.body.classList.remove('songlock');
 }
-function layoutSongOverlay(){ if(typeof playState==='undefined') return; if(playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } else if(playState.mode==='guide'){ lockSongOverlay(); layoutGuideWrap(); } }
+function layoutSongOverlay(){ if(typeof playState==='undefined') return; if(playState.mode==='song' && playState.openId){ lockSongOverlay(); layoutSheetWrap(); } else if(playState.mode==='guide'){ lockSongOverlay(); layoutGuideWrap(); } else if(playState.mode==='rev'){ lockSongOverlay(); layoutRevWrap(); } }
 function layoutSheetWrap(){
   const wrap=$('sheetWrap'); if(!wrap) return;
   const vp=$('v-play'), head=document.querySelector('.songhead');
@@ -1791,32 +1958,36 @@ function renderSong(){
       if(ln.type==='blank'){ h+='<div style="height:5px"></div>'; return; }
       if(ln.type==='bar'){
         let row='<div class="bar-row">';
-        ln.raw.split('|').forEach((part, pi)=>{
-          const toks=part.trim().split(/\s+/).filter(Boolean);
+        const bparts=barLineTokens(ln.raw);
+        bparts.forEach((toks, pi)=>{
           toks.forEach((tok, ti)=>{
-            const dc=dispChord(tok);
-            const cell='<span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:44})+'</span><div class="cname">'+esc(dc)+(playState.easy && EASY_SHAPES[dc]?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div>';
+            if(playState.chordEdit) row+='<button class="insbtn" onclick="playInsertChordBar(event,'+si+','+li+','+pi+','+ti+')" aria-label="ここにコードを追加">＋</button>';
+            const cd=chordDiagram(tok, 44), dc=cd.name;
+            const cell='<span class="dgchip">'+cd.svg+'</span><div class="cname">'+esc(dc)+((!cd.annotated && playState.easy && EASY_SHAPES[dc])?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div>';
             row+= playState.chordEdit
               ? '<div class="bar-cell ced" onclick="playEditChordBar(event,'+si+','+li+','+pi+','+ti+')">'+cell+'</div>'
               : '<div class="bar-cell">'+cell+'</div>';
           });
         });
+        if(playState.chordEdit && bparts.length) row+='<button class="insbtn" onclick="playInsertChordBar(event,'+si+','+li+','+(bparts.length-1)+','+bparts[bparts.length-1].length+')" aria-label="行末にコードを追加">＋</button>';
         row+='</div>'; h+=row;
         if(song.builtin && !aligned){ const lt=(lyrLines[rowIdx]||'').trim(); if(lt) h+='<div class="sheet-lyr">'+esc(lt)+'</div>'; }
         rowIdx++;
         return;
       }
       let lh='<div class="lyr-line">';
+      if(playState.chordEdit) lh+='<button class="insbtn" onclick="playInsertChord(event,'+si+','+li+',0)" aria-label="行頭にコードを追加">＋</button>';
       (ln.segs||[]).forEach((sg, sgi)=>{
         if(sg.chord){
-          const dc=dispChord(sg.chord);
-          const top='<span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:48})+'</span><span class="cname">'+esc(dc)+'</span>';
+          const cd=chordDiagram(sg.chord, 48), dc=cd.name;
+          const top='<span class="dgchip">'+cd.svg+'</span><span class="cname">'+esc(dc)+'</span>';
           lh+= playState.chordEdit
             ? '<span class="seg"><span class="seg-top ced" onclick="playEditChord(event,'+si+','+li+','+sgi+')">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>'
             : '<span class="seg"><span class="seg-top">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }else{
           lh+='<span class="seg plain"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }
+        if(playState.chordEdit) lh+='<button class="insbtn" onclick="playInsertChord(event,'+si+','+li+','+(sgi+1)+')" aria-label="ここにコードを追加">＋</button>';
       });
       lh+='</div>'; h+=lh;
     });
@@ -1860,7 +2031,7 @@ function songEditSource(song){
   if(song.builtin) return {kind:'body', text:builtinBody(song)};
   return {kind:'song', text:(song.body||'')};
 }
-function barLineTokens(raw){ return String(raw||'').split('|').map(p=>p.trim().split(/\s+/).filter(Boolean)); }
+function barLineTokens(raw){ return splitBarParts(raw).map(p=>p.trim().split(/\s+/).filter(Boolean)); }
 function barLineJoin(parts){ return parts.map(t=>t.join(' ')).join(' | '); }
 function serializeSongBody(sections){
   const out=[];
@@ -1874,60 +2045,206 @@ function serializeSongBody(sections){
   });
   return out.join('\n');
 }
+/* ================= fretboard input (v3.18, shared component) =================
+   One implementation, two hosts: the chord editor panel (session 'ce', showPct OFF —
+   the user wants just ranked name chips while editing) and the standalone コード逆引き
+   page (session 'rc', showPct ON — it is a reference tool).
+   Board orientation matches the app diagrams: horizontal, nut at left, 1st string
+   (high e) on the TOP row, 6th string at the bottom. Fret columns are 1..11.
+   String state (array index 0 = 6th string … 5 = 1st string): null (unset) |
+   'o' (open) | 'x' (mute) | fret number (display terms; capo = the nut). */
+let fbSessions={};
+function fbNewSession(showPct){ return {strings:[null,null,null,null,null,null], sel:null, showPct:!!showPct}; }
+function fbPitchInfo(sess){
+  const pcs=new Set(), names=[]; let bass=null;
+  for(let i=0;i<6;i++){
+    const st=sess.strings[i];
+    if(st==null || st==='x') continue;
+    const pc=(STRING_OPEN_PC[i] + (st==='o'? 0 : st))%12;
+    pcs.add(pc);
+    if(bass===null) bass=pc;
+    const nm=NOTES[pc]; if(!names.includes(nm)) names.push(nm);
+  }
+  return {pcs:pcs, names:names, bass:bass};
+}
+function fbBoardHTML(id, sess){
+  let hd='<div class="fbhead"><span class="fbmark"></span>';
+  for(let f=1;f<=11;f++) hd+='<span>'+f+'</span>';
+  hd+='</div>';
+  let rows='';
+  for(let r=0;r<6;r++){
+    const i=5-r; // top row = 1st string
+    const st=sess.strings[i];
+    const mark=(st==='o')? '○' : (st==='x')? '×' : '・';
+    rows+='<div class="fbrow"><button class="fbmark'+((st==='o'||st==='x')?' set':'')+'" onclick="fbMark(\''+id+'\','+i+')" aria-label="弦の開放／ミュート切替">'+mark+'</button>';
+    for(let f=1;f<=11;f++) rows+='<button class="fbcell" onclick="fbTap(\''+id+'\','+i+','+f+')" aria-label="'+(i+1)+'弦 '+f+'フレット">'+(st===f? '<span class="fbdot"></span>':'')+'</button>';
+    rows+='</div>';
+  }
+  return '<div class="fretboard">'+hd+rows+'</div>';
+}
+function fbRender(id){
+  const sess=fbSessions[id]; if(!sess) return;
+  const b=$(id+'Board'); if(b) b.innerHTML=fbBoardHTML(id, sess);
+  const info=fbPitchInfo(sess);
+  const n=$(id+'Notes');
+  if(n) n.innerHTML= info.names.length? '構成音：<b>'+info.names.join('・')+'</b>' : '弦をタップして押さえ方を作ると、コード名の候補が出ます。';
+  const c=$(id+'Cands');
+  if(c){
+    if(!info.pcs.size){ c.innerHTML=''; }
+    else{
+      const cands=identifyChord(info.pcs, info.bass);
+      c.innerHTML= cands.length
+        ? cands.map(cd=>'<button class="candchip'+(sess.sel===cd.name?' sel':'')+'" onclick="fbSelect(\''+id+'\',\''+cd.name+'\')">'+esc(cd.name)+(sess.showPct? '<span class="fit">'+Math.round(cd.fit*100)+'%</span>':'')+'</button>').join('')
+        : '<span class="note">候補がありません（構成音の組み合わせを確認してください）</span>';
+    }
+  }
+  const sn=$(id+'Sel');
+  if(sn) sn.innerHTML='選択中：'+(sess.sel? '<b>'+esc(sess.sel)+'</b>' : '候補をタップしてください');
+}
+function fbTap(id, strIdx, fret){
+  const sess=fbSessions[id]; if(!sess) return;
+  sess.strings[strIdx]=(sess.strings[strIdx]===fret)? null : fret;
+  sess.sel=null;
+  fbRender(id); if(id==='rc') renderRevResult();
+}
+function fbMark(id, strIdx){
+  const sess=fbSessions[id]; if(!sess) return;
+  const cur=sess.strings[strIdx];
+  sess.strings[strIdx]=(cur==null || typeof cur==='number')? 'o' : (cur==='o')? 'x' : null;
+  sess.sel=null;
+  fbRender(id); if(id==='rc') renderRevResult();
+}
+function fbClear(id){
+  const sess=fbSessions[id]; if(!sess) return;
+  sess.strings=[null,null,null,null,null,null]; sess.sel=null;
+  fbRender(id); if(id==='rc') renderRevResult();
+}
+function fbSelect(id, name){
+  const sess=fbSessions[id]; if(!sess) return;
+  sess.sel=name;
+  fbRender(id);
+  if(id==='ce'){
+    const inp=$('ceInput'); if(inp) inp.value=name;
+    chordEditPreview();
+    const err=$('ceBoardErr'); if(err) err.style.display='none';
+  }
+  if(id==='rc') renderRevResult();
+}
+function fbInitFromFrets(sess, frets){
+  // frets: display-terms array (index 0 = 6th string, -1 mute, 0 open) -> board states
+  for(let i=0;i<6;i++){
+    const f=frets? frets[i] : -1;
+    sess.strings[i]=(f==null || f<0)? 'x' : (f===0)? 'o' : f;
+  }
+}
 function playEditChord(e, si, li, idx){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'seg', si:si, li:li, idx:idx}); }
 function playEditChordBar(e, si, li, pi, ti){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'bar', si:si, li:li, pi:pi, ti:ti}); }
+function playInsertChord(e, si, li, at){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'ins-seg', si:si, li:li, at:at}); }
+function playInsertChordBar(e, si, li, pi, ti){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'ins-bar', si:si, li:li, pi:pi, ti:ti}); }
+function chordEditTab(t){
+  if(!chordEditCtx) return;
+  chordEditCtx.tab=t;
+  const n=$('ceTabName'), b=$('ceTabBoard'), bn=$('ceTabBtnName'), bb=$('ceTabBtnBoard');
+  if(n) n.style.display=(t==='name')? '' : 'none';
+  if(b) b.style.display=(t==='board')? '' : 'none';
+  if(bn) bn.classList.toggle('on', t==='name');
+  if(bb) bb.classList.toggle('on', t==='board');
+  if(t==='board') fbRender('ce');
+}
 function openChordEditor(ctx){
   const song=playSongById(playState.openId); if(!song) return;
   const src=songEditSource(song);
   const sections=parseSongBody(src.text);
   const sec=sections[ctx.si]; if(!sec) return;
   const ln=sec.lines[ctx.li]; if(!ln) return;
+  const isAdd=(ctx.kind==='ins-seg' || ctx.kind==='ins-bar');
   let cur='';
   if(ctx.kind==='seg'){ if(!ln.segs || !ln.segs[ctx.idx] || !ln.segs[ctx.idx].chord) return; cur=ln.segs[ctx.idx].chord; }
-  else { const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; cur=parts[ctx.pi][ctx.ti]; }
-  ctx.sections=sections; ctx.srcKind=src.kind; ctx.songId=song.id;
-  const disp=dispChord(cur);
+  else if(ctx.kind==='bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; cur=parts[ctx.pi][ctx.ti]; }
+  else if(ctx.kind==='ins-seg'){ if(!ln.segs || ctx.at<0 || ctx.at>ln.segs.length) return; }
+  else if(ctx.kind==='ins-bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || ctx.ti<0 || ctx.ti>parts[ctx.pi].length) return; }
+  else return;
+  ctx.sections=sections; ctx.srcKind=src.kind; ctx.songId=song.id; ctx.tab='name'; ctx.mode=isAdd? 'add':'edit';
+  const disp=isAdd? '' : dispChord(cur);
   const seen=[], seenSet=new Set();
   const noteChord=c=>{ const d=dispChord(c); if(!seenSet.has(d)){ seenSet.add(d); seen.push(d); } };
   sections.forEach(s2=>s2.lines.forEach(l2=>{
     if(l2.type==='lyric') (l2.segs||[]).forEach(sg=>{ if(sg.chord) noteChord(sg.chord); });
     else if(l2.type==='bar') barLineTokens(l2.raw).forEach(part=>part.forEach(noteChord));
   }));
-  let h='<div style="display:flex;align-items:flex-start;gap:10px"><div class="atitle" style="font-size:1.05em;flex:1">コードを変更</div><button class="btn small" onclick="closeDetail()">✕</button></div>';
-  h+='<div class="note" style="margin:6px 0 2px">いまのコード：<b>'+esc(disp)+'</b>（タップした位置のコードだけを変更します。表示されている名前のまま編集できます）</div>';
-  h+='<div style="display:flex;align-items:center;gap:12px;margin:10px 0 4px"><span class="dgchip" id="cePrev">'+diagramSVG(disp,{easy:playState.easy, w:48})+'</span><span id="cePrevName" style="font-weight:800;color:#d8a24a;font-size:1.1em">'+esc(disp)+'</span></div>';
-  h+='<div class="playform"><label>新しいコード名</label><input class="textin" id="ceInput" value="'+escA(disp)+'" oninput="chordEditPreview()" autocomplete="off" autocapitalize="off"></div>';
+  // fretboard session (shared component, % OFF in the editor): when editing, start from
+  // the current voicing (its annotation if it has one, else the generated fingering).
+  const sess=fbNewSession(false); fbSessions.ce=sess;
+  if(!isAdd){
+    const sp=splitChordToken(cur);
+    let fr=sp.ann? annotationFrets(sp.ann, playState.capo) : null;
+    if(!fr) fr=getFingering(disp, playState.easy);
+    fbInitFromFrets(sess, fr);
+    sess.sel=disp;
+  }
+  let h='<div style="display:flex;align-items:flex-start;gap:10px"><div class="atitle" style="font-size:1.05em;flex:1">'+(isAdd? 'コードを追加':'コードを変更')+'</div><button class="btn small" onclick="closeDetail()">✕</button></div>';
+  h+= isAdd
+    ? '<div class="note" style="margin:6px 0 2px">タップした位置に新しいコードを差し込みます。名前を打つか、指板で押さえ方を作ってください。</div>'
+    : '<div class="note" style="margin:6px 0 2px">いまのコード：<b>'+esc(disp)+'</b>（タップした位置のコードだけを変更します。表示されている名前のまま編集できます）</div>';
+  h+='<div class="cetabs"><button class="cetab on" id="ceTabBtnName" onclick="chordEditTab(\'name\')">名前</button><button class="cetab" id="ceTabBtnBoard" onclick="chordEditTab(\'board\')">指板</button></div>';
+  /* name tab */
+  h+='<div id="ceTabName">';
+  h+='<div style="display:flex;align-items:center;gap:12px;margin:10px 0 4px"><span class="dgchip" id="cePrev">'+(isAdd? '' : diagramSVG(disp,{easy:playState.easy, w:48}))+'</span><span id="cePrevName" style="font-weight:800;color:#d8a24a;font-size:1.1em">'+esc(disp)+'</span></div>';
+  h+='<div class="playform"><label>'+(isAdd? '追加するコード名':'新しいコード名')+'</label><input class="textin" id="ceInput" value="'+escA(disp)+'" oninput="chordEditPreview()" autocomplete="off" autocapitalize="off"></div>';
   h+='<div class="note" id="ceErr" style="color:#e5484d;display:none;margin-top:4px">コード名として読み取れません（例：Am、F#m7、G/B）</div>';
   if(seen.length) h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px">'+seen.map(c=>'<button class="ppill" onclick="chordEditPick(\''+c+'\')">'+esc(c)+'</button>').join('')+'</div>';
-  h+='<div class="btnrow"><button class="btn primary" onclick="playApplyChordEdit()">変更</button><button class="btn" onclick="closeDetail()">キャンセル</button></div>';
+  h+='</div>';
+  /* fretboard tab */
+  h+='<div id="ceTabBoard" style="display:none">'
+    +'<div id="ceBoard"></div><div class="fbnotes" id="ceNotes"></div><div class="fbcands" id="ceCands"></div>'
+    +'<div class="fbsel" id="ceSel"></div>'
+    +'<div class="note" id="ceBoardErr" style="color:#e5484d;display:none;margin-top:4px">候補からコードを選んでください</div>'
+    +'<div style="margin-top:8px"><button class="btn small" onclick="fbClear(\'ce\')">クリア</button></div>'
+    +'</div>';
+  h+='<div class="btnrow"><button class="btn primary" onclick="playApplyChordEdit()">'+(isAdd? '追加':'変更')+'</button><button class="btn" onclick="closeDetail()">キャンセル</button></div>';
   if(song.builtin && songHasOverride(song.id)){
     h+='<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><button class="btn small" onclick="playResetSongEdits()">この曲の編集をリセット</button><div class="note" style="margin-top:4px">この曲に保存された編集（歌詞つき譜面・コード編集）をすべて消し、収録時のコード進行だけの表示に戻します。</div></div>';
   }
   chordEditCtx=ctx;
   openSheet(h);
+  fbRender('ce');
 }
 function chordEditPreview(){
   const inp=$('ceInput'); if(!inp) return;
   const v=(inp.value||'').trim();
   const err=$('ceErr');
-  if(v && isChordToken(v)){
+  if(v && isChordName(v)){
     const p=$('cePrev'); if(p) p.innerHTML=diagramSVG(v,{easy:playState.easy, w:48});
     const n=$('cePrevName'); if(n) n.textContent=v;
     if(err) err.style.display='none';
   }else{
-    if(err) err.style.display='';
+    if(err) err.style.display= v? '' : 'none';
   }
 }
 function chordEditPick(name){ const inp=$('ceInput'); if(inp) inp.value=name; chordEditPreview(); }
 function playApplyChordEdit(){
   const ctx=chordEditCtx; if(!ctx) return;
-  const inp=$('ceInput'); const v=inp? (inp.value||'').trim() : '';
-  if(!v || !isChordToken(v)){ const err=$('ceErr'); if(err) err.style.display=''; return; }
-  const stored=transposeChord(v, playState.capo - playState.transpose);
+  let token='';
+  if(ctx.tab==='board'){
+    // fretboard tab: the selected candidate name + the board's fingering as an annotation.
+    const sess=fbSessions.ce;
+    if(!sess || !sess.sel){ const err=$('ceBoardErr'); if(err) err.style.display=''; return; }
+    const storedName=transposeChord(sess.sel, playState.capo - playState.transpose);
+    token=storedName+'|'+boardToAnnotation(sess.strings, playState.capo);
+  }else{
+    // name tab: a plain rename/insert — any previous annotation is dropped (new name =
+    // generated diagram), per the v3.18 rule.
+    const inp=$('ceInput'); const v=inp? (inp.value||'').trim() : '';
+    if(!v || !isChordName(v)){ const err=$('ceErr'); if(err) err.style.display=''; return; }
+    token=transposeChord(v, playState.capo - playState.transpose);
+  }
   const sec=ctx.sections[ctx.si]; if(!sec) return;
   const ln=sec.lines[ctx.li]; if(!ln) return;
-  if(ctx.kind==='seg'){ if(!ln.segs || !ln.segs[ctx.idx]) return; ln.segs[ctx.idx].chord=stored; }
-  else { const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; parts[ctx.pi][ctx.ti]=stored; ln.raw=barLineJoin(parts); }
+  if(ctx.kind==='seg'){ if(!ln.segs || !ln.segs[ctx.idx]) return; ln.segs[ctx.idx].chord=token; }
+  else if(ctx.kind==='bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; parts[ctx.pi][ctx.ti]=token; ln.raw=barLineJoin(parts); }
+  else if(ctx.kind==='ins-seg'){ if(!ln.segs) return; ln.segs.splice(ctx.at, 0, {chord:token, text:''}); }
+  else if(ctx.kind==='ins-bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || ctx.ti<0 || ctx.ti>parts[ctx.pi].length) return; parts[ctx.pi].splice(ctx.ti, 0, token); ln.raw=barLineJoin(parts); }
+  else return;
   const text=serializeSongBody(ctx.sections);
   const song=playSongById(ctx.songId); if(!song) return;
   if(song.builtin){
