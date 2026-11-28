@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.4">
+<meta name="app-version" content="3.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -18,9 +18,10 @@ body{ padding-bottom:96px; }
 header{ position:sticky; top:0; z-index:20; background:rgba(20,18,16,.92); backdrop-filter:blur(8px); padding:calc(env(safe-area-inset-top, 0px) + 16px) 14px 8px; border-bottom:1px solid var(--line); }
 h1{ font-size:1.06em; margin:0; letter-spacing:.14em; font-weight:700; }
 h1 .en{ color:var(--acc); font-size:.72em; letter-spacing:.22em; margin-left:8px; }
-#syncbar{ display:flex; align-items:center; gap:7px; margin-top:7px; background:none; border:none; color:var(--sub); font-size:.8em; padding:4px 0; cursor:pointer; text-align:left; }
-#syncdot{ width:8px; height:8px; border-radius:50%; background:var(--red); flex:none; }
-.sbhint{ color:var(--acc); }
+/* sync dot in title line: 9px visual, ~29px hit area via padding + background-clip */
+#syncdot{ display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--acc); vertical-align:middle; margin:-10px -10px -10px -2px; padding:10px; background-clip:content-box; cursor:pointer; }
+#syncdot.err{ animation:syncpulse 1.1s ease-in-out infinite; }
+@keyframes syncpulse{ 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.35); opacity:.55; } }
 main{ padding:12px 14px 0; max-width:640px; margin:0 auto; }
 .view{ display:none; touch-action:pan-y; }
 .view.on{ display:block; }
@@ -170,31 +171,28 @@ select.textin{ appearance:none; }
 .savedmark{ color:var(--green); font-size:.75em; margin-left:6px; }
 
 /* play / chord sheet */
-.sheet{ background:#ffffff; color:#1a1a1a; border-radius:14px; padding:18px 14px 22px; margin-top:10px; overflow:hidden; }
-.sheet-sec{ margin-bottom:20px; }
+.sheet{ background:#ffffff; color:#1a1a1a; border-radius:14px; padding:14px; margin-top:10px; overflow:hidden; }
+.sheet-sec{ margin-bottom:12px; }
 .sheet-sec:last-child{ margin-bottom:4px; }
-.sheet-secname{ font-weight:800; font-size:.92em; color:#7a5a17; border-bottom:2px solid #e8dcc0; padding-bottom:5px; margin-bottom:12px; letter-spacing:.06em; }
-.bar-row{ display:flex; flex-wrap:wrap; align-items:flex-start; margin-bottom:10px; }
-.bar-cell{ display:flex; flex-direction:column; align-items:center; width:60px; padding:2px 2px 4px; border-left:1px solid #ddd6c4; }
+.sheet-secname{ font-weight:800; font-size:.92em; color:#7a5a17; border-bottom:2px solid #e8dcc0; padding-bottom:5px; margin-bottom:8px; letter-spacing:.06em; }
+.bar-row{ display:flex; flex-wrap:wrap; align-items:flex-start; margin-bottom:7px; }
+.bar-cell{ display:flex; flex-direction:column; align-items:center; width:60px; padding:1px 2px 3px; border-left:1px solid #ddd6c4; }
 .bar-cell:first-child{ border-left:none; }
 .bar-cell .cname{ font-weight:800; font-size:.92em; color:#14335c; margin-top:2px; line-height:1.2; text-align:center; }
-.lyr-line{ line-height:1.25; margin-bottom:10px; word-break:break-all; }
+.lyr-line{ line-height:1.25; margin-bottom:4px; word-break:break-all; }
 .seg{ display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:bottom; }
-.seg-top{ height:56px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:48px; }
-.seg-top .cname{ font-weight:800; font-size:.86em; color:#14335c; line-height:1.15; margin-top:1px; }
-.seg-lyr{ font-size:1.15em; line-height:1.45; white-space:pre-wrap; color:#1a1a1a; min-height:1.45em; }
+.seg-top{ height:42px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:38px; }
+.seg-top .cname{ font-weight:800; font-size:.82em; color:#14335c; line-height:1.15; margin-top:1px; }
+.seg-lyr{ font-size:.95em; line-height:1.35; white-space:pre-wrap; color:#1a1a1a; min-height:1.35em; }
 .seg.plain .seg-top{ min-width:0; }
 .ctlgrid{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .stepper{ display:flex; align-items:center; gap:6px; background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:4px 6px; }
 .stepper button{ appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); width:36px; height:36px; border-radius:50%; font-size:17px; cursor:pointer; line-height:1; }
 .stepper .sv{ min-width:64px; text-align:center; font-size:.82em; }
 .stepper .sv b{ color:var(--acc); font-size:1.05em; }
-#metroDot{ width:14px; height:14px; border-radius:50%; background:#574c3a; flex:none; transition:background .06s, transform .06s; }
-#metroDot.beat{ background:var(--red); transform:scale(1.35); }
-#metroDot.beat1{ background:var(--acc); transform:scale(1.5); }
 .songcard{ cursor:pointer; }
 .playform label{ display:block; font-size:.8em; color:var(--sub); margin:12px 0 5px; }
-.sec-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; background:#262019; border-radius:9px; padding:6px 8px 6px 12px; margin-bottom:12px; }
+.sec-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; background:#262019; border-radius:9px; padding:6px 8px 6px 12px; margin-bottom:8px; }
 .sec-bar-name{ color:#ece5d8; font-weight:800; font-size:.88em; letter-spacing:.06em; }
 .loopbtn{ appearance:none; border:1px solid #574c3a; background:#1e1a17; color:#a99e8c; border-radius:999px; padding:6px 13px; font-size:.75em; min-height:32px; cursor:pointer; font-weight:700; flex:none; }
 .loopbtn.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
@@ -214,7 +212,8 @@ select.textin{ appearance:none; }
 
 /* play v3.4: song = fixed overlay (only sheet scrolls), compact 2-row toolbar */
 .songroot{ display:flex; flex-direction:column; height:100%; min-height:0; }
-#v-play.songmode{ position:fixed; left:0; right:0; bottom:0; z-index:25; background:var(--bg); display:flex; flex-direction:column; padding:6px 14px 84px; box-sizing:border-box; touch-action:none; overflow:hidden; }
+/* song overlay covers the whole screen incl. app header (top:0); padding-bottom: #nav height 56 + bottom offset 15 = 71px footprint, +6px clearance = 77px (was 84px) */
+#v-play.songmode{ position:fixed; left:0; right:0; top:0; bottom:0; z-index:25; background:var(--bg); display:flex; flex-direction:column; padding:calc(8px + env(safe-area-inset-top)) 14px 77px; box-sizing:border-box; touch-action:none; overflow:hidden; }
 html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:none; }
 .songhead{ flex:none; padding-bottom:4px; touch-action:none; }
 .stitle-row{ display:flex; align-items:center; gap:8px; }
@@ -240,26 +239,29 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .peff b{ color:var(--acc); }
 .plbl{ font-size:.75em; color:var(--sub); flex:none; }
 .pslider{ flex:1; min-width:70px; }
-.adjpanel{ display:none; flex:none; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:6px 8px; margin-top:5px; touch-action:none; }
-.adjpanel.open{ display:block; }
+.pdiv{ flex:none; width:1px; align-self:stretch; background:var(--line); margin:3px 2px; }
+.songops{ display:flex; gap:6px; justify-content:flex-end; margin-top:6px; }
+.songops button{ appearance:none; background:none; border:none; color:var(--sub); font-size:.78em; cursor:pointer; padding:5px 8px; font-family:inherit; }
+.scrollbadge{ position:fixed; right:22px; bottom:89px; z-index:26; pointer-events:none; transition:opacity .2s; }
+.scrollbadge span{ background:rgba(38,32,25,.88); color:var(--acc); font-size:.72em; padding:5px 11px; border-radius:999px; letter-spacing:.04em; }
+.scrollbadge.off{ opacity:0; }
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:4px 0; -webkit-overflow-scrolling:touch; scrollbar-width:none; touch-action:none; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--sub); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
 .sheetwrap{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:14px; min-height:0; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
-.strumstrip{ display:flex; align-items:center; gap:8px; background:#262019; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:12px; cursor:pointer; min-height:30px; box-sizing:border-box; }
+.strumstrip{ display:flex; align-items:center; gap:8px; background:#262019; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
 .strumstrip b{ color:var(--acc); flex:none; }
 .strumstrip .strum-txt{ flex:1; min-width:0; }
 .strumstrip.collapsed .strum-txt{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .strumstrip .strum-tgl{ flex:none; color:var(--sub); font-size:.85em; }
-.sheet-lyr{ font-size:1.05em; line-height:1.5; color:#222; margin:-4px 0 12px; white-space:pre-wrap; }
+.sheet-lyr{ font-size:1.05em; line-height:1.4; color:#222; margin:-4px 0 8px; white-space:pre-wrap; }
 </style>
 </head>
 <body>
 <div id="veil"></div>
 <header>
-  <div class="hrow"><h1>Musilabo<span class="en">MUSIC ATLAS</span></h1><button id="bell" onclick="openHistory()" aria-label="更新履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="bellbdg"></span></button></div>
-  <button id="syncbar" onclick="syncBarTap()"><span id="syncdot"></span><span id="syncmsg">読み込み中…</span></button>
+  <div class="hrow"><h1>Musilabo<span class="en">MUSIC ATLAS</span><span id="syncdot" onclick="syncBarTap()" title="同期"></span></h1><button id="bell" onclick="openHistory()" aria-label="更新履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="bellbdg"></span></button></div>
 </header>
 <main>
   <section class="view on" id="v-rec"></section>
@@ -286,7 +288,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.4';
+const APP_VERSION='3.5';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -527,7 +529,18 @@ function mergeData(a,b){
   const sids=new Set([...Object.keys(a.songs||{}),...Object.keys(b.songs||{})]);
   sids.forEach(id=>{ const x=(a.songs||{})[id], y=(b.songs||{})[id]; out.songs[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
   const smids=new Set([...Object.keys(a.songMeta||{}),...Object.keys(b.songMeta||{})]);
-  smids.forEach(id=>{ const x=(a.songMeta||{})[id], y=(b.songMeta||{})[id]; out.songMeta[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
+  smids.forEach(id=>{
+    const x=(a.songMeta||{})[id], y=(b.songMeta||{})[id];
+    if(!x){ out.songMeta[id]=y; return; }
+    if(!y){ out.songMeta[id]=x; return; }
+    const win=(+y.u||0)>(+x.u||0)? y : x;
+    const lose=(win===y)? x : y;
+    const merged=Object.assign({}, win);
+    // keep lyrics payloads from the loser if the winner lacks them (a stale local meta must not wipe alignedBody/lyrics)
+    if(!merged.alignedBody && lose.alignedBody) merged.alignedBody=lose.alignedBody;
+    if(!merged.lyrics && lose.lyrics) merged.lyrics=lose.lyrics;
+    out.songMeta[id]=merged;
+  });
   const aids=new Set([...Object.keys(a.artists||{}),...Object.keys(b.artists||{})]);
   aids.forEach(id=>{ const x=a.artists[id], y=b.artists[id]; out.artists[id]=(!y)?x:(!x)?y:((+y.u||0)>(+x.u||0)?y:x); });
   { const nmap=new Map(); (a.world.nodes||[]).forEach(n=>nmap.set(n[0],n)); (b.world.nodes||[]).forEach(n=>{ if(!nmap.has(n[0])) nmap.set(n[0],n); }); out.world.nodes=[...nmap.values()];
@@ -1167,6 +1180,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.5','2026-11-28','コード譜の表示を詰めて見やすくした（図と文字を少し小さくし、1行に複数のコードが流れるU-FRET式の密度に）。曲画面ではアプリのヘッダーも隠れ、譜面が画面のほぼ全体を占める形にした。設定は普段は隠れ、必要な時だけ「設定」で開く形にした。同期表示はタイトル横のドットだけにした（同期バー廃止）。実効表示とメトロノームボタンを外してツールバーをすっきりさせた。自動スクロールは譜面をタップして開始／停止する形に変更。「調整」パネルを廃止し、自分の曲の編集・削除は曲一覧のカードへ移した。下の余白も詰めた。歌詞つきデータが同期で消えないよう保持方法も改善'],
  ['3.4','2026-11-28','曲画面のレイアウトを変更：白い譜面が画面の大部分を占める形にし、設定は上部に2行のツールバーへ圧縮。速度・文字サイズ・歌詞ボタンは「調整」の中に収納。曲画面では譜面の枠内だけがスクロールし、画面全体は固定されるようにした。内蔵曲に歌詞つきデータがある場合は、コードと歌詞をU-FRET式に一体表示'],
  ['3.3','2026-11-28','コードの押さえ方図を90度反時計回りに回転し、横向き（ナットが左、高い弦が上）に変更して見やすくした'],
  ['3.2','2026-11-28','曲画面を固定レイアウトに変更：操作部は上に固定され、コード譜の枠内だけがスクロールするように。操作ボタンをコンパクト化。内蔵曲『世界は広いよ』に歌詞を貼れる欄を追加（セクションごと、Drive同期）'],
@@ -1366,7 +1380,7 @@ function diagramSVG(chordName, opts){
   // Horizontal chart: the old vertical chart rotated 90deg CCW.
   // Nut at left, frets extend right, high e (string index 5) on top, low E (index 0) at bottom.
   const W=44,H=38, lx=10, fw=6.0, yTop=10, dy=4.9;
-  const sc=(opts&&opts.scale)? opts.scale:1;
+  const sc=(opts&&opts.w)? (opts.w/W) : ((opts&&opts.scale)? opts.scale : 1);
   const rowY=i=> yTop+(5-i)*dy;
   const colX=f=> lx+(f-base)*fw+fw/2;
   let s='<svg width="'+Math.round(W*sc)+'" height="'+Math.round(H*sc)+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
@@ -1435,7 +1449,7 @@ function builtinBody(song){
   // not used for rendering builtin (sections used directly), kept for editor conversion
   return song.sections.map(sec=> '#'+sec.name+'\n'+sec.bars.join('\n')).join('\n');
 }
-let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false, speedPct:100, loopSec:-1, showAdj:false, strumOpen:false};
+let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false, speedPct:100, loopSec:-1, showCtl:false, strumOpen:false};
 let drillState={idx:0, shown:1, ok:0, ng:0, easy:false, auto:false, autoSec:8, timer:null};
 let tunerState={stream:null, raf:null, ctx:null, analyser:null, running:false, lastUpd:0, refCtx:null};
 function effectiveBpm(){ return Math.max(1, Math.round(playState.bpm*(playState.speedPct||100)/100)); }
@@ -1491,14 +1505,16 @@ function renderPlay(){
     const hasAligned=!!(s.builtin && meta && typeof meta.alignedBody==='string' && meta.alignedBody.trim());
     h+='<div class="card songcard" onclick="openPlaySong(\''+s.id+'\')"><div class="atitle">'+esc(s.title||'無題')+(s.builtin?' <span class="reqst done">収録曲</span>':'')+(hasAligned?' <span class="reqst done">歌詞つき</span>':'')+'</div>'
       +'<div class="aartist">'+esc(s.artist||'')+'</div>'
-      +'<div class="ameta">BPM '+(s.bpm||'-')+' ・ キー '+esc(s.key||'-')+' ・ カポ '+(s.capo||0)+(plays?' ・ '+plays+'回弾いた':'')+'</div></div>';
+      +'<div class="ameta">BPM '+(s.bpm||'-')+' ・ キー '+esc(s.key||'-')+' ・ カポ '+(s.capo||0)+(plays?' ・ '+plays+'回弾いた':'')+'</div>'
+      +(!s.builtin? '<div class="songops"><button onclick="event.stopPropagation();playEditSong(\''+s.id+'\')">編集</button><button onclick="event.stopPropagation();playDeleteSong(\''+s.id+'\')">削除</button></div>' : '')
+      +'</div>';
   });
   el.innerHTML=h;
 }
 function openPlaySong(id){
   const s=playSongById(id); if(!s) return;
   stopPlayFx();
-  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.showAdj=false; playState.strumOpen=false;
+  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.showCtl=false; playState.strumOpen=false;
   bumpPlays(id);
   renderSong(); window.scrollTo(0,0);
 }
@@ -1537,19 +1553,18 @@ function playSaveLyrics(){
 function lockSongOverlay(){
   const el=$('v-play'); if(!el) return;
   el.classList.add('songmode');
-  const hd=document.querySelector('header');
-  el.style.top=(hd? hd.offsetHeight : 96)+'px';
   document.documentElement.classList.add('songlock');
   if(document.body) document.body.classList.add('songlock');
 }
 function unlockSongOverlay(){
-  const el=$('v-play'); if(el){ el.classList.remove('songmode'); el.style.top=''; }
+  const el=$('v-play'); if(el) el.classList.remove('songmode');
   document.documentElement.classList.remove('songlock');
   if(document.body) document.body.classList.remove('songlock');
 }
 function layoutSongOverlay(){ if(typeof playState!=='undefined' && playState.mode==='song' && playState.openId) lockSongOverlay(); }
 window.addEventListener('resize', layoutSongOverlay);
-function playToggleAdj(){ playState.showAdj=!playState.showAdj; renderSong(); }
+function playToggleCtl(){ playState.showCtl=!playState.showCtl; renderSong(); }
+function sheetTap(e){ const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip')) return; toggleScroll(); }
 function playToggleStrum(){
   playState.strumOpen=!playState.strumOpen;
   const st=document.querySelector('.strumstrip');
@@ -1564,33 +1579,24 @@ function renderSong(){
   const lyrMap=(song.builtin && !aligned)? builtinLyrics(song) : {};
   let h='<div class="songroot">';
   h+='<div class="songhead"><div class="stitle-row"><button class="ppill pback" onclick="backToPlayList()">← 一覧</button>'
-    +'<div class="stitle-main"><span class="stitle">'+esc(song.title||'無題')+'</span>'+(song.artist? '<span class="sartist">'+esc(song.artist)+'</span>':'')+'</div></div>'
+    +'<div class="stitle-main"><span class="stitle">'+esc(song.title||'無題')+'</span>'+(song.artist? '<span class="sartist">'+esc(song.artist)+'</span>':'')+'</div>'
+    +'<button class="ppill'+(playState.showCtl?' on':'')+'" onclick="playToggleCtl()">設定</button></div>'
     +'<div class="smeta">原曲キー '+esc(song.key||'-')+' ・ BPM <span id="bpmLbl">'+playState.bpm+'</span> ・ 実効 <span id="effBpmLbl">'+effectiveBpm()+'</span> ・ 実音キー <b>'+esc(soundingKey(song))+'</b> ・ カポ '+playState.capo+'</div></div>';
-  h+='<div class="pctl">'
-    +'<div class="prow">'
-    +'<div class="pstep"><span>移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="pv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
-    +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
-    +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
-    +'<div class="pstep"><span>BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="pv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
-    +'</div>'
-    +'<div class="prow">'
-    +[50,75,100,125].map(pct=>'<button class="ppill pspd speedchip'+(playState.speedPct===pct?' on':'')+'" data-pct="'+pct+'" onclick="playSetSpeed('+pct+')">'+pct+'%</button>').join('')
-    +'<span class="peff">実効 <b id="effBpm">'+effectiveBpm()+'</b></span>'
-    +'<button class="ppill" id="metroBtn" onclick="toggleMetro()">'+(metroTimer?'■ メトロノーム':'▶ メトロノーム')+'</button><span id="metroDot"></span>'
-    +'<button class="ppill" id="scrollBtn" onclick="toggleScroll()">'+(playState.scrolling?'■ 自動スクロール':'▶ 自動スクロール')+'</button>'
-    +'<button class="ppill'+(playState.showAdj?' on':'')+'" onclick="playToggleAdj()">調整</button>'
-    +'</div></div>';
-  h+='<div class="adjpanel'+(playState.showAdj?' open':'')+'" id="adjPanel">'
-    +'<div class="prow"><span class="plbl">速度</span><input class="pslider" type="range" min="10" max="120" step="2" value="'+playState.scrollSpeed+'" oninput="playSetScrollSpeed(this.value)"><span id="scrollSpdLbl" class="peff">'+playState.scrollSpeed+'</span></div>'
-    +'<div class="prow"><span class="plbl">文字</span><input class="pslider" type="range" min="0.9" max="1.3" step="0.05" value="'+playState.font+'" oninput="playSetFont(this.value)"><span id="fontLbl" class="peff">'+Math.round(playState.font*100)+'%</span></div>'
-    +(song.builtin
-      ? '<div class="prow"><button class="ppill" onclick="playOpenLyrics()">歌詞を貼る</button><a class="ppill" style="text-decoration:none" href="https://www.uta-net.com/song/270979/" target="_blank" rel="noopener">歌詞は歌ネットで</a></div>'
-      : '<div class="prow"><button class="ppill" onclick="playEditSong(\''+song.id+'\')">編集</button><button class="ppill" onclick="playDeleteSong(\''+song.id+'\')">削除</button></div>')
-    +'</div>';
+  if(playState.showCtl){
+    h+='<div class="pctl" id="ctlBar">'
+      +'<div class="prow">'
+      +'<div class="pstep"><span>移調</span><button onclick="playAdjTranspose(-1)">−</button><span class="pv"><b>'+(playState.transpose>0?'+':'')+playState.transpose+'</b></span><button onclick="playAdjTranspose(1)">＋</button></div>'
+      +'<div class="pstep"><span>カポ</span><button onclick="playAdjCapo(-1)">−</button><span class="pv"><b>'+playState.capo+'</b></span><button onclick="playAdjCapo(1)">＋</button></div>'
+      +'<button class="ppill'+(playState.easy?' on':'')+'" onclick="playToggleEasy()">かんたん</button>'
+      +'<div class="pstep"><span>BPM</span><button onclick="playAdjBpm(-1)">−</button><span class="pv"><b id="bpmSv">'+playState.bpm+'</b></span><button onclick="playAdjBpm(1)">＋</button></div>'
+      +'<span class="pdiv"></span>'
+      +[50,75,100,125].map(pct=>'<button class="ppill pspd speedchip'+(playState.speedPct===pct?' on':'')+'" data-pct="'+pct+'" onclick="playSetSpeed('+pct+')">'+pct+'%</button>').join('')
+      +'</div></div>';
+  }
   if(secs.some(s=>s.name)){
     h+='<div class="secchips">'+secs.map((sec,i)=> sec.name? '<button class="secchip" onclick="playScrollToSec('+i+')">'+esc(sec.name)+'</button>':'').join('')+'</div>';
   }
-  h+='<div class="sheetwrap" id="sheetWrap"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
+  h+='<div class="sheetwrap" id="sheetWrap" onclick="sheetTap(event)"><div class="sheet" id="playSheet" style="font-size:'+(playState.font*16)+'px">';
   const strum=song.strum||song.memo;
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
   secs.forEach((sec,si)=>{
@@ -1599,7 +1605,7 @@ function renderSong(){
     const lyrLines=(lyrMap[si]!=null? String(lyrMap[si]) : '').split('\n');
     let rowIdx=0;
     sec.lines.forEach(ln=>{
-      if(ln.type==='blank'){ h+='<div style="height:8px"></div>'; return; }
+      if(ln.type==='blank'){ h+='<div style="height:5px"></div>'; return; }
       if(ln.type==='bar'){
         let row='<div class="bar-row">';
         ln.raw.split('|').forEach(part=>{
@@ -1618,7 +1624,7 @@ function renderSong(){
       (ln.segs||[]).forEach(sg=>{
         if(sg.chord){
           const dc=dispChord(sg.chord);
-          lh+='<span class="seg"><span class="seg-top">'+diagramSVG(dc,{easy:playState.easy})+'<span class="cname">'+esc(dc)+'</span></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+          lh+='<span class="seg"><span class="seg-top">'+diagramSVG(dc,{easy:playState.easy, w:34})+'<span class="cname">'+esc(dc)+'</span></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }else{
           lh+='<span class="seg plain"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }
@@ -1629,7 +1635,8 @@ function renderSong(){
     h+='</div>';
   });
   h+='</div>';
-  if(song.builtin && !aligned) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。歌詞は「歌詞を貼る」からセクションごとに貼ると、譜面の各行の下に表示されます。</div>';
+  if(song.builtin && !aligned) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。</div>';
+  h+='<div class="scrollbadge'+(playState.scrolling?'':' off')+'" id="scrollBadge"><span>▶ 自動スクロール中</span></div>';
   h+='</div></div>';
   el.innerHTML=h;
 }
@@ -1686,8 +1693,8 @@ function scrollStep(ts){
   if(wrap.scrollTop + wrap.clientHeight >= wrap.scrollHeight - 4){ stopScroll(); return; }
   scrollRaf=requestAnimationFrame(scrollStep);
 }
-function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; scrollRaf=requestAnimationFrame(scrollStep); const b=$('scrollBtn'); if(b) b.textContent='■ 自動スクロール'; }
-function stopScroll(){ playState.scrolling=false; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const b=$('scrollBtn'); if(b) b.textContent='▶ 自動スクロール'; }
+function startScroll(){ if(playState.scrolling) return; playState.scrolling=true; scrollLast=0; scrollRaf=requestAnimationFrame(scrollStep); const bd=$('scrollBadge'); if(bd) bd.classList.remove('off'); }
+function stopScroll(){ playState.scrolling=false; if(scrollRaf) cancelAnimationFrame(scrollRaf); scrollRaf=null; const bd=$('scrollBadge'); if(bd) bd.classList.add('off'); }
 function toggleScroll(){ if(playState.scrolling) stopScroll(); else startScroll(); }
 function stopPlayFx(){ try{ stopMetro(); }catch(e){} try{ stopScroll(); }catch(e){} try{ stopDrillAuto(); }catch(e){} try{ stopTuner(); }catch(e){} try{ unlockSongOverlay(); }catch(e){} }
 /* editor */
@@ -1974,13 +1981,16 @@ let syncErr='';
 function scheduleSync(){ if(!relayReady()) return; if(syncTimer) clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncNow('auto'), 1500); }
 function fmtTime(ts){ const d=new Date(ts); return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
 function renderSyncStatus(){
-  const dot=$('syncdot'), msg=$('syncmsg'); if(!dot||!msg) return;
-  dot.style.background=(relayReady() && syncStatus!=='error')? 'var(--green)':'var(--red)';
-  if(syncStatus==='synced') msg.innerHTML='同期済み（'+fmtTime(lastSyncAt)+'）<span class="sbhint"> ・ タップで再同期</span>';
-  else if(syncStatus==='syncing') msg.textContent='同期中…';
-  else if(syncStatus==='error') msg.innerHTML='同期エラー：'+esc(syncErr)+'<span class="sbhint"> ・ タップで再試行</span>';
-  else if(relayReady()) msg.innerHTML='中継で接続済み（未同期）<span class="sbhint"> ・ タップで再同期</span>';
-  else msg.innerHTML='未設定（端末内に保存中）<span class="sbhint"> ・ タップで設定へ</span>';
+  const dot=$('syncdot'); if(!dot) return;
+  let col='var(--acc)', err=false, ttl='タップで同期';
+  if(syncStatus==='error'){ col='var(--red)'; err=true; ttl='同期エラー（タップで再試行）'; }
+  else if(syncStatus==='synced'){ col='var(--green)'; ttl='同期済み '+fmtTime(lastSyncAt)+'（タップで再同期）'; }
+  else if(syncStatus==='syncing'){ ttl='同期中'; }
+  else if(relayReady()){ ttl='未同期（タップで同期）'; }
+  else { ttl='この端末内に保存中（タップで設定へ）'; }
+  dot.style.background=col;
+  dot.classList.toggle('err', err);
+  dot.title=ttl;
   const vs=$('val-sync'); if(vs) vs.textContent=syncValText();
 }
 function syncBarTap(){ if(syncRunning) return; if(relayReady()) syncNow('manual'); else go('set'); }
