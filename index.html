@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.21">
+<meta name="app-version" content="3.22">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -364,7 +364,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <body>
 <div id="veil"></div>
 <header>
-  <div class="hrow"><h1>Musilabo<span class="en">MUSIC ATLAS</span><span id="syncdot" onclick="syncBarTap()" title="同期"></span></h1><button id="bell" onclick="openHistory()" aria-label="更新履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="bellbdg"></span></button></div>
+  <div class="hrow"><h1>Musilabo<span id="syncdot" onclick="syncBarTap()" title="同期"></span><span class="en">MUSIC ATLAS</span></h1><button id="bell" onclick="openHistory()" aria-label="更新履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span id="bellbdg"></span></button></div>
 </header>
 <main>
   <section class="view on" id="v-rec"></section>
@@ -391,7 +391,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.21';
+const APP_VERSION='3.22';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1284,6 +1284,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.22','2026-11-28','『世界は広いよ』のコード進行を音楽理論で裁定し直した'],
  ['3.21','2026-11-28','指板入力のときに画面が動かないようにした'],
  ['3.20','2026-11-28','編集モードでコードを削除できるようにした。譜面の行間を広げて、コードと歌詞の組が分かるようにした'],
  ['3.19','2026-11-28','『世界は広いよ』はカポなしで開くようにした'],
@@ -1408,9 +1409,14 @@ function importData(inp){
 }
 /* ================= play: chord scores (U-FRET superior) ================= */
 const BUILTIN_SONGS=[{id:'sekai-wa-hiroiyo', title:'世界は広いよ', artist:'betcover!!', bpm:136, key:'B', capo:0, strum:'8ビートで前のめりに刻む。サビは開いて強く、Aメロはミュート気味に。B→Bmの切り替わりが一番効く所。', sections:[
- {name:'Aメロ', bars:['Bm | B | D#m | C#m','B | E | B | B']},
+ {name:'Aメロ', bars:['Bm | B | D#m | C#m','B | E | B | D#m','C#m | B | E | G#m','F# | B']},
+ {name:'プレコーラス', bars:['C#m | D#m | G#m | F#','C#m | B | D#m | E','F#']},
  {name:'サビ（基本形）', bars:['E | F# | B | B','E | F# | B | B']},
  {name:'サビ（変形）', bars:['E | F# | E | F#','B | B | Bm | Bm']},
+ {name:'Aメロ2', bars:['Bm | B | D#m | C#m7','C#m | B | E | B','D#m | C#m7 | B | E']},
+ {name:'ブリッジ', bars:['B | D#m | C#m | F#','D# | G#m | F# | C#m','D#m | E | F#']},
+ {name:'間奏', bars:['E | B | D#m | C#m','F# | B | D#m | Bm','B | C#m | F#']},
+ {name:'ラスト', bars:['D#m | G#m | D#m | C#m','B | E']},
  {name:'アウトロ', bars:['B | E | B | E']}
 ]}];
 const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
