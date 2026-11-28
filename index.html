@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.19">
+<meta name="app-version" content="3.20">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -46,6 +46,7 @@ main{ padding:12px 14px 0; max-width:640px; margin:0 auto; }
 .recfoot .stars{ margin-top:0; }
 .recfoot .btnrow{ margin-top:0; margin-left:auto; }
 .btn{ appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--tx); border-radius:999px; padding:11px 18px; min-height:48px; font-size:.85em; cursor:pointer; }
+.btn.danger{ border-color:#e5484d; color:#e5484d; background:rgba(229,72,77,.10); font-weight:700; }
 .btn.primary{ background:var(--acc); border-color:var(--acc); color:#1c1508; font-weight:700; }
 .btn.small{ min-height:44px; padding:8px 14px; font-size:.8em; }
 .btn.on{ background:var(--acc); color:#1c1508; border-color:var(--acc); font-weight:700; }
@@ -173,11 +174,11 @@ select.textin{ appearance:none; }
 .sheet-sec{ margin-bottom:12px; }
 .sheet-sec:last-child{ margin-bottom:4px; }
 .sheet-secname{ font-weight:800; font-size:.92em; color:#d8a24a; border-bottom:2px solid #453b2f; padding-bottom:5px; margin-bottom:8px; letter-spacing:.06em; }
-.bar-row{ display:flex; flex-wrap:wrap; align-items:flex-start; margin-bottom:7px; }
+.bar-row{ display:flex; flex-wrap:wrap; align-items:flex-start; margin-bottom:12px; }
 .bar-cell{ display:flex; flex-direction:column; align-items:center; width:60px; padding:1px 2px 3px; border-left:1px solid #453b2f; }
 .bar-cell:first-child{ border-left:none; }
 .bar-cell .cname{ font-weight:800; font-size:.92em; color:#d8a24a; margin-top:2px; line-height:1.2; text-align:center; }
-.lyr-line{ line-height:1.25; margin-bottom:4px; word-break:break-all; }
+.lyr-line{ line-height:1.25; margin-bottom:16px; word-break:break-all; }
 .seg{ display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:bottom; }
 .seg-top{ height:64px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:60px; }
 .seg-top .cname{ font-weight:800; font-size:.82em; color:#d8a24a; line-height:1.15; margin-top:1px; }
@@ -352,7 +353,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .strumstrip .strum-txt{ flex:1; min-width:0; }
 .strumstrip.collapsed .strum-txt{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .strumstrip .strum-tgl{ flex:none; color:var(--sub); font-size:.85em; }
-.sheet-lyr{ font-size:1.05em; line-height:1.4; color:#ece5d8; margin:-4px 0 8px; white-space:pre-wrap; }
+.sheet-lyr{ font-size:1.05em; line-height:1.4; color:#ece5d8; margin:-4px 0 12px; white-space:pre-wrap; }
 </style>
 </head>
 <body>
@@ -385,7 +386,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.19';
+const APP_VERSION='3.20';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1278,6 +1279,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.20','2026-11-28','編集モードでコードを削除できるようにした。譜面の行間を広げて、コードと歌詞の組が分かるようにした'],
  ['3.19','2026-11-28','『世界は広いよ』はカポなしで開くようにした'],
  ['3.18','2026-11-28','編集モードでコード追加と指板入力（コード名の自動判定）、コード逆引きページを追加'],
  ['3.17','2026-11-28','曲画面でコードを編集できるようにした'],
@@ -2165,7 +2167,7 @@ function openChordEditor(ctx){
   else if(ctx.kind==='ins-seg'){ if(!ln.segs || ctx.at<0 || ctx.at>ln.segs.length) return; }
   else if(ctx.kind==='ins-bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || ctx.ti<0 || ctx.ti>parts[ctx.pi].length) return; }
   else return;
-  ctx.sections=sections; ctx.srcKind=src.kind; ctx.songId=song.id; ctx.tab='name'; ctx.mode=isAdd? 'add':'edit';
+  ctx.sections=sections; ctx.srcKind=src.kind; ctx.songId=song.id; ctx.tab='name'; ctx.mode=isAdd? 'add':'edit'; ctx.delArmed=false;
   const disp=isAdd? '' : dispChord(cur);
   const seen=[], seenSet=new Set();
   const noteChord=c=>{ const d=dispChord(c); if(!seenSet.has(d)){ seenSet.add(d); seen.push(d); } };
@@ -2203,6 +2205,9 @@ function openChordEditor(ctx){
     +'<div style="margin-top:8px"><button class="btn small" onclick="fbClear(\'ce\')">クリア</button></div>'
     +'</div>';
   h+='<div class="btnrow"><button class="btn primary" onclick="playApplyChordEdit()">'+(isAdd? '追加':'変更')+'</button><button class="btn" onclick="closeDetail()">キャンセル</button></div>';
+  if(!isAdd){
+    h+='<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><button class="btn small" id="ceDelBtn" onclick="playDeleteChord()">このコードを削除</button><div class="note" style="margin-top:4px">タップした位置のコードだけを消します（歌詞は残ります。小節形式では、そのコードだけのセルはセルごと消えます）。誤タップ防止のため、削除は2回タップで実行されます。</div></div>';
+  }
   if(song.builtin && songHasOverride(song.id)){
     h+='<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><button class="btn small" onclick="playResetSongEdits()">この曲の編集をリセット</button><div class="note" style="margin-top:4px">この曲に保存された編集（歌詞つき譜面・コード編集）をすべて消し、収録時のコード進行だけの表示に戻します。</div></div>';
   }
@@ -2223,6 +2228,23 @@ function chordEditPreview(){
   }
 }
 function chordEditPick(name){ const inp=$('ceInput'); if(inp) inp.value=name; chordEditPreview(); }
+/* Shared write-back for chord edit / insert / delete: same paths and item-level
+   merge carry-over as the v3.17 editor (alignedBody if in use, else the built-in
+   songMeta.body override, else the own-song body). Returns false if the song vanished. */
+function persistChordEdit(ctx, text){
+  const song=playSongById(ctx.songId); if(!song) return false;
+  if(song.builtin){
+    const cur=(data.songMeta||{})[song.id]||{plays:0, last:0, u:0};
+    const nm=Object.assign({}, cur, {u:Date.now()});
+    if(ctx.srcKind==='aligned') nm.alignedBody=text; else nm.body=text;
+    data.songMeta[song.id]=nm;
+  }else{
+    const rec=(data.songs||{})[song.id]; if(!rec) return false;
+    data.songs[song.id]=Object.assign({}, rec, {body:text, u:Date.now()});
+  }
+  saveLocal();
+  return true;
+}
 function playApplyChordEdit(){
   const ctx=chordEditCtx; if(!ctx) return;
   let token='';
@@ -2247,17 +2269,40 @@ function playApplyChordEdit(){
   else if(ctx.kind==='ins-bar'){ const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || ctx.ti<0 || ctx.ti>parts[ctx.pi].length) return; parts[ctx.pi].splice(ctx.ti, 0, token); ln.raw=barLineJoin(parts); }
   else return;
   const text=serializeSongBody(ctx.sections);
-  const song=playSongById(ctx.songId); if(!song) return;
-  if(song.builtin){
-    const cur=(data.songMeta||{})[song.id]||{plays:0, last:0, u:0};
-    const nm=Object.assign({}, cur, {u:Date.now()});
-    if(ctx.srcKind==='aligned') nm.alignedBody=text; else nm.body=text;
-    data.songMeta[song.id]=nm;
-  }else{
-    const rec=(data.songs||{})[song.id]; if(!rec) return;
-    data.songs[song.id]=Object.assign({}, rec, {body:text, u:Date.now()});
+  if(!persistChordEdit(ctx, text)) return;
+  chordEditCtx=null;
+  closeDetail();
+  renderSong();
+}
+/* Chord deletion (v3.20): edit-mode only, two-step confirm on the panel button
+   (first tap arms, second executes; a fresh ctx per panel open = closing or
+   cancelling the panel disarms). Lyric format: only the chord token at the
+   tapped position is removed, the lyric text stays. Bar format: remove just
+   that chord from its cell, or the whole cell when it was the cell's only chord. */
+function playDeleteChord(){
+  const ctx=chordEditCtx; if(!ctx || ctx.mode!=='edit') return;
+  if(!ctx.delArmed){
+    ctx.delArmed=true;
+    const btn=$('ceDelBtn');
+    if(btn){ btn.textContent='本当に削除する'; btn.classList.add('danger'); }
+    return;
   }
-  saveLocal();
+  const sec=ctx.sections[ctx.si]; if(!sec) return;
+  const ln=sec.lines[ctx.li]; if(!ln) return;
+  if(ctx.kind==='seg'){
+    if(!ln.segs || !ln.segs[ctx.idx] || !ln.segs[ctx.idx].chord) return;
+    ln.segs[ctx.idx].chord=null;
+  }
+  else if(ctx.kind==='bar'){
+    const parts=barLineTokens(ln.raw);
+    if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return;
+    parts[ctx.pi].splice(ctx.ti, 1);
+    if(!parts[ctx.pi].length) parts.splice(ctx.pi, 1);
+    ln.raw=barLineJoin(parts);
+  }
+  else return;
+  const text=serializeSongBody(ctx.sections);
+  if(!persistChordEdit(ctx, text)) return;
   chordEditCtx=null;
   closeDetail();
   renderSong();
