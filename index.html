@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.16">
+<meta name="app-version" content="3.17">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -283,6 +283,13 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .sheetctl input[type=range]{ accent-color:#d8a24a; }
 .ctlfloat{ position:absolute; top:calc(env(safe-area-inset-top, 0px) + 54px); right:14px; z-index:5; appearance:none; border:1px solid var(--acc); background:rgba(30,26,23,.92); color:var(--acc); border-radius:999px; padding:8px 16px; min-height:36px; font-size:.82em; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); font-family:inherit; }
 .ctlfloat.off{ display:none; }
+/* chord edit (v3.17): round floating edit button inside the sheet frame, bottom-right.
+   bottom:121px keeps it clear of the auto-scroll badge band (fixed, bottom:89px). */
+.editfab{ position:fixed; right:26px; bottom:121px; z-index:27; width:48px; height:48px; border-radius:50%; border:1px solid var(--line); background:rgba(42,36,29,.95); color:#d8a24a; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); padding:0; font-family:inherit; }
+.editfab.on{ background:#d8a24a; border-color:#d8a24a; color:#1c1508; }
+.ced{ cursor:pointer; }
+.ced .cname{ text-decoration:underline dashed #d8a24a; text-underline-offset:3px; }
+.ced .dgchip{ outline:1px dashed rgba(216,162,74,.7); outline-offset:1px; }
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:2px 0; margin:2px 0 8px; scrollbar-width:none; touch-action:pan-x; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
@@ -356,7 +363,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.16';
+const APP_VERSION='3.17';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -606,6 +613,7 @@ function mergeData(a,b){
     const merged=Object.assign({}, win);
     // keep lyrics payloads from the loser if the winner lacks them (a stale local meta must not wipe alignedBody/lyrics)
     if(!merged.alignedBody && lose.alignedBody) merged.alignedBody=lose.alignedBody;
+    if(!merged.body && lose.body) merged.body=lose.body;
     if(!merged.lyrics && lose.lyrics) merged.lyrics=lose.lyrics;
     out.songMeta[id]=merged;
   });
@@ -1248,6 +1256,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.17','2026-11-28','曲画面でコードを編集できるようにした'],
  ['3.16','2026-11-28','「弾く」にコード進行の割り出し方ページを追加'],
  ['3.15','2026-11-28','バレーコードの開始フレット番号を大きく濃く表示'],
  ['3.14','2026-11-28','スクロール修正を確認し診断表示を撤去。コード図の余白を整えた'],
@@ -1472,8 +1481,11 @@ function diagramSVG(chordName, opts){
   const colX=f=> lx+(f-base)*fw+fw/2;
   let s='<svg width="'+Math.round(W*sc)+'" height="'+Math.round(H*sc)+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
   // base fret number: large, bold, dark — for same-shape barres (C#m vs D#m) this number is the
-  // ONLY visual difference, so it must read at a glance at chip size (U-FRET style prominence)
-  if(base>1) s+='<text x="'+(lx-0.3)+'" y="8.4" font-size="8.5" font-weight="bold" fill="'+ink+'" font-family="sans-serif">'+base+'</text>';
+  // ONLY visual difference, so it must read at a glance at chip size (U-FRET style prominence).
+  // fill/font-size MUST be inline styles: the app-wide rule `svg text{ fill:var(--tx); font-size:10.5px }`
+  // (for the graph views) beats presentation attributes, which made this number pale cream and
+  // oversized in v3.15. End-anchored at the nut's left so it never collides with the first dot.
+  if(base>1) s+='<text x="'+(lx-1)+'" y="8.0" text-anchor="end" style="fill:'+ink+';font-size:8.5px;font-weight:bold" font-family="sans-serif">'+base+'</text>';
   // strings (horizontal lines)
   for(let i=0;i<6;i++){ const y=rowY(i); s+='<line x1="'+lx+'" y1="'+y+'" x2="'+(lx+fw*5)+'" y2="'+y+'" stroke="'+subStr+'" stroke-width="0.7"/>'; }
   // frets (vertical lines); the leftmost line is the nut
@@ -1490,7 +1502,7 @@ function diagramSVG(chordName, opts){
   }
   frets.forEach((f,i)=>{
     const y=rowY(i);
-    if(f===-1){ s+='<text x="2.9" y="'+(y+2.3)+'" font-size="6.5" fill="'+ink+'" font-family="sans-serif">×</text>'; }
+    if(f===-1){ s+='<text x="2.9" y="'+(y+2.3)+'" style="fill:'+ink+';font-size:6.5px" font-family="sans-serif">×</text>'; }
     else if(f===0){ s+='<circle cx="'+mx+'" cy="'+y+'" r="1.9" fill="none" stroke="'+ink+'" stroke-width="0.9"/>'; }
     else if(f>=base && f<base+5){ s+='<circle cx="'+colX(f)+'" cy="'+y+'" r="'+dotR+'" fill="'+ink+'"/>'; }
     else if(f>0){ s+='<circle cx="'+(lx+4*fw+fw/2)+'" cy="'+y+'" r="'+dotR+'" fill="'+ink+'"/>'; }
@@ -1537,7 +1549,7 @@ function builtinBody(song){
   // not used for rendering builtin (sections used directly), kept for editor conversion
   return song.sections.map(sec=> '#'+sec.name+'\n'+sec.bars.join('\n')).join('\n');
 }
-let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false, speedPct:100, loopSec:-1, showCtl:false, strumOpen:false};
+let playState={openId:null, mode:'list', editingId:null, transpose:0, capo:0, easy:false, font:1, bpm:136, scrollSpeed:36, scrolling:false, speedPct:100, loopSec:-1, showCtl:false, strumOpen:false, chordEdit:false};
 let drillState={idx:0, shown:1, ok:0, ng:0, easy:false, auto:false, autoSec:8, timer:null};
 let tunerState={stream:null, src:null, raf:null, ctx:null, analyser:null, running:false, lastUpd:0, refCtx:null, auto:true, target:0, done:{}, trace:[], holdMs:0, lastFrameTs:0, manualUntil:0, denied:false, lastInTune:false, gen:0, starting:false, freqHist:[], smoothCents:null, _smTarget:-1};
 function effectiveBpm(){ return Math.max(1, Math.round(playState.bpm*(playState.speedPct||100)/100)); }
@@ -1558,6 +1570,7 @@ function songSections(song){
   if(song.builtin){
     const m=(data.songMeta||{})[song.id];
     if(m && typeof m.alignedBody==='string' && m.alignedBody.trim()) return parseSongBody(m.alignedBody);
+    if(m && typeof m.body==='string' && m.body.trim()) return parseSongBody(m.body);
     if(song.sections){
       return song.sections.map(sec=>({name:sec.name, lines:sec.bars.map(b=>({type:'bar', raw:b}))}));
     }
@@ -1604,11 +1617,11 @@ function renderPlay(){
 function openPlaySong(id){
   const s=playSongById(id); if(!s) return;
   stopPlayFx();
-  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.strumOpen=false;
+  playState.openId=id; playState.mode='song'; playState.transpose=0; playState.capo=(+s.capo||0); playState.easy=false; playState.font=1; playState.bpm=(+s.bpm||120); playState.scrollSpeed=36; playState.speedPct=100; playState.loopSec=-1; playState.strumOpen=false; playState.chordEdit=false;
   bumpPlays(id);
   renderSong(); window.scrollTo(0,0);
 }
-function backToPlayList(){ stopPlayFx(); playState.mode='list'; playState.openId=null; renderPlay(); }
+function backToPlayList(){ stopPlayFx(); playState.mode='list'; playState.openId=null; playState.chordEdit=false; chordEditCtx=null; renderPlay(); }
 /* guide: コード進行の割り出し方 (v3.16) — same fixed-overlay pattern as the song view */
 function openGuide(){ stopPlayFx(); playState.mode='guide'; renderPlay(); window.scrollTo(0,0); }
 function layoutGuideWrap(){
@@ -1741,7 +1754,7 @@ function playShowSettings(){
   if(playState.scrolling){ scrollPos=0; scrollLastWritten=0; }
   onSheetScroll();
 }
-function sheetTap(e){ const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip,.sheetctl,.secchips')) return; toggleScroll(); }
+function sheetTap(e){ if(typeof playState!=='undefined' && playState.chordEdit) return; const t=e&&e.target; if(t && t.closest && t.closest('button,a,input,textarea,select,.strumstrip,.sheetctl,.secchips')) return; toggleScroll(); }
 function playToggleStrum(){
   playState.strumOpen=!playState.strumOpen;
   const st=document.querySelector('.strumstrip');
@@ -1774,15 +1787,18 @@ function renderSong(){
     h+='<div class="sec-bar"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
     const lyrLines=(lyrMap[si]!=null? String(lyrMap[si]) : '').split('\n');
     let rowIdx=0;
-    sec.lines.forEach(ln=>{
+    sec.lines.forEach((ln, li)=>{
       if(ln.type==='blank'){ h+='<div style="height:5px"></div>'; return; }
       if(ln.type==='bar'){
         let row='<div class="bar-row">';
-        ln.raw.split('|').forEach(part=>{
+        ln.raw.split('|').forEach((part, pi)=>{
           const toks=part.trim().split(/\s+/).filter(Boolean);
-          toks.forEach(tok=>{
+          toks.forEach((tok, ti)=>{
             const dc=dispChord(tok);
-            row+='<div class="bar-cell"><span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:44})+'</span><div class="cname">'+esc(dc)+(playState.easy && EASY_SHAPES[dc]?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div></div>';
+            const cell='<span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:44})+'</span><div class="cname">'+esc(dc)+(playState.easy && EASY_SHAPES[dc]?' <span style="font-size:.68em;color:#b3a68c">簡易</span>':'')+'</div>';
+            row+= playState.chordEdit
+              ? '<div class="bar-cell ced" onclick="playEditChordBar(event,'+si+','+li+','+pi+','+ti+')">'+cell+'</div>'
+              : '<div class="bar-cell">'+cell+'</div>';
           });
         });
         row+='</div>'; h+=row;
@@ -1791,10 +1807,13 @@ function renderSong(){
         return;
       }
       let lh='<div class="lyr-line">';
-      (ln.segs||[]).forEach(sg=>{
+      (ln.segs||[]).forEach((sg, sgi)=>{
         if(sg.chord){
           const dc=dispChord(sg.chord);
-          lh+='<span class="seg"><span class="seg-top"><span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:48})+'</span><span class="cname">'+esc(dc)+'</span></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
+          const top='<span class="dgchip">'+diagramSVG(dc,{easy:playState.easy, w:48})+'</span><span class="cname">'+esc(dc)+'</span>';
+          lh+= playState.chordEdit
+            ? '<span class="seg"><span class="seg-top ced" onclick="playEditChord(event,'+si+','+li+','+sgi+')">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>'
+            : '<span class="seg"><span class="seg-top">'+top+'</span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }else{
           lh+='<span class="seg plain"><span class="seg-top"></span><span class="seg-lyr">'+esc(sg.text)+'</span></span>';
         }
@@ -1808,6 +1827,7 @@ function renderSong(){
   if(song.builtin && !aligned) h+='<div class="note" style="padding:10px 2px 6px">収録曲はコード進行のみです。</div>';
   h+='<div class="scrollbadge'+(playState.scrolling?'':' off')+'" id="scrollBadge"><span>▶ 自動スクロール中</span></div>';
   h+='<button class="ctlfloat off" id="ctlFloat" onclick="playShowSettings()">設定</button>';
+  h+='<button class="editfab'+(playState.chordEdit?' on':'')+'" id="editFab" onclick="playToggleChordEdit()" aria-label="コード編集"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>';
   h+='</div></div>';
   el.innerHTML=h;
   onSheetScroll();
@@ -1820,6 +1840,120 @@ function playSetFont(v){ playState.font=+v; const sh=$('playSheet'); if(sh) sh.s
 function playSetScrollSpeed(v){ playState.scrollSpeed=+v; const l=$('scrollSpdLbl'); if(l) l.textContent=v; }
 function updEffBpm(){ const e=effectiveBpm(); const a=$('effBpm'); if(a) a.textContent=e; const b=$('effBpmLbl'); if(b) b.textContent=e; }
 function playToggleLoop(i){ playState.loopSec=(playState.loopSec===i)? -1 : i; document.querySelectorAll('.loopbtn').forEach(b=>{ const on=+b.dataset.sec===playState.loopSec; b.classList.toggle('on', on); b.textContent='↻ ループ'+(on?' ON':''); }); }
+/* ================= in-song chord editing (v3.17) =================
+   The user edits what he sees: the panel works in DISPLAYED chord names (after capo/transpose);
+   on apply the name is converted back to the stored (sounding) name before saving. */
+let chordEditCtx=null;
+function playToggleChordEdit(){
+  playState.chordEdit=!playState.chordEdit;
+  if(playState.chordEdit) stopScroll();
+  renderSong();
+}
+function songHasOverride(id){
+  const m=(data.songMeta||{})[id]; if(!m) return false;
+  return (typeof m.alignedBody==='string' && !!m.alignedBody.trim()) || (typeof m.body==='string' && !!m.body.trim());
+}
+function songEditSource(song){
+  const m=(data.songMeta||{})[song.id];
+  if(song.builtin && m && typeof m.alignedBody==='string' && m.alignedBody.trim()) return {kind:'aligned', text:m.alignedBody};
+  if(song.builtin && m && typeof m.body==='string' && m.body.trim()) return {kind:'body', text:m.body};
+  if(song.builtin) return {kind:'body', text:builtinBody(song)};
+  return {kind:'song', text:(song.body||'')};
+}
+function barLineTokens(raw){ return String(raw||'').split('|').map(p=>p.trim().split(/\s+/).filter(Boolean)); }
+function barLineJoin(parts){ return parts.map(t=>t.join(' ')).join(' | '); }
+function serializeSongBody(sections){
+  const out=[];
+  (sections||[]).forEach(sec=>{
+    if(sec.name) out.push('#'+sec.name);
+    (sec.lines||[]).forEach(ln=>{
+      if(ln.type==='blank') out.push('');
+      else if(ln.type==='bar') out.push(ln.raw);
+      else out.push((ln.segs||[]).map(sg=> sg.chord? ('['+sg.chord+']'+sg.text) : sg.text).join(''));
+    });
+  });
+  return out.join('\n');
+}
+function playEditChord(e, si, li, idx){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'seg', si:si, li:li, idx:idx}); }
+function playEditChordBar(e, si, li, pi, ti){ if(e && e.stopPropagation) e.stopPropagation(); if(!playState.chordEdit) return; openChordEditor({kind:'bar', si:si, li:li, pi:pi, ti:ti}); }
+function openChordEditor(ctx){
+  const song=playSongById(playState.openId); if(!song) return;
+  const src=songEditSource(song);
+  const sections=parseSongBody(src.text);
+  const sec=sections[ctx.si]; if(!sec) return;
+  const ln=sec.lines[ctx.li]; if(!ln) return;
+  let cur='';
+  if(ctx.kind==='seg'){ if(!ln.segs || !ln.segs[ctx.idx] || !ln.segs[ctx.idx].chord) return; cur=ln.segs[ctx.idx].chord; }
+  else { const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; cur=parts[ctx.pi][ctx.ti]; }
+  ctx.sections=sections; ctx.srcKind=src.kind; ctx.songId=song.id;
+  const disp=dispChord(cur);
+  const seen=[], seenSet=new Set();
+  const noteChord=c=>{ const d=dispChord(c); if(!seenSet.has(d)){ seenSet.add(d); seen.push(d); } };
+  sections.forEach(s2=>s2.lines.forEach(l2=>{
+    if(l2.type==='lyric') (l2.segs||[]).forEach(sg=>{ if(sg.chord) noteChord(sg.chord); });
+    else if(l2.type==='bar') barLineTokens(l2.raw).forEach(part=>part.forEach(noteChord));
+  }));
+  let h='<div style="display:flex;align-items:flex-start;gap:10px"><div class="atitle" style="font-size:1.05em;flex:1">コードを変更</div><button class="btn small" onclick="closeDetail()">✕</button></div>';
+  h+='<div class="note" style="margin:6px 0 2px">いまのコード：<b>'+esc(disp)+'</b>（タップした位置のコードだけを変更します。表示されている名前のまま編集できます）</div>';
+  h+='<div style="display:flex;align-items:center;gap:12px;margin:10px 0 4px"><span class="dgchip" id="cePrev">'+diagramSVG(disp,{easy:playState.easy, w:48})+'</span><span id="cePrevName" style="font-weight:800;color:#d8a24a;font-size:1.1em">'+esc(disp)+'</span></div>';
+  h+='<div class="playform"><label>新しいコード名</label><input class="textin" id="ceInput" value="'+escA(disp)+'" oninput="chordEditPreview()" autocomplete="off" autocapitalize="off"></div>';
+  h+='<div class="note" id="ceErr" style="color:#e5484d;display:none;margin-top:4px">コード名として読み取れません（例：Am、F#m7、G/B）</div>';
+  if(seen.length) h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px">'+seen.map(c=>'<button class="ppill" onclick="chordEditPick(\''+c+'\')">'+esc(c)+'</button>').join('')+'</div>';
+  h+='<div class="btnrow"><button class="btn primary" onclick="playApplyChordEdit()">変更</button><button class="btn" onclick="closeDetail()">キャンセル</button></div>';
+  if(song.builtin && songHasOverride(song.id)){
+    h+='<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><button class="btn small" onclick="playResetSongEdits()">この曲の編集をリセット</button><div class="note" style="margin-top:4px">この曲に保存された編集（歌詞つき譜面・コード編集）をすべて消し、収録時のコード進行だけの表示に戻します。</div></div>';
+  }
+  chordEditCtx=ctx;
+  openSheet(h);
+}
+function chordEditPreview(){
+  const inp=$('ceInput'); if(!inp) return;
+  const v=(inp.value||'').trim();
+  const err=$('ceErr');
+  if(v && isChordToken(v)){
+    const p=$('cePrev'); if(p) p.innerHTML=diagramSVG(v,{easy:playState.easy, w:48});
+    const n=$('cePrevName'); if(n) n.textContent=v;
+    if(err) err.style.display='none';
+  }else{
+    if(err) err.style.display='';
+  }
+}
+function chordEditPick(name){ const inp=$('ceInput'); if(inp) inp.value=name; chordEditPreview(); }
+function playApplyChordEdit(){
+  const ctx=chordEditCtx; if(!ctx) return;
+  const inp=$('ceInput'); const v=inp? (inp.value||'').trim() : '';
+  if(!v || !isChordToken(v)){ const err=$('ceErr'); if(err) err.style.display=''; return; }
+  const stored=transposeChord(v, playState.capo - playState.transpose);
+  const sec=ctx.sections[ctx.si]; if(!sec) return;
+  const ln=sec.lines[ctx.li]; if(!ln) return;
+  if(ctx.kind==='seg'){ if(!ln.segs || !ln.segs[ctx.idx]) return; ln.segs[ctx.idx].chord=stored; }
+  else { const parts=barLineTokens(ln.raw); if(!parts[ctx.pi] || parts[ctx.pi][ctx.ti]==null) return; parts[ctx.pi][ctx.ti]=stored; ln.raw=barLineJoin(parts); }
+  const text=serializeSongBody(ctx.sections);
+  const song=playSongById(ctx.songId); if(!song) return;
+  if(song.builtin){
+    const cur=(data.songMeta||{})[song.id]||{plays:0, last:0, u:0};
+    const nm=Object.assign({}, cur, {u:Date.now()});
+    if(ctx.srcKind==='aligned') nm.alignedBody=text; else nm.body=text;
+    data.songMeta[song.id]=nm;
+  }else{
+    const rec=(data.songs||{})[song.id]; if(!rec) return;
+    data.songs[song.id]=Object.assign({}, rec, {body:text, u:Date.now()});
+  }
+  saveLocal();
+  chordEditCtx=null;
+  closeDetail();
+  renderSong();
+}
+function playResetSongEdits(){
+  const song=playSongById(playState.openId); if(!song || !song.builtin) return;
+  const cur=(data.songMeta||{})[song.id]; if(!cur) return;
+  const nm=Object.assign({}, cur); delete nm.alignedBody; delete nm.body; nm.u=Date.now();
+  data.songMeta[song.id]=nm;
+  saveLocal();
+  chordEditCtx=null;
+  closeDetail();
+  renderSong();
+}
 /* metronome (functional audio, independent of SOUND_MUTED / playTap) */
 function metroClick(accent){
   try{
