@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.14">
+<meta name="app-version" content="3.15">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -327,7 +327,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.14';
+const APP_VERSION='3.15';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1219,6 +1219,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.15','2026-11-28','バレーコードの開始フレット番号を大きく濃く表示'],
  ['3.14','2026-11-28','スクロール修正を確認し診断表示を撤去。コード図の余白を整えた'],
  ['3.13','2026-11-28','曲画面のスクロールの仕組みを作り替えた（高さの決め方を変更）'],
  ['3.12','2026-11-28','コード図の白枠の余白を詰めた。スクロール不具合の診断表示を追加'],
@@ -1440,8 +1441,9 @@ function diagramSVG(chordName, opts){
   const rowY=i=> yTop+(5-i)*dy;
   const colX=f=> lx+(f-base)*fw+fw/2;
   let s='<svg width="'+Math.round(W*sc)+'" height="'+Math.round(H*sc)+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
-  // base fret number, small, inside the top margin band above the first fret column
-  if(base>1) s+='<text x="'+(lx-0.3)+'" y="6.6" font-size="5.6" fill="'+subNum+'" font-family="sans-serif">'+base+'</text>';
+  // base fret number: large, bold, dark — for same-shape barres (C#m vs D#m) this number is the
+  // ONLY visual difference, so it must read at a glance at chip size (U-FRET style prominence)
+  if(base>1) s+='<text x="'+(lx-0.3)+'" y="8.4" font-size="8.5" font-weight="bold" fill="'+ink+'" font-family="sans-serif">'+base+'</text>';
   // strings (horizontal lines)
   for(let i=0;i<6;i++){ const y=rowY(i); s+='<line x1="'+lx+'" y1="'+y+'" x2="'+(lx+fw*5)+'" y2="'+y+'" stroke="'+subStr+'" stroke-width="0.7"/>'; }
   // frets (vertical lines); the leftmost line is the nut
