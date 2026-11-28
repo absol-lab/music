@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.22">
+<meta name="app-version" content="3.23">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -391,7 +391,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.22';
+const APP_VERSION='3.23';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1284,6 +1284,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.23','2026-11-28','新しい版が出たら自動で切り替わるようにした'],
  ['3.22','2026-11-28','『世界は広いよ』のコード進行を音楽理論で裁定し直した'],
  ['3.21','2026-11-28','指板入力のときに画面が動かないようにした'],
  ['3.20','2026-11-28','編集モードでコードを削除できるようにした。譜面の行間を広げて、コードと歌詞の組が分かるようにした'],
@@ -2950,14 +2951,29 @@ function initSheetSwipe(){
   sh.addEventListener('pointercancel', end);
 }
 /* ================= boot ================= */
-function selfUpdate(){
+function updOverlayOpen(){
   try{
-    fetch(location.href.split('#')[0], {cache:'no-store'}).then(r=>r.text()).then(tx=>{
-      const m=tx.match(/name="app-version" content="([\d.]+)"/);
-      if(m && m[1]!==APP_VERSION && !sessionStorage.getItem('musicUpd')){
-        sessionStorage.setItem('musicUpd','1');
-        location.replace(location.href.split('#')[0]+'?v='+m[1]);
-      }
+    const sh=$('dsheet'); if(sh && sh.classList.contains('on')) return true;
+    const lb=$('lbox'); if(lb && lb.classList.contains('on')) return true;
+    const vp=$('v-play'); if(vp && vp.classList.contains('songmode')) return true;
+    if(typeof playState!=='undefined' && playState && playState.mode && playState.mode!=='list') return true;
+  }catch(e){}
+  return false;
+}
+function selfUpdate(fromFg){
+  try{
+    const base=location.href.split('#')[0].split('?')[0];
+    fetch(base+'?upd='+Date.now(), {cache:'no-store'}).then(r=>r.text()).then(tx=>{
+      const m=tx.match(/name="app-version" content="([\d.]+)"/) || tx.match(/APP_VERSION='([\d.]+)'/);
+      if(!m) return;
+      const fetched=m[1];
+      if(verCmp(fetched, APP_VERSION)<=0) return;
+      let guarded=null;
+      try{ guarded=sessionStorage.getItem('musicUpdTo'); }catch(e){}
+      if(guarded===fetched) return;
+      if(fromFg && updOverlayOpen()) return;
+      try{ sessionStorage.setItem('musicUpdTo', fetched); }catch(e){}
+      location.reload();
     }).catch(()=>{});
   }catch(e){}
 }
@@ -2971,6 +2987,7 @@ function boot(){
 }
 document.addEventListener('click', e=>{ if(e.target && e.target.closest && e.target.closest('button, a.btn, .tagchip, .atile, .ptile, .gchip')) playTap(); });
 document.addEventListener('DOMContentLoaded', boot);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' || !document.hidden) selfUpdate(true); });
 
 </script>
 </body>
