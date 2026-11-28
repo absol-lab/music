@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.18">
+<meta name="app-version" content="3.19">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -385,7 +385,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.18';
+const APP_VERSION='3.19';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1278,6 +1278,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.19','2026-11-28','『世界は広いよ』はカポなしで開くようにした'],
  ['3.18','2026-11-28','編集モードでコード追加と指板入力（コード名の自動判定）、コード逆引きページを追加'],
  ['3.17','2026-11-28','曲画面でコードを編集できるようにした'],
  ['3.16','2026-11-28','「弾く」にコード進行の割り出し方ページを追加'],
@@ -1398,7 +1399,7 @@ function importData(inp){
   f.text().then(tx=>{ try{ data=normalizeData(JSON.parse(tx)); saveLocal(); renderRec(); renderLib(); alert('取り込みました'); }catch(e){ alert('読み込めませんでした：'+e.message); } });
 }
 /* ================= play: chord scores (U-FRET superior) ================= */
-const BUILTIN_SONGS=[{id:'sekai-wa-hiroiyo', title:'世界は広いよ', artist:'betcover!!', bpm:136, key:'B', capo:2, strum:'8ビートで前のめりに刻む。サビは開いて強く、Aメロはミュート気味に。B→Bmの切り替わりが一番効く所。', sections:[
+const BUILTIN_SONGS=[{id:'sekai-wa-hiroiyo', title:'世界は広いよ', artist:'betcover!!', bpm:136, key:'B', capo:0, strum:'8ビートで前のめりに刻む。サビは開いて強く、Aメロはミュート気味に。B→Bmの切り替わりが一番効く所。', sections:[
  {name:'Aメロ', bars:['Bm | B | D#m | C#m','B | E | B | B']},
  {name:'サビ（基本形）', bars:['E | F# | B | B','E | F# | B | B']},
  {name:'サビ（変形）', bars:['E | F# | E | F#','B | B | Bm | Bm']},
