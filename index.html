@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.2">
+<meta name="app-version" content="3.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -180,7 +180,7 @@ select.textin{ appearance:none; }
 .bar-cell .cname{ font-weight:800; font-size:.92em; color:#14335c; margin-top:2px; line-height:1.2; text-align:center; }
 .lyr-line{ line-height:1.25; margin-bottom:10px; word-break:break-all; }
 .seg{ display:inline-flex; flex-direction:column; align-items:flex-start; vertical-align:bottom; }
-.seg-top{ height:62px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:38px; }
+.seg-top{ height:56px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; min-width:48px; }
 .seg-top .cname{ font-weight:800; font-size:.86em; color:#14335c; line-height:1.15; margin-top:1px; }
 .seg-lyr{ font-size:1.15em; line-height:1.45; white-space:pre-wrap; color:#1a1a1a; min-height:1.45em; }
 .seg.plain .seg-top{ min-width:0; }
@@ -271,7 +271,7 @@ select.textin{ appearance:none; }
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.2';
+const APP_VERSION='3.3';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1150,6 +1150,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.3','2026-11-28','コードの押さえ方図を90度反時計回りに回転し、横向き（ナットが左、高い弦が上）に変更して見やすくした'],
  ['3.2','2026-11-28','曲画面を固定レイアウトに変更：操作部は上に固定され、コード譜の枠内だけがスクロールするように。操作ボタンをコンパクト化。内蔵曲『世界は広いよ』に歌詞を貼れる欄を追加（セクションごと、Drive同期）'],
  ['3.1','2026-11-28','「弾く」タブに練習機能とチューナーを追加。セクションのループ再生、50〜125%の速度変更（メトロノームと自動スクロール連動）、大きな図でコードを覚えるコード練習、標準チューニングの基準音とマイク測定チューナー'],
  ['3.0','2026-11-28','「弾く」タブを追加。U-FRET式コード譜：コード名と押さえ方図が歌詞の真上に常時表示され、移調／カポに図ごと連動。かんたんコード変換、自動スクロール、BPMメトロノーム、自分の曲の保存（Drive同期）に対応。1曲目にbetcover!!『世界は広いよ』（進行のみ）を収録'],
@@ -1344,30 +1345,35 @@ function diagramSVG(chordName, opts){
   const pos=frets.filter(f=>f>0);
   let base=1;
   if(pos.length){ const mn=Math.min.apply(null,pos), mx=Math.max.apply(null,pos); if(mx>5) base=mn; else base=1; }
-  const W=36,H=44, x0=5, dx=5.2, top=13, fh=5.6;
+  // Horizontal chart: the old vertical chart rotated 90deg CCW.
+  // Nut at left, frets extend right, high e (string index 5) on top, low E (index 0) at bottom.
+  const W=44,H=38, lx=10, fw=6.0, yTop=10, dy=4.9;
   const sc=(opts&&opts.scale)? opts.scale:1;
+  const rowY=i=> yTop+(5-i)*dy;
+  const colX=f=> lx+(f-base)*fw+fw/2;
   let s='<svg width="'+Math.round(W*sc)+'" height="'+Math.round(H*sc)+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
-  // fret number
-  if(base>1) s+='<text x="1" y="'+(top+fh-1)+'" font-size="6" fill="#555" font-family="sans-serif">'+base+'</text>';
-  // strings + frets grid
-  for(let i=0;i<6;i++){ const x=x0+i*dx; s+='<line x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+(top+fh*5)+'" stroke="#999" stroke-width="0.7"/>'; }
-  for(let r=0;r<=5;r++){ const y=top+r*fh; const w=(r===0&&base===1)?2.2:0.7; s+='<line x1="'+x0+'" y1="'+y+'" x2="'+(x0+dx*5)+'" y2="'+y+'" stroke="#222" stroke-width="'+w+'"/>'; }
-  // barre detection: >=3 strings at base fret (and base is min pos)
+  // base fret number above the first fret column
+  if(base>1) s+='<text x="'+(lx+1)+'" y="6" font-size="6" fill="#555" font-family="sans-serif">'+base+'</text>';
+  // strings (horizontal lines)
+  for(let i=0;i<6;i++){ const y=rowY(i); s+='<line x1="'+lx+'" y1="'+y+'" x2="'+(lx+fw*5)+'" y2="'+y+'" stroke="#999" stroke-width="0.7"/>'; }
+  // frets (vertical lines); the leftmost line is the nut
+  for(let r=0;r<=5;r++){ const x=lx+r*fw; const w=(r===0&&base===1)?2.2:0.7; s+='<line x1="'+x+'" y1="'+rowY(5)+'" x2="'+x+'" y2="'+rowY(0)+'" stroke="#222" stroke-width="'+w+'"/>'; }
+  // barre detection: >=3 strings at base fret (and base is min pos) -> vertical bar at that fret
   if(pos.length){
     const mn=Math.min.apply(null,pos);
     const barreIdx=[]; frets.forEach((f,i)=>{ if(f===mn) barreIdx.push(i); });
     if(barreIdx.length>=3 && mn>=base && mn<base+5){
-      const y=top+(mn-base)*fh+fh/2;
-      const xa=x0+Math.min.apply(null,barreIdx)*dx, xb=x0+Math.max.apply(null,barreIdx)*dx;
-      s+='<rect x="'+(xa-3)+'" y="'+(y-3)+'" width="'+(xb-xa+6)+'" height="6" rx="3" fill="#222"/>';
+      const x=colX(mn);
+      const ys=barreIdx.map(rowY); const ya=Math.min.apply(null,ys), yb=Math.max.apply(null,ys);
+      s+='<rect x="'+(x-3)+'" y="'+(ya-3)+'" width="6" height="'+(yb-ya+6)+'" rx="3" fill="#222"/>';
     }
   }
   frets.forEach((f,i)=>{
-    const x=x0+i*dx;
-    if(f===-1){ s+='<text x="'+(x-2.2)+'" y="'+(top-3)+'" font-size="7" fill="#222" font-family="sans-serif">×</text>'; }
-    else if(f===0){ s+='<circle cx="'+x+'" cy="'+(top-5)+'" r="2" fill="none" stroke="#222" stroke-width="0.9"/>'; }
-    else if(f>=base && f<base+5){ const y=top+(f-base)*fh+fh/2; s+='<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
-    else if(f>0){ const y=top+4*fh+fh/2; s+='<circle cx="'+x+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
+    const y=rowY(i);
+    if(f===-1){ s+='<text x="2" y="'+(y+2.5)+'" font-size="7" fill="#222" font-family="sans-serif">×</text>'; }
+    else if(f===0){ s+='<circle cx="5.5" cy="'+y+'" r="2" fill="none" stroke="#222" stroke-width="0.9"/>'; }
+    else if(f>=base && f<base+5){ s+='<circle cx="'+colX(f)+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
+    else if(f>0){ s+='<circle cx="'+(lx+4*fw+fw/2)+'" cy="'+y+'" r="2.6" fill="#222"/>'; }
   });
   s+='</svg>';
   return s;
