@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.13">
+<meta name="app-version" content="3.14">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -286,7 +286,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:2px 0; margin:2px 0 8px; scrollbar-width:none; touch-action:pan-x; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
-.dgchip{ background:#ffffff; border-radius:6px; padding:1px 2px; display:inline-flex; line-height:0; }
+.dgchip{ background:#ffffff; border-radius:6px; padding:2px; display:inline-flex; align-items:center; justify-content:center; line-height:0; }
 .sheetwrap{ position:absolute; left:14px; right:14px; bottom:77px; overflow-y:auto; border-radius:14px; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#2e2820; border:1px solid #453b2f; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
@@ -327,7 +327,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.13';
+const APP_VERSION='3.14';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1219,6 +1219,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.14','2026-11-28','スクロール修正を確認し診断表示を撤去。コード図の余白を整えた'],
  ['3.13','2026-11-28','曲画面のスクロールの仕組みを作り替えた（高さの決め方を変更）'],
  ['3.12','2026-11-28','コード図の白枠の余白を詰めた。スクロール不具合の診断表示を追加'],
  ['3.11','2026-11-28','曲画面のスクロールとチューナーのマイクを改善。コード図を白枠＋拡大、セクション移動を設定の下へ'],
@@ -1321,12 +1322,6 @@ function renderSet(){
     +'<button class="setrow" onclick="openHistory()"><span>更新履歴</span><span class="val">v'+APP_VERSION+'</span><span class="chev">›</span></button>'
     + setRow('about','このアプリについて', 'v'+APP_VERSION,
       '<div class="note">Musilabo v'+APP_VERSION+'</div>')
-    +'</div>';
-  /* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic mirror — remove after diagnosis */
-  h+='<div class="setgroup">'
-    + setRow('diag','スクロール診断', lastScrollDiag? esc(lastScrollDiag) : '未計測（曲を開くと計測）',
-      '<div class="note" style="white-space:pre-wrap;word-break:break-all">'+(lastScrollDiag? esc(lastScrollDiag) : '未計測（曲を開くと計測）')+'</div>',
-      'val-diag')
     +'</div>';
   $('v-set').innerHTML=h;
 }
@@ -1435,13 +1430,18 @@ function diagramSVG(chordName, opts){
   if(pos.length){ const mn=Math.min.apply(null,pos), mx=Math.max.apply(null,pos); if(mx>5) base=mn; else base=1; }
   // Horizontal chart: the old vertical chart rotated 90deg CCW.
   // Nut at left, frets extend right, high e (string index 5) on top, low E (index 0) at bottom.
-  const W=44,H=38, lx=10, fw=6.0, yTop=10, dy=4.9;
+  // Content is fitted to the viewBox with small, even inner margins (~2.5 units):
+  // the fret number (when base>1) sits inside the top margin band; without it the grid is vertically centered.
+  const W=44,H=40.5, fw=6.2, dy=5.0, dotR=2.6, mx=5.2;
+  // marker column only takes space when some string is open/muted; otherwise center the grid horizontally
+  const lx=frets.some(f=>f<=0)? 10.4 : 6.5;
   const sc=(opts&&opts.w)? (opts.w/W) : ((opts&&opts.scale)? opts.scale : 1);
+  const yTop=(base>1)? 10.4 : 7.45;
   const rowY=i=> yTop+(5-i)*dy;
   const colX=f=> lx+(f-base)*fw+fw/2;
   let s='<svg width="'+Math.round(W*sc)+'" height="'+Math.round(H*sc)+'" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
-  // base fret number above the first fret column
-  if(base>1) s+='<text x="'+(lx+1)+'" y="6" font-size="6" fill="'+subNum+'" font-family="sans-serif">'+base+'</text>';
+  // base fret number, small, inside the top margin band above the first fret column
+  if(base>1) s+='<text x="'+(lx-0.3)+'" y="6.6" font-size="5.6" fill="'+subNum+'" font-family="sans-serif">'+base+'</text>';
   // strings (horizontal lines)
   for(let i=0;i<6;i++){ const y=rowY(i); s+='<line x1="'+lx+'" y1="'+y+'" x2="'+(lx+fw*5)+'" y2="'+y+'" stroke="'+subStr+'" stroke-width="0.7"/>'; }
   // frets (vertical lines); the leftmost line is the nut
@@ -1458,10 +1458,10 @@ function diagramSVG(chordName, opts){
   }
   frets.forEach((f,i)=>{
     const y=rowY(i);
-    if(f===-1){ s+='<text x="2" y="'+(y+2.5)+'" font-size="7" fill="'+ink+'" font-family="sans-serif">×</text>'; }
-    else if(f===0){ s+='<circle cx="5.5" cy="'+y+'" r="2" fill="none" stroke="'+ink+'" stroke-width="0.9"/>'; }
-    else if(f>=base && f<base+5){ s+='<circle cx="'+colX(f)+'" cy="'+y+'" r="2.6" fill="'+ink+'"/>'; }
-    else if(f>0){ s+='<circle cx="'+(lx+4*fw+fw/2)+'" cy="'+y+'" r="2.6" fill="'+ink+'"/>'; }
+    if(f===-1){ s+='<text x="2.9" y="'+(y+2.3)+'" font-size="6.5" fill="'+ink+'" font-family="sans-serif">×</text>'; }
+    else if(f===0){ s+='<circle cx="'+mx+'" cy="'+y+'" r="1.9" fill="none" stroke="'+ink+'" stroke-width="0.9"/>'; }
+    else if(f>=base && f<base+5){ s+='<circle cx="'+colX(f)+'" cy="'+y+'" r="'+dotR+'" fill="'+ink+'"/>'; }
+    else if(f>0){ s+='<circle cx="'+(lx+4*fw+fw/2)+'" cy="'+y+'" r="'+dotR+'" fill="'+ink+'"/>'; }
   });
   s+='</svg>';
   return s;
@@ -1666,8 +1666,6 @@ function renderSong(){
   }
   const strum=song.strum||song.memo;
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
-  /* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic readout — remove after diagnosis */
-  h+='<div id="scrollDiag" style="font-size:10px;line-height:1.5;color:#8a7f6c;font-family:ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;margin:0 0 8px">診断: 計測中…</div>';
   secs.forEach((sec,si)=>{
     h+='<div class="sheet-sec" id="psec-'+si+'">';
     h+='<div class="sec-bar"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
@@ -1710,48 +1708,7 @@ function renderSong(){
   h+='</div></div>';
   el.innerHTML=h;
   onSheetScroll();
-  scheduleScrollDiag();
   if(window.requestAnimationFrame) requestAnimationFrame(layoutSheetWrap); else layoutSheetWrap();
-}
-/* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic — remove after diagnosis */
-let lastScrollDiag='';
-function scheduleScrollDiag(){
-  const run=()=>{ setTimeout(measureScrollDiag, 350); };
-  if(window.requestAnimationFrame) requestAnimationFrame(run); else run();
-}
-function measureScrollDiag(){
-  const dEl=$('scrollDiag'); if(!dEl) return;
-  try{
-    const vp=$('v-play'), wrap=$('sheetWrap'); if(!vp || !wrap) throw new Error('elements missing');
-    const root=document.querySelector('.songroot');
-    const cs=getComputedStyle(vp);
-    const vr=vp.getBoundingClientRect();
-    const rr=root? root.getBoundingClientRect() : {height:0};
-    let txt='vh='+window.innerHeight+' pos='+cs.position+' disp='+cs.display+' songmode='+vp.classList.contains('songmode')+' lock='+document.body.classList.contains('songlock');
-    txt+='\nvpRect='+Math.round(vr.top)+','+Math.round(vr.bottom)+','+Math.round(vr.height)+' rootRect='+Math.round(rr.height)+' docST='+Math.round(document.documentElement.scrollTop);
-    const wr=wrap.getBoundingClientRect();
-    txt+='\nwrap: rect='+Math.round(wr.top)+','+Math.round(wr.bottom)+','+Math.round(wr.height)+' client='+wrap.clientHeight+' scroll='+wrap.scrollHeight+' ovY='+getComputedStyle(wrap).overflowY;
-    dEl.textContent=txt;
-    lastScrollDiag=txt;
-    const vd=$('val-diag'); if(vd) vd.textContent=txt;
-    const s0=wrap.scrollTop;
-    wrap.scrollTop=60;
-    setTimeout(()=>{
-      try{
-        const s1=wrap.scrollTop;
-        wrap.scrollTop=s0;
-        const full=txt+'\nselftest: '+s0+'→set60→'+s1;
-        const d2=$('scrollDiag'); if(d2) d2.textContent=full;
-        lastScrollDiag=full;
-        const vd2=$('val-diag'); if(vd2) vd2.textContent=full;
-      }catch(e){}
-    },120);
-  }catch(e){
-    const msg='診断: ERR '+((e && e.message)? e.message : e);
-    try{ dEl.textContent=msg; }catch(_e){}
-    lastScrollDiag=msg;
-    const vd=$('val-diag'); if(vd) vd.textContent=msg;
-  }
 }
 function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
