@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.11">
+<meta name="app-version" content="3.12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Musilabo</title>
@@ -286,7 +286,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 .secchips{ flex:none; display:flex; gap:6px; overflow-x:auto; flex-wrap:nowrap; padding:2px 0; margin:2px 0 8px; scrollbar-width:none; touch-action:pan-x; }
 .secchips::-webkit-scrollbar{ display:none; }
 .secchip{ flex:none; appearance:none; border:1px solid var(--line); background:var(--panel); color:var(--tx); border-radius:999px; padding:4px 10px; font-size:.75em; min-height:28px; cursor:pointer; font-family:inherit; }
-.dgchip{ background:#ffffff; border-radius:7px; padding:3px 5px; display:inline-flex; line-height:0; }
+.dgchip{ background:#ffffff; border-radius:6px; padding:1px 2px; display:inline-flex; line-height:0; }
 .sheetwrap{ flex:1; overflow-y:auto; border-radius:14px; min-height:0; touch-action:pan-y; }
 .sheetwrap .sheet{ margin-top:0; }
 .strumstrip{ display:flex; align-items:center; gap:8px; background:#2e2820; border:1px solid #453b2f; color:#d9d0bf; border-radius:9px; padding:5px 11px; font-size:.8em; line-height:1.4; margin-bottom:8px; cursor:pointer; min-height:30px; box-sizing:border-box; }
@@ -327,7 +327,7 @@ html.songlock, body.songlock{ overflow:hidden !important; overscroll-behavior:no
 <div id="verBadge"></div>
 <script>
 "use strict";
-const APP_VERSION='3.11';
+const APP_VERSION='3.12';
 const $=id=>document.getElementById(id);
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function escA(s){ return esc(s); }
@@ -1219,6 +1219,7 @@ function playTap(){
 }
 /* ================= update history / bell ================= */
 const HISTORY=[
+ ['3.12','2026-11-28','コード図の白枠の余白を詰めた。スクロール不具合の診断表示を追加'],
  ['3.11','2026-11-28','曲画面のスクロールとチューナーのマイクを改善。コード図を白枠＋拡大、セクション移動を設定の下へ'],
  ['3.10','2026-11-28','チューナーのマイク再開と音程検出の精度を改善。曲画面のスクロールまわりも安定化。譜面をダークカラーにした'],
  ['3.9','2026-11-28','チューナーをGuitarTuna方式に作り替え（バブル指標＋ヘッドの絵＋弦ボタン＋自動判定）。マイクはチューナーを開くと自動で始まり、離れると止まる。設定は譜面の先頭に置き、スクロールで隠れたら右上に設定ボタンが出る形にした。自動スクロール中でも手動で前後に動かせるようにした。端で止めるスクロールの仕掛けは取りやめ、自然なスクロールに戻した'],
@@ -1319,6 +1320,12 @@ function renderSet(){
     +'<button class="setrow" onclick="openHistory()"><span>更新履歴</span><span class="val">v'+APP_VERSION+'</span><span class="chev">›</span></button>'
     + setRow('about','このアプリについて', 'v'+APP_VERSION,
       '<div class="note">Musilabo v'+APP_VERSION+'</div>')
+    +'</div>';
+  /* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic mirror — remove after diagnosis */
+  h+='<div class="setgroup">'
+    + setRow('diag','スクロール診断', lastScrollDiag? esc(lastScrollDiag) : '未計測（曲を開くと計測）',
+      '<div class="note" style="white-space:pre-wrap;word-break:break-all">'+(lastScrollDiag? esc(lastScrollDiag) : '未計測（曲を開くと計測）')+'</div>',
+      'val-diag')
     +'</div>';
   $('v-set').innerHTML=h;
 }
@@ -1651,6 +1658,8 @@ function renderSong(){
   }
   const strum=song.strum||song.memo;
   if(strum) h+='<div class="strumstrip'+(playState.strumOpen?'':' collapsed')+'" onclick="playToggleStrum()"><b>弾き方メモ</b><span class="strum-txt">'+esc(strum)+'</span><span class="strum-tgl">'+(playState.strumOpen?'▴':'▾')+'</span></div>';
+  /* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic readout — remove after diagnosis */
+  h+='<div id="scrollDiag" style="font-size:10px;line-height:1.5;color:#8a7f6c;font-family:ui-monospace,monospace;white-space:pre-wrap;word-break:break-all;margin:0 0 8px">診断: 計測中…</div>';
   secs.forEach((sec,si)=>{
     h+='<div class="sheet-sec" id="psec-'+si+'">';
     h+='<div class="sec-bar"><span class="sec-bar-name">'+(sec.name? esc(sec.name) : 'セクション '+(si+1))+'</span><button class="loopbtn'+(playState.loopSec===si?' on':'')+'" data-sec="'+si+'" onclick="playToggleLoop('+si+')">↻ ループ'+(playState.loopSec===si?' ON':'')+'</button></div>';
@@ -1693,6 +1702,47 @@ function renderSong(){
   h+='</div></div>';
   el.innerHTML=h;
   onSheetScroll();
+  scheduleScrollDiag();
+}
+/* TEMP DIAGNOSTIC (v3.12): scroll self-diagnostic — remove after diagnosis */
+let lastScrollDiag='';
+function scheduleScrollDiag(){
+  const run=()=>{ setTimeout(measureScrollDiag, 350); };
+  if(window.requestAnimationFrame) requestAnimationFrame(run); else run();
+}
+function measureScrollDiag(){
+  const dEl=$('scrollDiag'); if(!dEl) return;
+  try{
+    const vp=$('v-play'), wrap=$('sheetWrap'); if(!vp || !wrap) throw new Error('elements missing');
+    const root=document.querySelector('.songroot');
+    const cs=getComputedStyle(vp);
+    const vr=vp.getBoundingClientRect();
+    const rr=root? root.getBoundingClientRect() : {height:0};
+    let txt='vh='+window.innerHeight+' pos='+cs.position+' disp='+cs.display+' songmode='+vp.classList.contains('songmode')+' lock='+document.body.classList.contains('songlock');
+    txt+='\nvpRect='+Math.round(vr.top)+','+Math.round(vr.bottom)+','+Math.round(vr.height)+' rootRect='+Math.round(rr.height)+' docST='+Math.round(document.documentElement.scrollTop);
+    const wr=wrap.getBoundingClientRect();
+    txt+='\nwrap: rect='+Math.round(wr.top)+','+Math.round(wr.bottom)+','+Math.round(wr.height)+' client='+wrap.clientHeight+' scroll='+wrap.scrollHeight+' ovY='+getComputedStyle(wrap).overflowY;
+    dEl.textContent=txt;
+    lastScrollDiag=txt;
+    const vd=$('val-diag'); if(vd) vd.textContent=txt;
+    const s0=wrap.scrollTop;
+    wrap.scrollTop=60;
+    setTimeout(()=>{
+      try{
+        const s1=wrap.scrollTop;
+        wrap.scrollTop=s0;
+        const full=txt+'\nselftest: '+s0+'→set60→'+s1;
+        const d2=$('scrollDiag'); if(d2) d2.textContent=full;
+        lastScrollDiag=full;
+        const vd2=$('val-diag'); if(vd2) vd2.textContent=full;
+      }catch(e){}
+    },120);
+  }catch(e){
+    const msg='診断: ERR '+((e && e.message)? e.message : e);
+    try{ dEl.textContent=msg; }catch(_e){}
+    lastScrollDiag=msg;
+    const vd=$('val-diag'); if(vd) vd.textContent=msg;
+  }
 }
 function playScrollToSec(i){ const wrap=$('sheetWrap'), t=$('psec-'+i); if(!wrap || !t) return; const wr=wrap.getBoundingClientRect(), r=t.getBoundingClientRect(); wrap.scrollTop=Math.max(0, wrap.scrollTop + (r.top - wr.top) - 6); if(playState.scrolling) scrollPos=wrap.scrollTop; }
 function playAdjCapo(d){ playState.capo=Math.max(0, Math.min(7, playState.capo+d)); renderSong(); }
